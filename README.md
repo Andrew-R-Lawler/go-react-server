@@ -8,5 +8,3 @@ Create a new repository with this template, clone it into your machine, and move
 git clone your-github-link-here
 cd newly-added-respository
 ```
-
-beepboop
