@@ -3,7 +3,7 @@ Simple webserver template using go on the backend, and Typescript and React on t
 
 ## Usage
 Create a new repository with this template, clone it into your machine, and move into the new directory
->git clone your-github-link-here
->cd newly-added-respository
+`git clone your-github-link-here
+cd newly-added-respository`
 
 beepboop
