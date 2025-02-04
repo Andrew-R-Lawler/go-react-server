@@ -17,14 +17,11 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	r.SetTrustedProxies(nil) // change this to a slice of strings containing trusted proxy IPs for production
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 		log.Println("GET /ping called")
-	})
-	r.GET("/pong", func(c *gin.Context) {
-		c.String(200, "new POST who dis")
-		log.Println("POST /pong called")
 	})
 
 	r.Run()
