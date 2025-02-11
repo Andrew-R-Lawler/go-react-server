@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"database/sql"
 	"os"
+	"net/http"
 
 	_ "github.com/lib/pq"
 	"github.com/gin-contrib/static"
@@ -13,6 +14,7 @@ import (
 )
 
 func init() {
+	// load environment variables from .env
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -29,7 +31,7 @@ func main() {
 	// define connection string
 	connStr := fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable", dbuser, dbpassword, dbhost, dbname)
 		
-	// open the connection
+	// open connection to postgres database
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -41,16 +43,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Successfully connected to the database")
-	
 
 	// gin router defined
 	r := gin.Default()
-	r.SetTrustedProxies(nil) // change this to a slice of strings containing trusted proxy IPs for production
+
+	// set trusted proxies
+	r.SetTrustedProxies(nil) // change nil to a slice of strings containing trusted proxy IPs for production
+
+	// serve the static webpage located in the client directory
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-		log.Println("GET /ping called")
+
+	// create api router group
+	apiGroup := r.Group("/api")
+
+	// define routes for api group
+	apiGroup.GET("/todo", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "List of Todos"})
+	})
+	apiGroup.POST("/todo", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Todo Created"})
 	})
 
 	// run gin server
