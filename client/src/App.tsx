@@ -32,18 +32,18 @@ function App() {
                 name: inputValue.trim(),
                 completed: false,
             }
-          setItems([...items, newItem])
-          setInputValue("") // Clear the input after adding
+            setItems([...items, newItem])
+            setInputValue("") // Clear the input after adding
         }
-      }
+    }
     
   return (
     <div className="flex-container">
         <div className="space-y-4 w-full max-w-sm">
             <div className='flex-item'>
             <h1 className='chakra-petch-medium header1 text-white'>To-Do List</h1>
-                <form onSubmit={handleAddItem} className="space-y-4">
-                    <div className="flex items-center space-x-0 border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-400">
+                <form onSubmit={handleAddItem} className="space-y-4 bg-stone-700 rounded-md">
+                    <div className="flex items-center space-x-0 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-400">
                         <Input
                           type="text"
                           placeholder="Add an item..."
@@ -53,7 +53,7 @@ function App() {
                         />
                         <Button
                           type="submit"
-                          className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none rounded-none m-1 p-2 w-10 h-10 flex-shrink-0"
+                          className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none rounded-none m-2 p-2 w-10 h-10 flex-shrink-0"
                           aria-label="Add item"
                         >
                           <Plus className="w-6 h-6" />
