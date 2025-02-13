@@ -36,15 +36,14 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
       <Table className="border rounded-md overflow-hidden">
         <TableHeader className="bg-gradient-to-r from-orange-400 to-green-500">
           <TableRow>
+            <TableHead className="text-white font-bold w-16">Status</TableHead>
             <TableHead className="text-white font-bold">Item</TableHead>
-            <TableHead className="text-white font-bold text-center">Status</TableHead>
             <TableHead className="text-white font-bold text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id} className={item.completed ? "bg-gray-100" : ""}>
-              <TableCell>{item.name}</TableCell>
               <TableCell className="text-center">
                 <Checkbox
                   checked={item.completed}
@@ -52,6 +51,7 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
                   aria-label={`Mark ${item.name} as ${item.completed ? "incomplete" : "complete"}`}
                 />
               </TableCell>
+              <TableCell>{item.name}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
                   <Button
