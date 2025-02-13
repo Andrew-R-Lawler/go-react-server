@@ -36,7 +36,7 @@ export function InputWithButton() {
 
   return (
     <div className="space-y-4 w-full max-w-sm">
-      <div className="flex items-center space-x-0 border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-400">
+      <div className="flex items-center bg-stone-900 space-x-0 border rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-400">
         <Input
           type="text"
           placeholder="Add an item..."

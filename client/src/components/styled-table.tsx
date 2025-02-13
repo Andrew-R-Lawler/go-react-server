@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2, Edit2 } from "lucide-react"
+import '../App.css'
 
 interface Item {
   id: number
@@ -32,8 +33,8 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <Table className="border rounded-md overflow-hidden">
+    <div className="text-white w-full max-w-sm">
+      <Table className="chakra-petch-regular border-radius bg-stone-700 rounded-md overflow-hidden">
         <TableHeader className="bg-gradient-to-r from-orange-400 to-green-500">
           <TableRow>
             <TableHead className="text-white font-bold w-16">Status</TableHead>
@@ -43,7 +44,7 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
         </TableHeader>
         <TableBody>
           {items.map((item) => (
-            <TableRow key={item.id} className={item.completed ? "bg-gray-100" : ""}>
+            <TableRow key={item.id} className={item.completed ? "bg-stone-500" : ""}>
               <TableCell className="text-center">
                 <Checkbox
                   checked={item.completed}
@@ -51,7 +52,7 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
                   aria-label={`Mark ${item.name} as ${item.completed ? "incomplete" : "complete"}`}
                 />
               </TableCell>
-              <TableCell>{item.name}</TableCell>
+              <TableCell className="chakra-petch-regular">{item.name}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
                   <Button
