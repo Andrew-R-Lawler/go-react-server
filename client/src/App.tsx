@@ -43,12 +43,12 @@ function App() {
             <div className='flex-item'>
             <h1 className='chakra-petch-medium header1 text-white'>To-Do List</h1>
                 <form onSubmit={handleAddItem} className="space-y-4 bg-stone-700 rounded-md">
-                    <div className="flex items-center space-x-0 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-400">
+                    <div className="flex items-center space-x-0 rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-offset-1">
                         <Input
                           type="text"
                           placeholder="Add an item..."
                           className="chakra-petch-regular border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
-                          value={inputValue}
+                          value={inputValue}nd
                           onChange={handleChange}
                         />
                         <Button

@@ -34,9 +34,9 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
 
   return (
     <div className="text-white w-full max-w-sm">
-      <Table className="chakra-petch-regular border-radius bg-stone-700 rounded-md overflow-hidden">
+      <Table className="chakra-petch-regular border-none border-radius bg-stone-700 rounded-md overflow-hidden">
         <TableHeader className="bg-gradient-to-r from-orange-400 to-green-500">
-          <TableRow>
+          <TableRow className="border-none">
             <TableHead className="text-white font-bold w-16">Status</TableHead>
             <TableHead className="text-white font-bold">Item</TableHead>
             <TableHead className="text-white font-bold text-right">Actions</TableHead>
@@ -44,7 +44,7 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
         </TableHeader>
         <TableBody>
           {items.map((item) => (
-            <TableRow key={item.id} className={item.completed ? "bg-stone-500" : ""}>
+            <TableRow key={item.id} className={item.completed ? "bg-stone-500 border-none" : "border-none"}>
               <TableCell className="text-center">
                 <Checkbox
                   checked={item.completed}
