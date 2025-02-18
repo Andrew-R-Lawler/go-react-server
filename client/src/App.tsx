@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Plus } from 'lucide-react';
 import { StyledTable } from './components/styled-table';
+import axios from 'axios'
 
 function App() {
-    
+
     interface Item {
         id: number
         name: string
@@ -18,12 +19,19 @@ function App() {
         { id: 2, name: "To-Do", completed: true },
         { id: 3, name: "Here", completed: false },
     ]);
+
+    const fetchTodos = async () => {
+        const response = await axios.get('/api/todo/');
+        console.log(response.data);
+        setItems(response.data);
+        return response.data;
+    }
+
     const [inputValue, setInputValue] = useState<string>('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
     };
-
     const handleAddItem = (e: React.FormEvent) => {
         e.preventDefault()
         if (inputValue.trim()) {
@@ -36,6 +44,10 @@ function App() {
             setInputValue("") // Clear the input after adding
         }
     }
+
+    useEffect(() => {
+        fetchTodos();
+    }, [])
     
   return (
     <div className="flex-container">
@@ -48,7 +60,7 @@ function App() {
                           type="text"
                           placeholder="Add an item..."
                           className="chakra-petch-regular border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
-                          value={inputValue}nd
+                          value={inputValue}
                           onChange={handleChange}
                         />
                         <Button
@@ -60,6 +72,10 @@ function App() {
                         </Button>
                     </div>
                 </form>
+                <Button
+                    onClick={fetchTodos}>
+                    fetch todos 
+                </Button>
             </div>
             <StyledTable items={items} setItems={setItems} />
         </div>
