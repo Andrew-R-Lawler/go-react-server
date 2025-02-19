@@ -6,13 +6,12 @@ import (
 	"database/sql"
 	"os"
 	"net/http"
-	"time"
+	"io"
 
 	_ "github.com/lib/pq"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/itsjamie/gin-cors"
 )
 
 type Todo struct {
@@ -56,16 +55,6 @@ func main() {
 	// gin router defined
 	r := gin.Default()
 
-	// cors configuration
-	r.Use(cors.Middleware(cors.Config{
-		Origins:        "*",
-		Methods:        "GET, PUT, POST, DELETE, OPTIONS",
-		RequestHeaders: "Origin, Authorization, Content-Type",
-		ExposedHeaders: "",
-		MaxAge: 50 * time.Second,
-		Credentials: false,
-		ValidateHeaders: false,
-	}))
 	// set trusted proxies
 	r.SetTrustedProxies(nil) // change nil to a slice of strings containing trusted proxy IPs for production
 
@@ -89,7 +78,6 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read todo"})
 				return
 			}
-			log.Printf("todo: %v", todo)
 			todos = append(todos, todo)
 		}
 		if err := rows.Err(); err != nil {
@@ -98,8 +86,36 @@ func main() {
 		c.JSON(http.StatusOK, todos)
 	})
 	
-	r.POST("/todo", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Todo Created"})
+	apiGroup.DELETE("/todo/:id", func(c *gin.Context) {
+		todoId := c.Param("id")
+		query := "DELETE FROM todos WHERE id = $1"
+		_, err := db.Exec(query, todoId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	})
+
+	apiGroup.POST("/todo", func(c *gin.Context) {
+		query := `INSERT INTO "todos" ("name", "created_at", "completed")
+VALUES ($1, now(), $2) RETURNING id`
+		b, err := io.ReadAll(c.Request.Body)
+		body := string(b)
+		f := 0
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
+			return
+		}
+		var newID int
+		err = db.QueryRow(query, body, f).Scan(&newID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		}
+		c.JSON(http.StatusCreated, gin.H{
+			"id":       newID,
+			"name":    body,
+			"completed": f,
+		})
 	})
 
 	// run gin server

@@ -22,8 +22,11 @@ function App() {
 
     const fetchTodos = async () => {
         const response = await axios.get('/api/todo/');
-        console.log(response.data);
-        setItems(response.data);
+        if (response.data === null) {
+            setItems([{id: 1, name: "start adding to-dos", completed: false }]);  
+        } else (
+            setItems(response.data)
+        )
         return response.data;
     }
 
@@ -32,16 +35,16 @@ function App() {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
     };
-    const handleAddItem = (e: React.FormEvent) => {
+
+    const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (inputValue.trim()) {
-            const newItem: Item = {
-                id: Date.now(),
-                name: inputValue.trim(),
-                completed: false,
-            }
-            setItems([...items, newItem])
-            setInputValue("") // Clear the input after adding
+        try {
+            const response = await axios.post('/api/todo', inputValue)
+            console.log('Todo added successfully:', response.data)
+            setInputValue("") 
+            fetchTodos()
+        } catch (error) {
+            console.error('Error adding todo:', error)
         }
     }
 
@@ -72,10 +75,6 @@ function App() {
                         </Button>
                     </div>
                 </form>
-                <Button
-                    onClick={fetchTodos}>
-                    fetch todos 
-                </Button>
             </div>
             <StyledTable items={items} setItems={setItems} />
         </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2, Edit2 } from "lucide-react"
 import '../App.css'
+import axios from 'axios'
 
 interface Item {
   id: number
@@ -19,8 +20,25 @@ interface StyledTableProps {
 }
 
 export function StyledTable({ items, setItems }: StyledTableProps) {
-  const deleteItem = (id: number) => {
-    setItems(items.filter((item) => item.id !== id))
+
+    const fetchTodos = async () => {
+        const response = await axios.get('/api/todo/');
+        if (response.data === null) {
+            setItems([{id: 1, name: "start adding to-dos", completed: false }]);  
+        } else {
+            setItems(response.data);
+        }
+        return response.data;
+    }
+
+  const deleteItem = async (id: number) => {
+      try {
+          const response = await axios.delete(`/api/todo/${id}`);
+          console.log(`Item deleted: ${id}`, response.data)
+          fetchTodos();
+      } catch (error) {
+          console.error('Error deleting item:', error)
+      };
   }
 
   const toggleCompleted = (id: number) => {
