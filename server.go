@@ -19,6 +19,7 @@ type Todo struct {
 	Name		string	`json:"name"`
 	Created_at	string	`json:"created_at"`
 	Completed	bool	`json:"completed"`
+	Editable	bool	`json:"editable"`	
 }
 
 func init() {
@@ -74,7 +75,7 @@ func main() {
 
 		for rows.Next() {
 			var todo Todo
-			if err := rows.Scan(&todo.Id, &todo.Name, &todo.Created_at, &todo.Completed); err != nil {
+			if err := rows.Scan(&todo.Id, &todo.Name, &todo.Created_at, &todo.Completed, &todo.Editable); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read todo"})
 				return
 			}

@@ -12,6 +12,7 @@ interface Item {
   id: number
   name: string
   completed: boolean
+  editable: boolean
 }
 
 interface StyledTableProps {
@@ -24,7 +25,7 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
     const fetchTodos = async () => {
         const response = await axios.get('/api/todo/');
         if (response.data === null) {
-            setItems([{id: 1, name: "start adding to-dos", completed: false }]);  
+            setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
         } else {
             setItems(response.data);
         }
