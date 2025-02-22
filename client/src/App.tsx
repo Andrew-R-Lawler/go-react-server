@@ -12,18 +12,19 @@ function App() {
         id: number
         name: string
         completed: boolean
+        editable: boolean
     }
 
     const [items, setItems] = useState<Item[]>([
-         { id: 1, name: "Placeholder", completed: false },
-        { id: 2, name: "To-Do", completed: true },
-        { id: 3, name: "Here", completed: false },
+         { id: 1, name: "Placeholder", completed: false, editable: false },
+        { id: 2, name: "To-Do", completed: true, editable: false },
+        { id: 3, name: "Here", completed: false, editable: false },
     ]);
 
     const fetchTodos = async () => {
         const response = await axios.get('/api/todo/');
         if (response.data === null) {
-            setItems([{id: 1, name: "start adding to-dos", completed: false }]);  
+            setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
         } else (
             setItems(response.data)
         )

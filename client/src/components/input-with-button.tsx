@@ -8,14 +8,15 @@ interface Item {
   id: number
   name: string
   completed: boolean
+  editable: boolean
 }
 
 export function InputWithButton() {
   const [inputValue, setInputValue] = React.useState("")
   const [items, setItems] = React.useState<Item[]>([
-    { id: 1, name: "Apple", completed: false },
-    { id: 2, name: "Banana", completed: true },
-    { id: 3, name: "Orange", completed: false },
+    { id: 1, name: "Apple", completed: false, editable: false },
+    { id: 2, name: "Banana", completed: true, editable: false },
+    { id: 3, name: "Orange", completed: false, editable: false },
   ])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +29,7 @@ export function InputWithButton() {
         id: Date.now(),
         name: inputValue.trim(),
         completed: false,
+        editable: false,
       }
       setItems([...items, newItem])
       setInputValue("") // Clear the input after adding
