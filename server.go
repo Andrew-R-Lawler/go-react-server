@@ -65,7 +65,7 @@ func main() {
 	apiGroup := r.Group("/api")
 	// define routes for api group
 	apiGroup.GET("/todo", func(c *gin.Context) {
-		rows, err := db.Query(`SELECT * FROM "todos" LIMIT 50`)
+		rows, err := db.Query(`SELECT * FROM "todos" ORDER BY id`)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -140,6 +140,30 @@ VALUES ($1, now(), $2) RETURNING id`
 			"id":		todoId,
 			"name":		body,
 			"result": 	result,
+		})
+	})
+
+	apiGroup.PUT("/todo/completed/:id", func(c *gin.Context) {
+		query := `UPDATE "todos"
+		SET completed = $1
+		WHERE id = $2`
+		todoId := c.Param("id")
+		body, err := io.ReadAll(c.Request.Body)
+		b := string(body)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
+			return
+		}
+		result, err := db.Exec(query, b, todoId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update todo"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": 		"todo updated successfully",
+			"id": 			todoId,
+			"completed":	body,
+			"result":		result,
 		})
 	})
 

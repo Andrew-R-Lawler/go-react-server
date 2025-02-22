@@ -50,8 +50,25 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
       };
   }
 
-  const toggleCompleted = (id: number, completed: boolean) => {
-    console.log("completed toggle press ID:", id, "completed:", completed)
+  const toggleCompleted = async (id: number, completed: boolean) => {
+    if (completed === false) {
+        try {
+            const response = await axios.put(`/api/todo/completed/${id}`, 'true')
+            fetchTodos()
+            return response
+        } catch (error) {
+            console.error('Error changing completed boolean to true:', error)
+        }
+    }
+    if (completed === true) {
+        try {
+            const response = await axios.put(`/api/todo/completed/${id}`, 'false')
+            fetchTodos()
+            return response
+        } catch (error) {
+            console.error('Error changing completed boolean to false:', error)
+        }
+    }
   }
 
   const editItem = (id: number) => {
