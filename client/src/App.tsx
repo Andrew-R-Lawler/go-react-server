@@ -31,6 +31,7 @@ function App() {
     }
 
     const [inputValue, setInputValue] = useState<string>('');
+    const [error, setError] = useState<string>('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
@@ -38,13 +39,18 @@ function App() {
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault()
-        try {
-            const response = await axios.post('/api/todo', inputValue)
-            console.log('Todo added successfully:', response.data)
-            setInputValue("") 
-            fetchTodos()
-        } catch (error) {
-            console.error('Error adding todo:', error)
+        if (inputValue.trim() === '') {
+            setError('Input Cannot be empty');
+        } else {
+            try {
+                const response = await axios.post('/api/todo', inputValue)
+                setInputValue("") 
+                setError("")
+                fetchTodos()
+                return response
+            } catch (error) {
+                console.error('Error adding todo:', error)
+            }
         }
     }
 
@@ -75,6 +81,7 @@ function App() {
                         </Button>
                     </div>
                 </form>
+                {error && <p className= "chakra-petch-regular text-red-500 text-left">{error}</p>}
             </div>
             <StyledTable items={items} setItems={setItems} />
         </div>
