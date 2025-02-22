@@ -2,7 +2,6 @@ import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus } from "lucide-react"
-import { StyledTable } from "./styled-table"
 
 interface Item {
   id: number
@@ -18,7 +17,7 @@ export function InputWithButton() {
     { id: 2, name: "Banana", completed: true, editable: false },
     { id: 3, name: "Orange", completed: false, editable: false },
   ])
-
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
   }
@@ -55,8 +54,7 @@ export function InputWithButton() {
           <Plus className="w-6 h-6" />
         </Button>
       </div>
-      <StyledTable items={items} setItems={setItems} />
-    </div>
+     </div>
   )
 }
 

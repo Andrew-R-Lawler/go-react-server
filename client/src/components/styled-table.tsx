@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash2, Edit2, X, Check } from "lucide-react"
 import '../App.css'
-import axios from 'axios'
+import axios, {AxiosResponse} from 'axios'
 
 interface Item {
   id: number
@@ -20,8 +20,10 @@ interface Item {
 interface StyledTableProps {
   items: Item[]
   setItems: React.Dispatch<React.SetStateAction<Item[]>>
+  fetchTodos: () => Promise<AxiosResponse<Item[]>>
 }
-export function StyledTable({ items, setItems }: StyledTableProps) {
+
+export function StyledTable({ items, setItems, fetchTodos }: StyledTableProps) {
 
     const [inputValue, setInputValue] = useState<string>('');
     const [error, setError] = useState<string>('');
@@ -30,20 +32,10 @@ export function StyledTable({ items, setItems }: StyledTableProps) {
         setInputValue(event.target.value);
     };
 
-    const fetchTodos = async () => {
-        const response = await axios.get('/api/todo/');
-        if (response.data === null) {
-            setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
-        } else {
-            setItems(response.data);
-        }
-        return response.data;
-    }
-
   const deleteItem = async (id: number) => {
       try {
           const response = await axios.delete(`/api/todo/${id}`);
-          fetchTodos();
+          fetchTodos()
           return response
       } catch (error) {
           console.error('Error deleting item:', error)
