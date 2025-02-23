@@ -58,6 +58,5 @@ func main() {
 	todoGroup.PUT("/:id", func(c *gin.Context) {handlers.UpdateTodo(c, db)})
 	todoGroup.PUT("/completed/:id", func(c *gin.Context) {handlers.CompleteTodo(c, db)})
 
-	// run gin server
 	r.Run()
 }
