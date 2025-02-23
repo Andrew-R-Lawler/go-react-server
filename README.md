@@ -3,7 +3,7 @@ Template for a full-stack crud application using TypeScript, golang, and Postgre
 
 ## Table of Contents
 
-    - [Install](#install)
+- [Install](#install)
     
 ## Install
 
