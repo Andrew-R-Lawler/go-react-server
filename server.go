@@ -65,19 +65,8 @@ func main() {
 
 	todoGroup := r.Group("/api/todo")
 
-	todoGroup.GET("/", func(c *gin.Context) {
-		handlers.GetTodos(c, db)
-	})
-	
-	todoGroup.DELETE("/:id", func(c *gin.Context) {
-		todoId := c.Param("id")
-		query := "DELETE FROM todos WHERE id = $1"
-		_, err := db.Exec(query, todoId)
-		if err != nil {
-			log.Fatal(err)
-		}
-		return
-	})
+	todoGroup.GET("/", func(c *gin.Context) {handlers.GetTodos(c, db)})
+	todoGroup.DELETE("/:id", func(c *gin.Context) {handlers.DeleteTodo(c, db)})
 
 	todoGroup.POST("/", func(c *gin.Context) {
 		query := `INSERT INTO "todos" ("name", "created_at", "completed")
