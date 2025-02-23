@@ -7,6 +7,7 @@ import (
 	"os"
 	"net/http"
 	"io"
+	"github.com/andrew-r-lawler/go-react-server/handlers"
 
 	_ "github.com/lib/pq"
 	"github.com/gin-contrib/static"
@@ -62,32 +63,13 @@ func main() {
 	// serve the static webpage located in the client directory
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
 
-	apiGroup := r.Group("/api")
-	// define routes for api group
-	apiGroup.GET("/todo", func(c *gin.Context) {
-		rows, err := db.Query(`SELECT * FROM "todos" ORDER BY id`)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-		
-		var todos []Todo
+	todoGroup := r.Group("/api/todo")
 
-		for rows.Next() {
-			var todo Todo
-			if err := rows.Scan(&todo.Id, &todo.Name, &todo.Created_at, &todo.Completed, &todo.Editable); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read todo"})
-				return
-			}
-			todos = append(todos, todo)
-		}
-		if err := rows.Err(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while iterating todos"})
-		}
-		c.JSON(http.StatusOK, todos)
+	todoGroup.GET("/", func(c *gin.Context) {
+		handlers.GetTodos(c, db)
 	})
 	
-	apiGroup.DELETE("/todo/:id", func(c *gin.Context) {
+	todoGroup.DELETE("/:id", func(c *gin.Context) {
 		todoId := c.Param("id")
 		query := "DELETE FROM todos WHERE id = $1"
 		_, err := db.Exec(query, todoId)
@@ -97,9 +79,9 @@ func main() {
 		return
 	})
 
-	apiGroup.POST("/todo", func(c *gin.Context) {
+	todoGroup.POST("/", func(c *gin.Context) {
 		query := `INSERT INTO "todos" ("name", "created_at", "completed")
-VALUES ($1, now(), $2) RETURNING id`
+		VALUES ($1, now(), $2) RETURNING id`
 		b, err := io.ReadAll(c.Request.Body)
 		body := string(b)
 		f := 0
@@ -119,7 +101,7 @@ VALUES ($1, now(), $2) RETURNING id`
 		})
 	})
 
-	apiGroup.PUT("/todo/:id", func(c *gin.Context) {
+	todoGroup.PUT("/:id", func(c *gin.Context) {
 		query := `UPDATE "todos"
 		SET name = $1
 		WHERE id = $2`
@@ -143,7 +125,7 @@ VALUES ($1, now(), $2) RETURNING id`
 		})
 	})
 
-	apiGroup.PUT("/todo/completed/:id", func(c *gin.Context) {
+	todoGroup.PUT("/completed/:id", func(c *gin.Context) {
 		query := `UPDATE "todos"
 		SET completed = $1
 		WHERE id = $2`
