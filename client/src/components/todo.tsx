@@ -75,7 +75,7 @@ function Todo() {
                         />
                         <Button
                           type="submit"
-                          className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none rounded-none m-2 p-2 w-10 h-10 flex-shrink-0"
+                          className="bg-stone-900 text-white border-none rounded-none m-2 p-2 w-10 h-10 flex-shrink-0"
                           aria-label="Add item"
                         >
                           <Plus className="w-6 h-6" />

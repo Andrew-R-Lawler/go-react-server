@@ -90,7 +90,7 @@ export function StyledTable({ items, setItems, fetchTodos }: StyledTableProps) {
     <div className="text-white w-full max-w-sm">
     {error && <p className= "chakra-petch-regular text-red-500 text-left">{error}</p>}
       <Table className="chakra-petch-regular border-none border-radius bg-stone-700 rounded-md overflow-hidden">
-        <TableHeader className="bg-gradient-to-r from-orange-400 to-green-500">
+        <TableHeader className="bg-stone-900">
           <TableRow className="border-none">
             <TableHead className="text-white font-bold w-16">Status</TableHead>
             <TableHead className="text-white font-bold">Item</TableHead>
@@ -116,14 +116,14 @@ export function StyledTable({ items, setItems, fetchTodos }: StyledTableProps) {
                           <div className="flex justify-end space-x-2">
                               <Button
                               onClick={() => editItem(item.id)}
-                              className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none p-2 w-8 h-8"
+                              className="bg-stone-900 text-white border-none p-2 w-8 h-8"
                               aria-label={`Edit ${item.name}`}
                               >
                                   <Edit2 className="w-4 h-4" />
                               </Button>
                               <Button
                               onClick={() => deleteItem(item.id)}
-                              className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none p-2 w-8 h-8"
+                              className="bg-stone-900 text-white border-none p-2 w-8 h-8"
                               aria-label={`Delete ${item.name}`}
                               >
                                   <Trash2 className="w-4 h-4" />
