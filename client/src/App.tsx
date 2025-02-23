@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Todo from './components/todo'
 import Login from './components/login'
 import HomePage from './components/homepage'
+import UserRegistration from './components/registration'
 import logo from '../src/assets/icons8-checkmark.svg'
 
 function App() {
@@ -23,6 +24,9 @@ function App() {
             <li className='nav-item'>
                 <Link to="/login">Login</Link>
             </li>
+            <li className='nav-item'>
+                <Link to="/register">Register</Link>
+            </li>
           </ul>
         </nav>
 
@@ -30,6 +34,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/todo" element={<Todo />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<UserRegistration />} />
         </Routes>
       </div>
     </Router>

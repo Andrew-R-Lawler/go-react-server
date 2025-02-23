@@ -1,8 +1,11 @@
 # go-react-server
-Simple webserver template using go on the backend, and Typescript and React on the front end.
-This server has a simple crud rest API.
+Template for a full-stack crud application using TypeScript, golang, and PostgreSQL.
 
-## Requirements
+## Table of Contents
+
+    - [Install](install)
+    
+## Install
 
 In order to use this template you need to have a few things installed on your machine.
 
