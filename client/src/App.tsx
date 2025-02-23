@@ -8,7 +8,7 @@ function App() {
   return (
       <Router>
       <div>
-        <nav className='bg-stone-800 flex-row items-start'>
+        <nav className='bg-stone-800'>
           <ul>
             <li>
               <Link to="/">Login</Link>
