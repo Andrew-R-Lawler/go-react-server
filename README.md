@@ -12,9 +12,9 @@ Template for a full-stack crud application using TypeScript, React, Golang, and 
 
 In order to use this template you need to have a few things installed on your machine.
 
-* Golang
-* Bun (Package management, Runtime)
-* Air (Go hot reload)
+* [Golang](https://go.dev/doc/install)
+* [Bun](https://bun.sh/docs/installation) (Package management, Runtime)
+* [Air](https://github.com/air-verse/air) (Go hot reload)
 
 ## Usage
 Create a new repository with this template, clone it into your machine, move into the client directory in the cloned repository.
