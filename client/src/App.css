@@ -4,6 +4,35 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.nav-bar {
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+.nav-list {
+    margin:0;
+    padding:1rem 0;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    z-index:1000;
+}
+
+.nav-item {
+    list-style:none;
+    margin-right:2rem;
+}
+
+.nav-item a {
+    text-decoration:none;
+    color:white;
+}
+
+.nav-item:first-child{
+    margin-right:auto;
+    margin-left:1rem;
+}
+
 .flex-container {
   display: flex;
   justify-content: center; /* Horizontally center */
