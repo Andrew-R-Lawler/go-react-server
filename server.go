@@ -13,14 +13,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Todo struct {
-	Id			int		`json:"id"`
-	Name		string	`json:"name"`
-	Created_at	string	`json:"created_at"`
-	Completed	bool	`json:"completed"`
-	Editable	bool	`json:"editable"`	
-}
-
 func init() {
 	err := godotenv.Load()
 	if err != nil {

@@ -148,14 +148,14 @@ export function StyledTable({ items, setItems, fetchTodos }: StyledTableProps) {
                               <Button
                               type="submit"
                               onClick={() => updateItem(item.id)}
-                              className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none p-2 w-8 h-8"
+                              className="bg-stone-900 text-white border-none p-2 w-8 h-8"
                               aria-label={`Edit ${item.name}`}
                               >
                                 <Check />
                               </Button>
                               <Button
                               onClick={() => editItem(item.id)}
-                              className="bg-gradient-to-r from-orange-400 to-green-500 hover:from-orange-500 hover:to-green-600 text-white border-none p-2 w-8 h-8"
+                              className="bg-stone-900 text-white border-none p-2 w-8 h-8"
                               aria-label={`Delete ${item.name}`}
                               >
                                   <X className="w-4 h-4" />
