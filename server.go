@@ -43,12 +43,16 @@ func main() {
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
 
 	todoGroup := r.Group("/api/todo")
+	userGroup := r.Group("/api/user")
 
 	todoGroup.GET("/", func(c *gin.Context) {handlers.GetTodos(c, db)})
 	todoGroup.DELETE("/:id", func(c *gin.Context) {handlers.DeleteTodo(c, db)})
 	todoGroup.POST("/", func(c *gin.Context) {handlers.PostTodo(c, db)})
 	todoGroup.PUT("/:id", func(c *gin.Context) {handlers.UpdateTodo(c, db)})
 	todoGroup.PUT("/completed/:id", func(c *gin.Context) {handlers.CompleteTodo(c, db)})
+
+	userGroup.POST("/register", func(c *gin.Context) {handlers.Register(c, db)})
+	userGroup.POST("/login", func(c *gin.Context) {handlers.Login(c, db)})
 
 	r.Run()
 }

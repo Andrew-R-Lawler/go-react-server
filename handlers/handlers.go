@@ -1,11 +1,13 @@
 package handlers 
 
 import (
-	"github.com/gin-gonic/gin"
 	"database/sql"
 	"log"
 	"net/http"
 	"io"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Todo struct {
@@ -14,6 +16,11 @@ type Todo struct {
 	Created_at	string	`json:"created_at"`
 	Completed	bool	`json:"completed"`
 	Editable	bool	`json:"editable"`	
+}
+
+type User struct {
+	Email 		string 	`json:"email"`
+	Password	string	`json:"password"`
 }
  
 func GetTodos(c *gin.Context, db *sql.DB) {
@@ -117,3 +124,52 @@ func CompleteTodo(c *gin.Context, db *sql.DB) {
 			"result":		result,
 		})
 	}
+
+func Register(c *gin.Context, db *sql.DB) {
+	var user User
+	query := "INSERT INTO users (email, password) VALUES ($1, $2)"
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input"})
+		return
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash the password"})
+		return
+	}
+	_, err = db.Exec(query, user.Email, hashedPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
+		return
+	}	
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User registered successfully",
+	})
+}
+
+func Login(c *gin.Context, db *sql.DB) {
+	var user User 
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+	var storedPassword string
+	query := "SELECT password FROM users WHERE email = $1"
+	err := db.QueryRow(query, user.Email).Scan(&storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(user.Password))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})	
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful", 
+	})
+}
