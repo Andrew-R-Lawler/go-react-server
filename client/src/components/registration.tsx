@@ -21,12 +21,13 @@ function UserRegistration() {
             password: password
         }
         setIsLoading(true)
-            try {
-                const response = await axios.post("/api/user/register", newUser)
-                return response.data
-            } catch (error) {
-                console.error(error)
-            }
+        try {
+            const response = await axios.post("/api/user/register", newUser)
+            window.location.href = '/login'
+            return response.data
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (

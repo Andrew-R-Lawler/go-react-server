@@ -5,9 +5,13 @@ import (
 	"log"
 	"net/http"
 	"io"
+	"os"
+	"time"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type Todo struct {
@@ -22,6 +26,13 @@ type User struct {
 	Email 		string 	`json:"email"`
 	Password	string	`json:"password"`
 }
+
+type Claims struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
+}
+
+var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
 func GetTodos(c *gin.Context, db *sql.DB) {
 		rows, err := db.Query(`SELECT * FROM "todos" ORDER BY id`)
@@ -125,6 +136,36 @@ func CompleteTodo(c *gin.Context, db *sql.DB) {
 		})
 	}
 
+func GenerateToken(email string) (string, error) {
+	claims := Claims{
+		Email: email,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
+			Issuer:    "to-do app",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+func ValidateToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
+}
+
 func Register(c *gin.Context, db *sql.DB) {
 	var user User
 	query := "INSERT INTO users (email, password) VALUES ($1, $2)"
@@ -169,7 +210,13 @@ func Login(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})	
 		return
 	}
+	token, err := GenerateToken(user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful", 
+		"token": token,
 	})
 }
