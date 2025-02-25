@@ -7,31 +7,32 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import axios from 'axios'
+import { login, useAuth } from './authentication'
 
 function Login() {
 
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const { saveToken } = useAuth()
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        setIsLoading(true)
         const formData = new FormData(event.currentTarget)
         const email = formData.get('email')
         const password = formData.get('password')
-        const user = {
-            email: email,
-            password: password,
-        }
-        console.log('handleLogin called, email:', email, 'password:', password)
         try {
-            const response = await axios.post("/api/user/login", user)
-            return response.data
-        } catch (error) {
-            console.error(error)
+            const token = await login(email, password)
+            if (token !== undefined) {
+                saveToken(token)
+                window.location.href = '/'
+            } else {
+                setError('Email or Password is incorrect')
+                setIsLoading(false)
+            }
+        } catch (err) {
+            console.error(err)
         }
-        setIsLoading(true)
-        setError('')
     }
 
     return (

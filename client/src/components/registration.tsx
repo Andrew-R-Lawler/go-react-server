@@ -3,15 +3,12 @@ import { useState } from 'react'
 import '../App.css'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Alert, AlertDescription } from "./ui/alert"
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { AlertCircle } from "lucide-react"
 import axios from 'axios'
 
 function UserRegistration() {
 
-    const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
     const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -19,19 +16,17 @@ function UserRegistration() {
         const formData = new FormData(event.currentTarget)
         const email = formData.get('email')
         const password = formData.get('password')
-        console.log('handleRegister called, email:', email, 'password:', password)
         const newUser = {
             email: email,
             password: password
         }
-        try {
-            const response = await axios.post("/api/user/register", newUser)
-            return response.data
-        } catch (error) {
-            console.error(error)
-        }
         setIsLoading(true)
-        setError('')
+            try {
+                const response = await axios.post("/api/user/register", newUser)
+                return response.data
+            } catch (error) {
+                console.error(error)
+            }
     }
 
     return (
@@ -43,12 +38,6 @@ function UserRegistration() {
                         <CardDescription className='text-white'>Enter your email and password to create your account</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {error && (
-                        <Alert variant="destructive">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                      )}
                         <form onSubmit={handleRegister} className="space-y-4 text-white chakra-petch-regular">
                         <div className="space-y-2">
                           <Label htmlFor="email">Email</Label>

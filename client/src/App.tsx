@@ -5,10 +5,12 @@ import Login from './components/login'
 import HomePage from './components/homepage'
 import UserRegistration from './components/registration'
 import logo from '../src/assets/icons8-checkmark.svg'
+import { CookiesProvider } from 'react-cookie'
 
 function App() {
 
   return (
+      <CookiesProvider>
       <Router>
       <div>
         <nav className='nav-bar bg-black'>
@@ -38,6 +40,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </CookiesProvider>
   )
 }
 
