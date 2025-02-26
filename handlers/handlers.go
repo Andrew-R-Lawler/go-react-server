@@ -20,6 +20,7 @@ type Todo struct {
 	Created_at	string	`json:"created_at"`
 	Completed	bool	`json:"completed"`
 	Editable	bool	`json:"editable"`	
+	User_id		int		`json:"user_id"`
 }
 
 type User struct {
@@ -27,15 +28,27 @@ type User struct {
 	Password	string	`json:"password"`
 }
 
+type NewUser struct {
+	Email 		string 	`json:"email"`
+	Password	string	`json:"password"`
+}
+
 type Claims struct {
-	Email string `json:"email"`
+	ID 		int		`json:"id"`
+	Email 	string 	`json:"email"`
 	jwt.StandardClaims
 }
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
 func GetTodos(c *gin.Context, db *sql.DB) {
-		rows, err := db.Query(`SELECT * FROM "todos" ORDER BY id`)
+		userId := c.DefaultQuery("user_id", "")
+		if userId == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+			return
+		}
+		
+		rows, err := db.Query(`SELECT * FROM "todos" WHERE user_id = $1 ORDER BY id;`, userId)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +56,7 @@ func GetTodos(c *gin.Context, db *sql.DB) {
 		var todos []Todo
 		for rows.Next() {
 			var todo Todo
-			if err := rows.Scan(&todo.Id, &todo.Name, &todo.Created_at, &todo.Completed, &todo.Editable); err != nil {
+			if err := rows.Scan(&todo.Id, &todo.Name, &todo.Created_at, &todo.Completed, &todo.Editable, &todo.User_id); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read todo"})
 				return
 			}
@@ -67,17 +80,21 @@ func DeleteTodo(c *gin.Context, db *sql.DB) {
 
 
 func PostTodo(c *gin.Context, db *sql.DB) {
-		query := `INSERT INTO "todos" ("name", "created_at", "completed")
-		VALUES ($1, now(), $2) RETURNING id`
+		query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
+		VALUES ($1, now(), $2, $3) RETURNING id`
+		userId := c.DefaultQuery("user_id", "")
+		if userId == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+		}
 		b, err := io.ReadAll(c.Request.Body)
-		body := string(b)
-		f := 0
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
 			return
 		}
+		body := string(b)
+		f := 0
 		var newID int
-		err = db.QueryRow(query, body, f).Scan(&newID)
+		err = db.QueryRow(query, body, f, userId).Scan(&newID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		}
@@ -219,4 +236,35 @@ func Login(c *gin.Context, db *sql.DB) {
 		"message": "Login successful", 
 		"token": token,
 	})
+}
+
+func GetUser(c *gin.Context, db *sql.DB) {
+	email, _ := c.Get("email")
+	if email == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"email": email,
+	})
+
+}
+
+func GetUserId(c *gin.Context, db *sql.DB) {
+	email, _ := c.Get("email")
+	if email == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	var ID int
+	query := "SELECT id FROM users WHERE email = $1"
+	err := db.QueryRow(query, email).Scan(&ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ID": ID,
+	})
+
 }

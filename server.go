@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"os"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
+	"strings"
+	"net/http"
 
 	_ "github.com/lib/pq"
 	"github.com/gin-contrib/static"
@@ -18,6 +20,19 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
+
+func authMiddleware(c *gin.Context) {
+	tokenStr := c.GetHeader("Authorization")
+	tokenStr = strings.Replace(tokenStr, "Bearer ", "", 1)
+	claims, err := handlers.ValidateToken(tokenStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+	c.Set("email", claims.Email)
+	c.Next()
 }
 
 func main() {
@@ -44,6 +59,7 @@ func main() {
 
 	todoGroup := r.Group("/api/todo")
 	userGroup := r.Group("/api/user")
+	protectedGroup := r.Group("/api/protected", func(c *gin.Context) {authMiddleware(c)})
 
 	todoGroup.GET("/", func(c *gin.Context) {handlers.GetTodos(c, db)})
 	todoGroup.DELETE("/:id", func(c *gin.Context) {handlers.DeleteTodo(c, db)})
@@ -54,5 +70,9 @@ func main() {
 	userGroup.POST("/register", func(c *gin.Context) {handlers.Register(c, db)})
 	userGroup.POST("/login", func(c *gin.Context) {handlers.Login(c, db)})
 
+	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
+	protectedGroup.GET("/id", func(c *gin.Context) {handlers.GetUserId(c, db)})
+
 	r.Run()
 }
+

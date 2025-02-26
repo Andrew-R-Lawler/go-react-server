@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { login, useAuth } from './authentication'
+import { Link } from 'react-router-dom'
 
 function Login() {
 
@@ -65,6 +66,9 @@ function Login() {
                   </Button>
                 </CardFooter>
                 </form>
+                <div className="flex-item nav-item">
+                <p>Don't have an account?</p><Link to="/register">Sign Up</Link>
+                </div>
             </Card>
         </div>
     )
