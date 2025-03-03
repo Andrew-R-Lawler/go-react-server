@@ -55,7 +55,7 @@ function UserRegistration() {
                         </form>
                     </CardContent>
                         <div className="flex-item nav-item">
-                            <p>Already Signed up?</p><Link to="/register">Sign In</Link>
+                            <p>Already Signed up?</p><Link to="/login">Sign In</Link>
                         </div>
                 </Card>
             </main>
