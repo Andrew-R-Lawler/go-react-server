@@ -13,7 +13,7 @@ import { useCookies } from 'react-cookie'
 import { Button } from './components/ui/button'
 
 function App() {
-    const { getToken, deleteToken } = useAuth()
+    const { getToken, deleteToken, isAuthenticated } = useAuth()
     const [cookies, setCookie, removeCookie] = useCookies(['user', 'userid'])
 
     const getUser = async (token: string) => {
@@ -95,7 +95,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/todo" element={<Todo />} />
+          <Route path="/todo" element={isAuthenticated() ? <Todo /> : <Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
         </Routes>
