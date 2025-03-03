@@ -5,6 +5,7 @@ import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 function UserRegistration() {
@@ -53,6 +54,9 @@ function UserRegistration() {
                         </Button>
                         </form>
                     </CardContent>
+                        <div className="flex-item nav-item">
+                            <p>Already Signed up?</p><Link to="/register">Sign In</Link>
+                        </div>
                 </Card>
             </main>
         </div>
