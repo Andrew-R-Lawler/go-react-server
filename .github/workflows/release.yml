@@ -27,6 +27,9 @@ jobs:
         bun install
         bun run build
 
+    - name: Prepare Binary Directory
+      run: mkdir ./client/dist/binary
+
     - name: Build Binary
       run: go build -o gin-server ./client/dist/binary/
 
