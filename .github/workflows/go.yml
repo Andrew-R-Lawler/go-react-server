@@ -44,4 +44,4 @@ jobs:
         path: ./gin-server
 
     - name: Test
-      run: go test -v ./.CardFooter .
+      run: go test -v ./...
