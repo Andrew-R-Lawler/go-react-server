@@ -2,8 +2,7 @@ name: Create Release
 
 on:
   create:
-    tags: 
-      - 'v**'
+    tags: [ 'v**' ]
   workflow_dispatch:
 
 jobs:
