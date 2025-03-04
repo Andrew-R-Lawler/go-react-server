@@ -42,7 +42,7 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        files: release-artifacts/*  # Upload the artifacts from the release-artifacts directory
-        tag_name: ${{ github.ref }}
+        files: release-artifacts/  # Upload the artifacts from the release-artifacts directory
+        tag_name: '/refs/tags/v1.0.15'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
