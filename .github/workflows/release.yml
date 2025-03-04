@@ -2,7 +2,8 @@ name: Create Release
 
 on:
   push:
-    tags: [ 'v**' ]
+    tags:
+      - '**'
   workflow_dispatch:
 
 jobs:
