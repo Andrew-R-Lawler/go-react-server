@@ -2,8 +2,7 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - '*'  # This triggers the workflow only when a tag is pushed, like v1.0.0
+    tags: '*'  # This triggers the workflow only when a tag is pushed, like v1.0.0
 
 jobs:
   release:
