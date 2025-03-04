@@ -28,19 +28,17 @@ jobs:
         bun run build
 
     - name: Build Binary
-      run: go build -o gin-server ./
+      run: go build -o gin-server ./client/dist/binary/
 
-    - name: Upload release artifact
-      run: |
-        mkdir release-artifacts
-        mv ./gin-server ./release-artifacts
-        mv ./client/dist/ ./release-artifacts
+    - name: Create Release Archive
+      run: zip -r gin-server.zip ./client/dist/*
+      
 
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2
       with:
-        files: release-artifacts/*  # Upload the artifacts from the release-artifacts directory
+        files: gin-server.zip  # Upload the artifacts from the release-artifacts directory
         tag_name: ${{ github.ref }}
         generate_release_notes: true
       env:
