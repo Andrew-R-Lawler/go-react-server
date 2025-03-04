@@ -49,5 +49,9 @@ unzip gin-server.zip
 # remove the unneeded archive
 rm gin-server.zip
 
+# clear the terminal
+clear
+
+# start the webserver
 ./gin-server
 
