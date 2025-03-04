@@ -21,7 +21,7 @@ if [ -n "$ARCHIVE_URL" ]; then
 
     # Extract the ZIP file
     echo "Extracting artifact.zip..."
-    unzip -o artifact.zip -d ./gin-server/
+    unzip -o artifact.zip -d
     echo "Extraction complete"
     
 else
