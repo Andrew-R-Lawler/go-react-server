@@ -16,6 +16,9 @@ if [ -n "$ARCHIVE_URL" ]; then
     curl -L -o artifact.zip "$ARCHIVE_URL"
     echo "Artifact downloaded successfully as artifact.zip"
 
+    # Make Directory for artifact to extract into
+    mkdir gin-server
+
     # Extract the ZIP file
     echo "Extracting artifact.zip..."
     unzip -o artifact.zip -d gin-server/
