@@ -2,7 +2,8 @@ name: Create Release
 
 on:
   push:
-    tags: '*'  # This triggers the workflow only when a tag is pushed, like v1.0.0
+    tags: 
+      - '*'  # This triggers the workflow only when a tag is pushed, like v1.0.0
 
 jobs:
   release:
@@ -41,5 +42,3 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: release-artifacts/*  # Upload the artifacts from the release-artifacts directory
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
