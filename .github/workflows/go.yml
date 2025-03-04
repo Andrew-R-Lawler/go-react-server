@@ -43,7 +43,7 @@ jobs:
         name: gin-server
         path: |
           ./gin-server
-          ./dist
+          ./client/dist
 
     - name: Test
       run: go test -v ./...
