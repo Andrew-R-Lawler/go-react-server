@@ -49,6 +49,6 @@ jobs:
       run: go test -v ./...
       
     - name: Create GitHub Release
-      uses: ghcr.io/softprops/action-gh-release@v1
+      uses: ghcr.io/softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub automatically provides this token to interact with the API
