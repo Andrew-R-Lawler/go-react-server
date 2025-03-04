@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: go build -V ./...
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: GinServer
         path: Release/GinServer.exe
