@@ -54,5 +54,5 @@ wait
 clear
 
 # start the webserver
-./gin-server
+./client/dist/binary/gin-server
 
