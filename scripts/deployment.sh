@@ -21,9 +21,6 @@ if [ -n "$ARCHIVE_URL" ]; then
     unzip -o artifact.zip -d gin-server/
     echo "Extraction complete"
     
-    echo "Removing artifact.zip..."
-    rm artifact.zip
-    echo "Removal Complete"
 else
     echo "No artifacts found."
 fi
