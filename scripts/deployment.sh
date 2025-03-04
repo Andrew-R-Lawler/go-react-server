@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# clear the terminal
+clear
+
 # take inputs for environment variables
 echo "Please enter the port number to run your gin server on:"
 read PORT
