@@ -49,6 +49,7 @@ unzip gin-server.zip
 # remove the unneeded archive
 rm gin-server.zip
 
+wait
 # clear the terminal
 clear
 
