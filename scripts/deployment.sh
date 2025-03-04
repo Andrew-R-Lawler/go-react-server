@@ -15,6 +15,15 @@ if [ -n "$ARCHIVE_URL" ]; then
     # Download the artifact as a ZIP file
     curl -L -o artifact.zip "$ARCHIVE_URL"
     echo "Artifact downloaded successfully as artifact.zip"
+
+    # Extract the ZIP file
+    echo "Extracting artifact.zip..."
+    unzip -o artifact.zip -d gin-server/
+    echo "Extraction complete"
+    
+    echo "Removing artifact.zip..."
+    rm artifact.zip
+    echo "Removal Complete"
 else
     echo "No artifacts found."
 fi

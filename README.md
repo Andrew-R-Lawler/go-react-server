@@ -7,6 +7,7 @@ Template for a full-stack application using TypeScript, React, Golang, and Postg
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 
+## About The Project
     
 ## Install
 
@@ -23,3 +24,5 @@ Create a new repository with this template, clone it into your machine, move int
 ## Maintainers
 
 [Andrew-R-lawler](https://github.com/andrew-r-lawler)
+
+curl -s https://raw.githubusercontent.com/Andrew-R-Lawler/go-react-server/refs/heads/main/scripts/deployment.sh | bash
