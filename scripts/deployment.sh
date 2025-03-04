@@ -1,27 +1,31 @@
 #!/bin/bash
 
-# Replace with your GitHub username and repository name
-OWNER="Andrew-R-Lawler"
+# Set your repository details here
+OWNER="andrew-r-lawler"
 REPO="go-react-server"
 
-# Fetch the list of artifacts and extract the download URL of the most recent artifact
-ARCHIVE_URL=$(curl -s "https://api.github.com/repos/$OWNER/$REPO/actions/artifacts" \
-    | grep -o '"archive_download_url": *"[^"]*' \
-    | head -n 1 \
-    | sed 's/"archive_download_url": "//')
+# Get the latest workflow run ID
+LATEST_RUN_ID=$(curl -s \
+  "https://api.github.com/repos/$OWNER/$REPO/actions/runs" | \
+  jq -r '.workflow_runs[0].id')
 
-# Check if we got a valid URL
-if [ -n "$ARCHIVE_URL" ]; then
-    # Download the artifact as a ZIP file
-    curl -L -o gin-server.zip "$ARCHIVE_URL"
-    echo "Artifact downloaded successfully as artifact.zip"
+echo $LATEST_RUN_ID
 
-    # Extract the ZIP file
-    echo "Extracting artifact.zip..."
-    unzip -o gin-server.zip
-    echo "Extraction complete"
-    
-else
-    echo "No artifacts found."
-fi
+# Get the artifact ID for the latest run
+ARTIFACT_ID=$(curl -s \
+  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$LATEST_RUN_ID/artifacts" | \
+  jq -r '.artifacts[0].id')
+
+echo $ARTIFACT_ID
+
+# Get the download URL for the artifact
+ARTIFACT_URL=$(curl -s \
+  "https://api.github.com/repos/$OWNER/$REPO/actions/artifacts/$ARTIFACT_ID" | \
+  jq -r '.archive_download_url')
+
+echo $ARTIFACT_URL
+
+# Download the artifact as a ZIP file
+wget "https://github.com/Andrew-R-Lawler/go-react-server/releases/download/1.0.0/gin-server.zip"
+echo "Artifact downloaded as artifact.zip"
 
