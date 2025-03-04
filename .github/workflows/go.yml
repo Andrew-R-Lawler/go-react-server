@@ -41,7 +41,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: gin-server
-        path: ./gin-server
+        path: |
+          ./gin-server
+          ./client/dist
 
     - name: Test
-      run: go test -v ./.CardFooter .
+      run: go test -v ./...
