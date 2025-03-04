@@ -13,7 +13,7 @@ ARCHIVE_URL=$(curl -s "https://api.github.com/repos/$OWNER/$REPO/actions/artifac
 # Check if we got a valid URL
 if [ -n "$ARCHIVE_URL" ]; then
     # Download the artifact as a ZIP file
-    curl -L -o artifact.zip "$ARCHIVE_URL"
+    curl -L -o gin-server.zip "$ARCHIVE_URL"
     echo "Artifact downloaded successfully as artifact.zip"
 
     # Make directory for program files to be extracted into
@@ -21,7 +21,7 @@ if [ -n "$ARCHIVE_URL" ]; then
 
     # Extract the ZIP file
     echo "Extracting artifact.zip..."
-    unzip -o artifact.zip -d
+    unzip -o gin-server.zip
     echo "Extraction complete"
     
 else
