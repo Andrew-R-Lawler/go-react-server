@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     tags: 
-      - v**
+      - **v**
   workflow_dispatch:
 
 jobs:
@@ -43,6 +43,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: release-artifacts/*  # Upload the artifacts from the release-artifacts directory
-        tag_name: 'refs/tags/v1.0.9'
+        tag_name: ${{ github.ref }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
