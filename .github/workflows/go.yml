@@ -22,7 +22,7 @@ jobs:
         go-version: '1.23'
 
     - name: Build
-      run: go build -V ./...
+      run: go build -o ./...
 
     - uses: actions/upload-artifact@v4
       with:
