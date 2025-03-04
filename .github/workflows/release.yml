@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     tags: 
-      - 'refs/tags/*'  # This triggers the workflow only when a tag is pushed, like v1.0.0
+      - '**'
   workflow_dispatch:
 
 jobs:
