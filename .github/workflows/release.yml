@@ -44,7 +44,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: gin-server.zip  # Upload the artifacts from the release-artifacts directory
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
