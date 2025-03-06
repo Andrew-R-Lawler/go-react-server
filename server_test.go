@@ -49,6 +49,7 @@ func TestGetTodos(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
-
+	expectedString := `[{"id":64,"name":"test","created_at":"2025-03-05T23:30:40.449529Z","completed":false,"editable":false,"user_id":4}]`
 	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, expectedString, w.Body.String())
 }
