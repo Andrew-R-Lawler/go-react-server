@@ -4,43 +4,28 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"database/sql"
-	"os"
-	"log"
-	"fmt"
+	"regexp"
+	"strconv"
 
 	_ "github.com/lib/pq"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"github.com/stretchr/testify/assert"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"github.com/DATA-DOG/go-sqlmock"
 )
 
-func setupTestDatabase() (*sql.DB, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	dbuser := os.Getenv("DB_USER")
-	dbpassword := os.Getenv("DB_PASSWORD")
-	dbhost := os.Getenv("DB_HOST")
-	dbname := os.Getenv("DB_NAME")
-	connStr := fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable", dbuser, dbpassword, dbhost, dbname)
-		
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-    return db, nil
-}
-
 func TestGetTodos(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	db, err := setupTestDatabase()
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("failed to set up database: %v", err)
+		t.Fatalf("Error creating mock database: %v", err)
 	}
-	defer db.Close()
+	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "completed", "editable", "user_id"}).
+		AddRow(64, "test", "2025-03-05T23:30:40.449529Z", false, false, 4)
+
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "todos" WHERE user_id = $1 ORDER BY id;`)).
+		WithArgs(strconv.Itoa(4)).
+		WillReturnRows(rows)
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.GET("/api/todo/", func(c *gin.Context) {handlers.GetTodos(c, db)})
 	req, err := http.NewRequest(http.MethodGet, "/api/todo/?user_id=4", nil)
