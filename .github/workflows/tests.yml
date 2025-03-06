@@ -31,6 +31,4 @@ jobs:
         echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
 
     - name: Test
-      run: |
-        git pull
-        go test -v
+      run: go test -v
