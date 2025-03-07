@@ -55,5 +55,7 @@ func TestDeleteTodo(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
+	expectedString := `{"message":"todo successfully deleted"}`
 	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, expectedString, w.Body.String())
 }
