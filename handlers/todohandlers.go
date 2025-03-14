@@ -59,7 +59,7 @@ func DeleteTodo(c *gin.Context, db *sql.DB) {
 
 func PostTodo(c *gin.Context, db *sql.DB) {
 		query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
-		VALUES ($1, now(), $2, $3) RETURNING id`
+		VALUES ($1, now(), $2, $3)`
 		userId := c.DefaultQuery("user_id", "")
 		if userId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
@@ -71,15 +71,12 @@ func PostTodo(c *gin.Context, db *sql.DB) {
 		}
 		body := string(b)
 		f := 0
-		var newID int
-		err = db.QueryRow(query, body, f, userId).Scan(&newID)
+		_, err = db.Exec(query, body, f, userId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		}
 		c.JSON(http.StatusCreated, gin.H{
-			"id":       newID,
-			"name":    body,
-			"completed": f,
+			"message": "Added todo",
 		})
 	}
 

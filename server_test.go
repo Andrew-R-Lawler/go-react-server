@@ -6,6 +6,7 @@ import (
 	"testing"
 	"regexp"
 	"strconv"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
@@ -58,4 +59,25 @@ func TestDeleteTodo(t *testing.T) {
 	expectedString := `{"message":"todo successfully deleted"}`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expectedString, w.Body.String())
+}
+
+func TestPostTodo(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error creating mock database: %v", err)
+	}
+	query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
+	VALUES ($1, now(), $2, $3) RETURNING id`
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs("test").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.POST("/api/todo/", func(c *gin.Context) {handlers.PostTodo(c, db)})
+	reqBody := `{test: ""}`
+	req, err := http.NewRequest(http.MethodPost, "/api/todo/?user_id=1", strings.NewReader(reqBody))
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusCreated, w.Code)
 }
