@@ -43,11 +43,14 @@ function Todo() {
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault()
+        const postBody = {
+            "name": inputValue,
+        }
         if (inputValue.trim() === '') {
             setError('Input Cannot be empty');
         } else {
             try {
-                const response = await axios.post('/api/todo', inputValue, { params: { user_id: cookies.userid.ID }})
+                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.userid.ID }})
                 setInputValue("") 
                 setError("")
                 fetchTodos()

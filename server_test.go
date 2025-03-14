@@ -14,6 +14,10 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 )
 
+type Todo struct {
+	Name	string	`json:"name"`
+}
+
 func TestGetTodos(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {

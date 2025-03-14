@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"database/sql"
 	"io"
+	"fmt"
+
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,27 +61,26 @@ func DeleteTodo(c *gin.Context, db *sql.DB) {
 
 func PostTodo(c *gin.Context, db *sql.DB) {
 		query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
-		VALUES ($1, now(), $2, $3) RETURNING id`
+		VALUES ($1, now(), $2, $3)`
+		var todo Todo
 		userId := c.DefaultQuery("user_id", "")
 		if userId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		}
-		b, err := io.ReadAll(c.Request.Body)
+		err := c.ShouldBindJSON(&todo)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
 			return
 		}
-		body := string(b)
-		f := 0
-		var newID int
-		err = db.QueryRow(query, body, f, userId).Scan(&newID)
+		body := todo.Name
+		fmt.Printf("body: %v", body)
+		fmt.Printf("userId: %v", userId)
+		_, err = db.Exec(query, body, false, userId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		}
 		c.JSON(http.StatusCreated, gin.H{
-			"id":       newID,
-			"name":    body,
-			"completed": f,
+			"message": "Added todo",
 		})
 	}
 
