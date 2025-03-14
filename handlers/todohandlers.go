@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"database/sql"
 	"io"
+	"fmt"
+
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,6 +73,8 @@ func PostTodo(c *gin.Context, db *sql.DB) {
 			return
 		}
 		body := todo.Name
+		fmt.Printf("body: %v", body)
+		fmt.Printf("userId: %v", userId)
 		_, err = db.Exec(query, body, false, userId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})

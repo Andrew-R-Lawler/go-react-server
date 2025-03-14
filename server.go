@@ -54,7 +54,7 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.SetTrustedProxies(nil) // change nil to a slice of strings containing trusted proxy IPs for production
+	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
 
 	todoGroup := r.Group("/api/todo")

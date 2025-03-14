@@ -6,7 +6,9 @@ import (
 	"testing"
 	"regexp"
 	"strconv"
-	"strings"
+	"bytes"
+	"io"
+
 
 	_ "github.com/lib/pq"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
@@ -14,6 +16,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/DATA-DOG/go-sqlmock"
 )
+
+type Todo struct {
+	Name	string	`json:"name"`
+}
 
 func TestGetTodos(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -68,14 +74,17 @@ func TestPostTodo(t *testing.T) {
 	}
 	query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
 	VALUES ($1, now(), $2, $3)`
-	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs("test", false, 1).WillReturnResult(sqlmock.NewResult(1, 1))
+	test := "test"
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(test, false, 1).WillReturnResult(sqlmock.NewResult(1, 1))
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.POST("/api/todo/", func(c *gin.Context) {handlers.PostTodo(c, db)})
-	req, err := http.NewRequest(http.MethodPost, "/api/todo/?user_id=1", strings.NewReader("test"))
+	todoJSON := `{"name": "test"}`
+	req, err := http.NewRequest(http.MethodPost, "/api/todo/?user_id=1", io.NopCloser(bytes.NewBuffer([]byte(todoJSON))))
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
