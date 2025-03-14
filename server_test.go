@@ -67,13 +67,12 @@ func TestPostTodo(t *testing.T) {
 		t.Fatalf("Error creating mock database: %v", err)
 	}
 	query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
-	VALUES ($1, now(), $2, $3) RETURNING id`
-	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs("test").WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	VALUES ($1, now(), $2, $3)`
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs("test", false, 1).WillReturnResult(sqlmock.NewResult(1, 1))
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.POST("/api/todo/", func(c *gin.Context) {handlers.PostTodo(c, db)})
-	reqBody := `{test: ""}`
-	req, err := http.NewRequest(http.MethodPost, "/api/todo/?user_id=1", strings.NewReader(reqBody))
+	req, err := http.NewRequest(http.MethodPost, "/api/todo/?user_id=1", strings.NewReader("test"))
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
