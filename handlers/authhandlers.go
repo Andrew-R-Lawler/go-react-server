@@ -1,6 +1,9 @@
 package handlers 
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"log"
 	"database/sql"
 	"net/http"
 	"os"
@@ -10,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/wneessen/go-mail"
 )
 
 type User struct {
@@ -25,6 +29,37 @@ type Claims struct {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
+func SendEmail() {
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
+
+	if smtpUser == "" || smtpPass == "" {
+		log.Fatalf("SMTP user or password is missing")
+	}
+
+	body := "test email body"
+	subject := "test email"
+	to := "andrew.r.lawler@gmail.com"
+
+	m := mail.NewMsg()
+	if err := m.From(smtpUser); err != nil {
+		log.Fatalf("failed to set From address: %s", err)
+	}
+	if err := m.To(to); err != nil {
+		log.Fatalf("failed to set To address: %s", err)
+	}
+	m.Subject(subject)
+	m.SetBodyString(mail.TypeTextPlain, body)
+	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory), 
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
+	if err != nil {
+		log.Fatalf("failed to create mail client: %s", err)
+	}
+	if err := client.DialAndSend(m); err != nil {
+		log.Fatalf("failed to send mail: %s", err)
+	}
+}
+
 func GenerateToken(email string) (string, error) {
 	claims := Claims{
 		Email: email,
@@ -55,9 +90,18 @@ func ValidateToken(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
+func generateVerificationToken() string {
+	bytes := make([]byte, 32)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hex.EncodeToString(bytes)
+}
+
 func Register(c *gin.Context, db *sql.DB) {
 	var user User
-	query := "INSERT INTO users (email, password) VALUES ($1, $2)"
+	query := "INSERT INTO users (email, password, verification_token, token_expiration, verified) VALUES ($1, $2, $3, $4, $5)"
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input"})
 		return
@@ -67,11 +111,16 @@ func Register(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash the password"})
 		return
 	}
-	_, err = db.Exec(query, user.Email, hashedPassword)
+	verificationToken := generateVerificationToken()
+	currentTime := time.Now()
+	tokenExpiration := currentTime.Add(24 * time.Hour) 
+
+	_, err = db.Exec(query, user.Email, hashedPassword, verificationToken, tokenExpiration, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
 	}	
+	SendEmail()
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 	})
