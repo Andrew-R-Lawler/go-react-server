@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import Todo from './components/todo'
 import Login from './components/login'
 import HomePage from './components/homepage'
 import UserRegistration from './components/registration'
+import Verification from './components/verification'
 import logo from '../src/assets/icons8-checkmark.svg'
 import { CookiesProvider } from 'react-cookie'
 import { useAuth } from './components/authentication'
@@ -98,6 +99,8 @@ function App() {
           <Route path="/todo" element={isAuthenticated() ? <Todo /> : <Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
+          <Route path="/verify" element={<Verification />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </Router>

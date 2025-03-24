@@ -49,7 +49,7 @@ func SendEmail() {
 		log.Fatalf("failed to set To address: %s", err)
 	}
 	m.Subject(subject)
-	m.SetBodyString(mail.TypeTextPlain, body)
+	m.SetBodyString(mail.TypeTextHTML, body)
 	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory), 
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
@@ -188,4 +188,8 @@ func GetUserId(c *gin.Context, db *sql.DB) {
 		"ID": ID,
 	})
 
+}
+
+func Verify(c *gin.Context, db *sql.DB) {
+	c.Redirect(302, "https://webserver.lawlerlabs.duckdns.org/")
 }

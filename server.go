@@ -8,6 +8,7 @@ import (
 	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"strings"
 	"net/http"
+	"path/filepath"
 
 	_ "github.com/lib/pq"
 	"github.com/gin-contrib/static"
@@ -56,6 +57,9 @@ func main() {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
+	r.NoRoute(func(c *gin.Context) {
+		c.File(filepath.Join("./client/dist", "index.html"))
+	})
 
 	todoGroup := r.Group("/api/todo")
 	userGroup := r.Group("/api/user")
@@ -69,6 +73,7 @@ func main() {
 
 	userGroup.POST("/register", func(c *gin.Context) {handlers.Register(c, db)})
 	userGroup.POST("/login", func(c *gin.Context) {handlers.Login(c, db)})
+	userGroup.GET("/verify", func(c *gin.Context) {handlers.Verify(c, db)})
 
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
 	protectedGroup.GET("/id", func(c *gin.Context) {handlers.GetUserId(c, db)})
