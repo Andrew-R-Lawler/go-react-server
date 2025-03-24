@@ -73,7 +73,7 @@ func main() {
 
 	userGroup.POST("/register", func(c *gin.Context) {handlers.Register(c, db)})
 	userGroup.POST("/login", func(c *gin.Context) {handlers.Login(c, db)})
-	userGroup.GET("/verify", func(c *gin.Context) {handlers.Verify(c, db)})
+	userGroup.GET("/verify/:token", func(c *gin.Context) {handlers.Verify(c, db)})
 
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
 	protectedGroup.GET("/id", func(c *gin.Context) {handlers.GetUserId(c, db)})
