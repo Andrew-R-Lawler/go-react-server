@@ -29,17 +29,41 @@ type Claims struct {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
-func SendEmail() {
+func SendEmail(token string, email string) {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
 
 	if smtpUser == "" || smtpPass == "" {
 		log.Fatalf("SMTP user or password is missing")
 	}
-
-	body := "test email body"
+	body := fmt.Sprintf(`
+		<html>
+		<head>
+			<style>
+				.button {
+					background-color: #4CAF50;
+					border: none;
+					color: white;
+					padding: 10px 20 px;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 16px;
+					margin: 10px 0;
+					cursor: pointer;
+					border-radius: 5px;
+				}
+			</style>
+		</head>
+		<body>
+			<h2>Welcome to Our Service!</h2>
+			<p>Thank you for registering. Please verify your email address by clicking the button below:</p>
+			<a href="http://localhost:3000/api/user/verify/%s" class="button">Verify Email</a>
+		</body>
+		</html>
+	`, token)
 	subject := "test email"
-	to := "andrew.r.lawler@gmail.com"
+	to := email
 
 	m := mail.NewMsg()
 	if err := m.From(smtpUser); err != nil {
@@ -120,7 +144,7 @@ func Register(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
 	}	
-	SendEmail()
+	SendEmail(verificationToken, user.Email)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 	})
@@ -197,5 +221,5 @@ func Verify(c *gin.Context, db *sql.DB) {
 		return
 	}
 	log.Printf("Token %s verified\n", token)
-	c.Redirect(302, "https://webserver.lawlerlabs.duckdns.org/")
+	c.Redirect(302, "http://localhost:3000/verify")
 }
