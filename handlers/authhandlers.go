@@ -191,5 +191,11 @@ func GetUserId(c *gin.Context, db *sql.DB) {
 }
 
 func Verify(c *gin.Context, db *sql.DB) {
+	token := c.Param("token")
+	if token == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
+		return
+	}
+	log.Printf("Token %s verified\n", token)
 	c.Redirect(302, "https://webserver.lawlerlabs.duckdns.org/")
 }
