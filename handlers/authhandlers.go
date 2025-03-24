@@ -189,3 +189,7 @@ func GetUserId(c *gin.Context, db *sql.DB) {
 	})
 
 }
+
+func Verify(c *gin.Context, db *sql.DB) {
+	c.Redirect(302, "https://webserver.lawlerlabs.duckdns.org/")
+}
