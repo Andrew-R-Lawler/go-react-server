@@ -189,27 +189,18 @@ func GetUser(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"email": email,
-	})
-
-}
-
-func GetUserId(c *gin.Context, db *sql.DB) {
-	email, _ := c.Get("email")
-	if email == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
 	var ID int
-	query := "SELECT id FROM users WHERE email = $1"
-	err := db.QueryRow(query, email).Scan(&ID)
+	var Verified bool
+	query := "SELECT id, verified FROM users WHERE email = $1"
+	err := db.QueryRow(query, email).Scan(&ID, &Verified)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
+		"email": email,
 		"ID": ID,
+		"verified": Verified,
 	})
 
 }
@@ -238,6 +229,5 @@ func Verify(c *gin.Context, db *sql.DB) {
 	if rowsAffected == 0 {
 		log.Fatalf("verification token not found, or expired")
 	}
-	log.Printf("Token %s verified\n", token)
 	c.Redirect(302, "http://localhost:3000/verify")
 }

@@ -16,7 +16,7 @@ function Todo() {
         editable: boolean
     }
 
-    const [cookies] = useCookies(['userid'])
+    const [cookies] = useCookies(['user'])
     const [inputValue, setInputValue] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [items, setItems] = useState<Item[]>([
@@ -26,7 +26,7 @@ function Todo() {
     ]);
 
     const fetchTodos = async () => {
-        const userId = cookies.userid.ID
+        const userId = cookies.user.ID
         const response = await axios.get('/api/todo', { params: { user_id: userId }});
         if (response.data === null) {
             setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
@@ -50,7 +50,7 @@ function Todo() {
             setError('Input Cannot be empty');
         } else {
             try {
-                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.userid.ID }})
+                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.user.ID }})
                 setInputValue("") 
                 setError("")
                 fetchTodos()
@@ -63,7 +63,7 @@ function Todo() {
 
     useEffect(() => {
         fetchTodos();
-    }, [cookies.userid])
+    }, [cookies.user.ID])
     
   return (
     <div className="flex-container">

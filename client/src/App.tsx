@@ -15,27 +15,13 @@ import { Button } from './components/ui/button'
 
 function App() {
     const { getToken, deleteToken, isAuthenticated } = useAuth()
-    const [cookies, setCookie, removeCookie] = useCookies(['user', 'userid'])
+    const [cookies, setCookie, removeCookie] = useCookies(['user'])
 
     const getUser = async (token: string) => {
         try {
             const response = await axios.get('/api/protected/user', { headers: { Authorization: `Bearer ${token}`,},})
-            const email = response.data 
-            setCookie('user', email, {
-                path: '/',
-                maxAge: 24 * 60 * 60,
-                secure: false,
-                httpOnly: false,
-            })
-        } catch (err) {
-            console.error(err)
-        }
-    }
-    const getUserId = async (token: string) => {
-        try {
-            const response = await axios.get('/api/protected/id', { headers: { Authorization: `Bearer ${token}`,},})
-            const id = response.data
-            setCookie('userid', id, {
+            const user = response.data 
+            setCookie('user', user, {
                 path: '/',
                 maxAge: 24 * 60 * 60,
                 secure: false,
@@ -47,7 +33,6 @@ function App() {
     }
     const signOut = () => {
         console.log('signOut fired')
-        removeCookie('userid')
         removeCookie('user')
         deleteToken()
         window.location.href = '/'
@@ -56,7 +41,6 @@ function App() {
     useEffect(() => {
         const token = getToken()
         getUser(token)
-        getUserId(token)
     }, [])
 
 
