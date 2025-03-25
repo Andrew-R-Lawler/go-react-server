@@ -41,10 +41,10 @@ func SendEmail(token string, email string) {
 		<head>
 			<style>
 				.button {
-					background-color: #4CAF50;
+					background-color: blue;
 					border: none;
 					color: white;
-					padding: 10px 20 px;
+					padding: 10px;
 					text-align: center;
 					text-decoration: none;
 					display: inline-block;
@@ -58,11 +58,11 @@ func SendEmail(token string, email string) {
 		<body>
 			<h2>Welcome to Our Service!</h2>
 			<p>Thank you for registering. Please verify your email address by clicking the button below:</p>
-			<a href="http://localhost:3000/api/user/verify/%s" class="button">Verify Email</a>
+			<a href="http://localhost:3000/api/user/verify/%s" class="button" style="color: white; text-decoration: none;">Verify Email</a>
 		</body>
 		</html>
 	`, token)
-	subject := "test email"
+	subject := "Verify your e-mail address!"
 	to := email
 
 	m := mail.NewMsg()
