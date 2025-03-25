@@ -190,8 +190,9 @@ func GetUser(c *gin.Context, db *sql.DB) {
 		return
 	}
 	var ID int
-	query := "SELECT id FROM users WHERE email = $1"
-	err := db.QueryRow(query, email).Scan(&ID)
+	var Verified bool
+	query := "SELECT id, verified FROM users WHERE email = $1"
+	err := db.QueryRow(query, email).Scan(&ID, &Verified)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
@@ -199,6 +200,7 @@ func GetUser(c *gin.Context, db *sql.DB) {
 	c.JSON(http.StatusOK, gin.H{
 		"email": email,
 		"ID": ID,
+		"verified": Verified,
 	})
 
 }

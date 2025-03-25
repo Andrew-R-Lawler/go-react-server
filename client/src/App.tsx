@@ -15,7 +15,7 @@ import { Button } from './components/ui/button'
 
 function App() {
     const { getToken, deleteToken, isAuthenticated } = useAuth()
-    const [cookies, setCookie, removeCookie] = useCookies(['user', 'userid'])
+    const [cookies, setCookie, removeCookie] = useCookies(['user'])
 
     const getUser = async (token: string) => {
         try {
