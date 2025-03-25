@@ -220,6 +220,24 @@ func Verify(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
 		return
 	}
+	query := `
+		UPDATE users
+		SET verified = TRUE
+		WHERE verification_token = $1
+			AND token_expiration > NOW()
+			AND verified = FALSE;
+	`
+	result, err := db.Exec(query, token)
+	if err != nil {
+		log.Fatalf("could not update verification status: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatalf("could not get affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		log.Fatalf("verification token not found, or expired")
+	}
 	log.Printf("Token %s verified\n", token)
 	c.Redirect(302, "http://localhost:3000/verify")
 }
