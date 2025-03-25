@@ -29,17 +29,41 @@ type Claims struct {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
-func SendEmail() {
+func SendEmail(token string, email string) {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
 
 	if smtpUser == "" || smtpPass == "" {
 		log.Fatalf("SMTP user or password is missing")
 	}
-
-	body := "test email body"
-	subject := "test email"
-	to := "andrew.r.lawler@gmail.com"
+	body := fmt.Sprintf(`
+		<html>
+		<head>
+			<style>
+				.button {
+					background-color: blue;
+					border: none;
+					color: white;
+					padding: 10px;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 16px;
+					margin: 10px 0;
+					cursor: pointer;
+					border-radius: 5px;
+				}
+			</style>
+		</head>
+		<body>
+			<h2>Welcome to Our Service!</h2>
+			<p>Thank you for registering. Please verify your email address by clicking the button below:</p>
+			<a href="http://localhost:3000/api/user/verify/%s" class="button" style="color: white; text-decoration: none;">Verify Email</a>
+		</body>
+		</html>
+	`, token)
+	subject := "Verify your e-mail address!"
+	to := email
 
 	m := mail.NewMsg()
 	if err := m.From(smtpUser); err != nil {
@@ -120,7 +144,7 @@ func Register(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
 	}	
-	SendEmail()
+	SendEmail(verificationToken, user.Email)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 	})
@@ -196,6 +220,24 @@ func Verify(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
 		return
 	}
+	query := `
+		UPDATE users
+		SET verified = TRUE
+		WHERE verification_token = $1
+			AND token_expiration > NOW()
+			AND verified = FALSE;
+	`
+	result, err := db.Exec(query, token)
+	if err != nil {
+		log.Fatalf("could not update verification status: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatalf("could not get affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		log.Fatalf("verification token not found, or expired")
+	}
 	log.Printf("Token %s verified\n", token)
-	c.Redirect(302, "https://webserver.lawlerlabs.duckdns.org/")
+	c.Redirect(302, "http://localhost:3000/verify")
 }
