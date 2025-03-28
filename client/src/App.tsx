@@ -6,6 +6,7 @@ import Login from './components/login'
 import HomePage from './components/homepage'
 import UserRegistration from './components/registration'
 import Verification from './components/verification'
+import PasswordReset from './components/password-reset'
 import logo from '../src/assets/icons8-checkmark.svg'
 import { CookiesProvider } from 'react-cookie'
 import { useAuth } from './components/authentication'
@@ -100,6 +101,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
+          <Route path="/password-reset/:token" element={<PasswordReset />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
