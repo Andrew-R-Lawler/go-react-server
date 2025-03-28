@@ -231,3 +231,16 @@ func Verify(c *gin.Context, db *sql.DB) {
 	}
 	c.Redirect(302, "http://localhost:3000/verify")
 }
+
+func ForgotPassword(c *gin.Context, db *sql.DB) {
+	log.Println("Forgot password endpoint hit!")
+	c.Redirect(302, "http://localhost:3000/login")
+}
+
+func ResetPassword(c *gin.Context, db *sql.DB) {
+	token := c.Param("token")
+	fmt.Printf("Reset password endpoint hit, token: %v", token)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Reset Password Hit",
+	})
+}
