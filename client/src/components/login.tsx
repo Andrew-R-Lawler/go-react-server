@@ -37,7 +37,7 @@ function Login() {
     }
 
     return (
-        <div className="flex-container">
+        <div className="flex-container flex-col">
             <Card className="w-full max-w-sm mx-auto bg-stone-600 chakra-petch-regular border-none">
                 <CardHeader className='chakra-petch-regular space-y-1 text-white'>
                     <CardTitle className='text-2xl font-bold'>Login</CardTitle>
@@ -67,9 +67,12 @@ function Login() {
                 </CardFooter>
                 </form>
                 <div className="flex-item nav-item">
-                <p>Don't have an account?</p><Link to="/register">Sign Up</Link>
+                <p className='text-stone-900'>Don't have an account?</p><Link to="/register">Sign Up</Link>
                 </div>
             </Card>
+            <div className="p-2 flex nav-item chakra-petch-regular">
+                <p className='text-stone-600'>Forgot your password?</p><Link to="/forgotpassword" className='pl-1'>Click Here</Link>
+            </div>
         </div>
     )
 }
