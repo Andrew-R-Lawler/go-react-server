@@ -3,12 +3,27 @@ import '../App.css'
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Plus } from 'lucide-react';
+import axios from 'axios'
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card"
 
 function ForgotPassword() {
     const [inputValue, setInputValue] = useState<string>('');
 
     const handleForgotPassword = async (e: React.FormEvent) => {
         e.preventDefault()
+        try {
+            axios.post('/api/user/forgotpassword')
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,31 +31,27 @@ function ForgotPassword() {
     };
 
     return (
-    <div className="flex-container">
-        <div className="space-y-4 w-full max-w-sm">
-            <div className='flex-item'>
-            <h1 className='chakra-petch-medium header1 text-white'>Forgotten Password</h1>
-                <form onSubmit={handleForgotPassword} className="space-y-4 bg-stone-700 rounded-md">
-                    <div className="flex items-center space-x-0 rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-offset-1">
-                        <Input
-                          type="text"
-                          placeholder="Add an item..."
-                          className="chakra-petch-regular border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
-                          value={inputValue}
-                          onChange={handleChange}
-                        />
-                        <Button
-                          type="submit"
-                          className="bg-stone-900 text-white border-none rounded-none m-2 p-2 w-10 h-10 flex-shrink-0"
-                          aria-label="Add item"
-                        >
-                          <Plus className="w-6 h-6" />
-                        </Button>
-                    </div>
-                </form>
+        <div className='flex-container'>
+        <Card className="w-[350px] bg-stone-700 border-none text-white">
+            <CardHeader>
+                <CardTitle>Reset your password</CardTitle>
+                <CardDescription>Enter your email address and we'll send you a link to reset your password.</CardDescription>
+            </CardHeader>
+            <CardContent>
+            <form>
+            <div className="grid w-full items-center gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Name</Label>
+              <Input id="email" placeholder="name@example.com" className='border-none bg-stone-800'/>
             </div>
+            </div>
+            </form>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+                <Button className='w-full'>Send Reset Link</Button>
+            </CardFooter>
+        </Card>
         </div>
-    </div>
     )
 }
 
