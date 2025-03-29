@@ -31,8 +31,8 @@ function ForgotPassword() {
     };
 
     return (
-        <div className='flex-container'>
-        <Card className="w-[350px] bg-stone-700 border-none text-white">
+        <div className='flex-container chakra-petch-regular'>
+        <Card className="w-[350px] bg-stone-600 border-none text-white">
             <CardHeader>
                 <CardTitle>Reset your password</CardTitle>
                 <CardDescription>Enter your email address and we'll send you a link to reset your password.</CardDescription>
@@ -42,7 +42,7 @@ function ForgotPassword() {
             <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Name</Label>
-              <Input id="email" placeholder="name@example.com" className='border-none bg-stone-800'/>
+              <Input id="email" placeholder="name@example.com" className='border-none'/>
             </div>
             </div>
             </form>
