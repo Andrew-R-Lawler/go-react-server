@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import '../App.css'
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Plus } from 'lucide-react';
 import axios from 'axios'
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +40,7 @@ function ForgotPassword() {
             <form>
             <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">E-Mail Address</Label>
               <Input id="email" placeholder="name@example.com" className='border-none'/>
             </div>
             </div>
