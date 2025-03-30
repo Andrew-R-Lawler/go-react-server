@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import '../App.css'
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-// import axios from 'axios'
+import axios from 'axios'
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -24,6 +24,13 @@ function ForgotPassword() {
             email: email
         }
         setIsLoading(true)
+        try {
+            const response = await axios.post('/api/user/forgotpassword', postData)
+            setIsLoading(false)
+            return response.data
+        } catch (err) {
+            console.error(err)
+        }
         console.log(postData)
     }
 
@@ -39,7 +46,7 @@ function ForgotPassword() {
             <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">E-Mail Address</Label>
-              <Input id="email" name='email' type='email' placeholder="name@example.com" className='border-none'/>
+              <Input id="email" name='email' type='email' disabled={isLoading} placeholder="name@example.com" className='border-none'/>
             </div>
             </div>
             </form>
