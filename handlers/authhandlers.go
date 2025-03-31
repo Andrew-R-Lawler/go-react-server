@@ -240,8 +240,19 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
 		return
 	}	
-	fmt.Printf("email: %v", user.Email)
-	c.Redirect(302, "http://localhost:3000/login")
+	var userID int
+	err = db.QueryRow("SELECT id FROM users WHERE email = $1", user.Email).Scan(&userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No user found with the given email
+			log.Fatalln("No user found with the provided email.")
+		} else {
+			// Some other error occurred
+			log.Fatal(err)
+		}
+		return
+	}
+	fmt.Printf("user_id: %v", userID)
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
