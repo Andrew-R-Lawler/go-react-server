@@ -14,20 +14,25 @@ import {
 } from "./ui/card"
 
 function ForgotPassword() {
-    const [inputValue, setInputValue] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false)
 
-    const handleForgotPassword = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleForgotPassword = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const email = formData.get('email')
+        const postData = {
+            email: email
+        }
+        setIsLoading(true)
         try {
-            axios.post('/api/user/forgotpassword')
+            const response = await axios.post('/api/user/forgotpassword', postData)
+            setIsLoading(false)
+            return response.data
         } catch (err) {
             console.error(err)
         }
+        console.log(postData)
     }
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
-    };
 
     return (
         <div className='flex-container chakra-petch-regular'>
@@ -37,17 +42,19 @@ function ForgotPassword() {
                 <CardDescription>Enter your email address and we'll send you a link to reset your password.</CardDescription>
             </CardHeader>
             <CardContent>
-            <form>
+            <form onSubmit={handleForgotPassword}>
             <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">E-Mail Address</Label>
-              <Input id="email" placeholder="name@example.com" className='border-none'/>
+              <Input id="email" name='email' type='email' disabled={isLoading} placeholder="name@example.com" className='border-none'/>
             </div>
             </div>
             </form>
             </CardContent>
             <CardFooter className="flex justify-end">
-                <Button className='w-full'>Send Reset Link</Button>
+                <Button className='w-full' type='submit' disabled={isLoading}>
+                    {isLoading ? "Sending Reset Link..." : "Send Reset Link"}
+                </Button>
             </CardFooter>
         </Card>
         </div>

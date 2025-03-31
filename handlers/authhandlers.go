@@ -234,6 +234,13 @@ func Verify(c *gin.Context, db *sql.DB) {
 
 func ForgotPassword(c *gin.Context, db *sql.DB) {
 	log.Println("Forgot password endpoint hit!")
+	var user User
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
+		return
+	}	
+	fmt.Printf("email: %v", user.Email)
 	c.Redirect(302, "http://localhost:3000/login")
 }
 
