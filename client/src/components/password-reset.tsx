@@ -12,11 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card"
+import { AlertCircle } from "lucide-react"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 function PasswordReset() {
     const { token } = useParams();
     const [isLoading, setIsLoading] = useState(false)
     const [styles, setStyles] = useState('border-none')
+    const [error, setError] = useState('')
 
     const handlePasswordReset = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -25,16 +32,21 @@ function PasswordReset() {
         const confirmPassword = formData.get('Confirm Password')
         const postData = {
             newPassword: newPassword,
-            confirmPassword: confirmPassword,
             token: token,
         }
-        setIsLoading(true)
-        try {
-            setIsLoading(false)
-        } catch (err) {
-            console.error(err)
+        if (newPassword === confirmPassword) {
+            try {
+                setIsLoading(true)
+                // run axios PUT to update user's password with newPassword
+                console.log(postData)
+            } catch (err) {
+                console.error(err)
+            }
         }
-        console.log(postData)
+        else {
+            setError('Password inputs must be matching!')
+            console.log(error)
+        }
     }
 
     const handleInputValidation = (event: React.FormEvent<HTMLFormElement>) => {
@@ -43,6 +55,7 @@ function PasswordReset() {
         const confirmPassword = formData.get('Confirm Password')
         if (newPassword === confirmPassword) {
             setStyles("border-green-600")
+            setError('')
         }
         if (newPassword !== confirmPassword) {
             setStyles("border-red-600")
@@ -64,6 +77,13 @@ function PasswordReset() {
               <Input id="new-password" name='New Password' type='password' className='border-none'/>
               <Label htmlFor="confirm-password" className='pt-2'>Confirm Password</Label>
               <Input id="confirm-password" name='Confirm Password' type='password' className={styles}/>
+              { error && 
+                  <Alert variant="destructive" className='border-red-600 text-red-600 p-2 bg-red-300'>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
+              </Alert>
+              }
             </div>
             </div>
             </CardContent>
