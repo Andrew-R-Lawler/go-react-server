@@ -50,7 +50,7 @@ function Todo() {
             setError('Input Cannot be empty');
         } else {
             try {
-                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.userid.ID }})
+                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.user.ID }})
                 setInputValue("") 
                 setError("")
                 fetchTodos()
@@ -63,7 +63,7 @@ function Todo() {
 
     useEffect(() => {
         fetchTodos();
-    }, [cookies.userid])
+    }, [cookies.user])
     
   return (
     <div className="flex-container">

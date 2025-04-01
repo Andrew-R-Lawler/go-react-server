@@ -29,7 +29,7 @@ type Claims struct {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
  
-func SendEmail(token string, email string) {
+func SendVerificationEmail(token string, email string) {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
 
@@ -81,6 +81,62 @@ func SendEmail(token string, email string) {
 	}
 	if err := client.DialAndSend(m); err != nil {
 		log.Fatalf("failed to send mail: %s", err)
+	}
+}
+
+func SendResetEmail(token string, email string) {
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
+
+	if smtpUser == "" || smtpPass == "" {
+		log.Fatalf("SMTP user or password is missing")
+	}
+
+	body := fmt.Sprintf(`
+		<html>
+		<head>
+			<style>
+				.button {
+					background-color: blue;
+					border: none;
+					color: white;
+					padding: 10px;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 16px;
+					margin: 10px 0;
+					cursor: pointer;
+					border-radius: 5px;
+				}
+			</style>
+		</head>
+		<body>
+			<h2>Password Reset Request Header</h2>
+			<p>Password Reset Request Body</p>
+			<a href="http://localhost:3000/passwordreset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
+		</body>
+		</html>
+	`, token)
+	subject := "Password Reset Request"
+	to := email
+
+	m := mail.NewMsg()
+	if err := m.From(smtpUser); err != nil {
+		log.Fatalf("failed to set From address: %s", err)
+	}
+	if err := m.To(to); err != nil {
+		log.Fatalf("failed to set To address: %s", err)
+	}
+	m.Subject(subject)
+	m.SetBodyString(mail.TypeTextHTML, body)
+	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
+	if err != nil {
+		log.Fatalf("failed to create mail client: %s", err)
+	}
+	if err := client.DialAndSend(m); err != nil {
+		log.Fatalf("failed to sennd mail: %s", err)
 	}
 }
 
@@ -144,7 +200,7 @@ func Register(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
 	}	
-	SendEmail(verificationToken, user.Email)
+	SendVerificationEmail(verificationToken, user.Email)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 	})
@@ -261,6 +317,7 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 	if err != nil {
 		fmt.Errorf("failed to insert password reset request: %v", err)
 	}
+	SendResetEmail(resetToken, user.Email)
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
