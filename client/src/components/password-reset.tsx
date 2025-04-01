@@ -16,7 +16,7 @@ import {
 function PasswordReset() {
     const { token } = useParams();
     const [isLoading, setIsLoading] = useState(false)
-    const [isValid, setIsValid] = useState(false)
+    const [styles, setStyles] = useState('border-none')
 
     const handlePasswordReset = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -42,10 +42,10 @@ function PasswordReset() {
         const newPassword = formData.get('New Password')
         const confirmPassword = formData.get('Confirm Password')
         if (newPassword === confirmPassword) {
-            setIsValid(true)
+            setStyles("border-green-600")
         }
         if (newPassword !== confirmPassword) {
-            setIsValid(false)
+            setStyles("border-red-600")
         }
     }
 
@@ -63,7 +63,7 @@ function PasswordReset() {
               <Label htmlFor="new-password" className='pt-2'>New Password</Label>
               <Input id="new-password" name='New Password' type='password' className='border-none'/>
               <Label htmlFor="confirm-password" className='pt-2'>Confirm Password</Label>
-              <Input id="confirm-password" name='Confirm Password' type='password' className={isValid ? 'border-green-600' : 'border-red-600'}/>
+              <Input id="confirm-password" name='Confirm Password' type='password' className={styles}/>
             </div>
             </div>
             </CardContent>
