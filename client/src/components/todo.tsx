@@ -63,7 +63,7 @@ function Todo() {
 
     useEffect(() => {
         fetchTodos();
-    }, [cookies.user.ID])
+    }, [cookies.user])
     
   return (
     <div className="flex-container">
