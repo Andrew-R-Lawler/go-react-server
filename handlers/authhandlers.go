@@ -233,7 +233,6 @@ func Verify(c *gin.Context, db *sql.DB) {
 }
 
 func ForgotPassword(c *gin.Context, db *sql.DB) {
-	log.Println("Forgot password endpoint hit!")
 	var user User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
@@ -252,7 +251,16 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 		}
 		return
 	}
-	fmt.Printf("user_id: %v", userID)
+	resetToken := generateVerificationToken()
+	expiration := time.Now().Add(1 * time.Hour)
+	query := `
+		INSERT INTO password_reset (user_id, token, expires_at)
+		VALUES ($1, $2, $3)
+	`
+	_, err = db.Exec(query, userID, resetToken, expiration)
+	if err != nil {
+		fmt.Errorf("failed to insert password reset request: %v", err)
+	}
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
