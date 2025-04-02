@@ -18,6 +18,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert"
+import axios from 'axios';
 
 function PasswordReset() {
     const { token } = useParams();
@@ -30,22 +31,29 @@ function PasswordReset() {
         const formData = new FormData(event.currentTarget)
         const newPassword = formData.get('New Password')
         const confirmPassword = formData.get('Confirm Password')
-        const postData = {
-            newPassword: newPassword,
-            token: token,
-        }
         if (newPassword === confirmPassword) {
             try {
                 setIsLoading(true)
                 // run axios PUT to update user's password with newPassword
-                console.log(postData)
+                const response = await axios.post('/api/user/resetpassword', { token, newPassword })
+                console.log(response.data)
             } catch (err) {
-                console.error(err)
+                if (axios.isAxiosError(err)) {
+                    const response = err.response;
+                    if (response) {
+                        setError(response.data.error || 'An unknown error occured');
+                    } else {
+                        setError('Network error, please try again later')
+                    }
+                } else {
+                    setError("Failed to reset password, an uknown error has occured.")
+                }
+                setIsLoading(false)
+                setStyles('border-none')
             }
         }
         else {
             setError('Password inputs must be matching!')
-            console.log(error)
         }
     }
 
@@ -74,11 +82,11 @@ function PasswordReset() {
             <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5 pt-2">
               <Label htmlFor="new-password" className='pt-2'>New Password</Label>
-              <Input id="new-password" name='New Password' type='password' className='border-none'/>
+              <Input id="new-password" name='New Password' type='password' className='border-none' disabled={isLoading}/>
               <Label htmlFor="confirm-password" className='pt-2'>Confirm Password</Label>
-              <Input id="confirm-password" name='Confirm Password' type='password' className={styles}/>
+              <Input id="confirm-password" name='Confirm Password' type='password' className={styles} disabled={isLoading}/>
               { error && 
-                  <Alert variant="destructive" className='border-red-600 text-red-600 p-2 bg-red-300'>
+                  <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
@@ -88,7 +96,7 @@ function PasswordReset() {
             </div>
             </CardContent>
             <CardFooter className="flex justify-end pt-2">
-                <Button className='w-full' type='submit'>
+                <Button className='w-full' type='submit' disabled={isLoading}>
                     {isLoading ? "Resetting Password..." : "Reset Password"}
                 </Button>
             </CardFooter>

@@ -299,30 +299,59 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 	err = db.QueryRow("SELECT id FROM users WHERE email = $1", user.Email).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			// No user found with the given email
-			log.Fatalln("No user found with the provided email.")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No user found with the given email."})
 		} else {
-			// Some other error occurred
-			log.Fatal(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "An unknown error has occured."})
 		}
 		return
 	}
 	resetToken := generateVerificationToken()
-	expiration := time.Now().Add(1 * time.Hour)
+	expiration := time.Now().Add(2 * time.Hour)
 	query := `
 		INSERT INTO password_reset (user_id, token, expires_at)
 		VALUES ($1, $2, $3)
 	`
 	_, err = db.Exec(query, userID, resetToken, expiration)
 	if err != nil {
-		fmt.Errorf("failed to insert password reset request: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create password reset request"})
 	}
 	SendResetEmail(resetToken, user.Email)
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
-	token := c.Param("token")
-	fmt.Printf("Reset password endpoint hit, token: %v", token)
+	var request struct {
+		Token		string	`json:"token"`
+		NewPassword	string	`json:"newPassword`
+	}
+	if err := c.BindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
+		return
+	}
+	log.Printf("Hashed Password: %s", hashedPassword)
+	var resetToken struct {
+		UserID	int	`json:"user_id"`
+		TokenExpiration	time.Time `json:"expires_at`
+	}
+	err = db.QueryRow("SELECT user_id, expires_at FROM password_reset WHERE token = $1", request.Token).Scan(&resetToken.UserID, &resetToken.TokenExpiration)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Fatalln("No password reset request found with given token.")
+		} else {
+			log.Fatal(err)
+		}
+	}
+	log.Printf("User ID: %d", resetToken.UserID)
+	if time.Now().After(resetToken.TokenExpiration) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Your password reset token has expired."})
+		return
+	} else {
+		fmt.Println("The token is still valid.")
+
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Reset Password Hit",
 	})
