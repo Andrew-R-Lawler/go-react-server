@@ -75,7 +75,7 @@ func main() {
 	userGroup.POST("/login", func(c *gin.Context) {handlers.Login(c, db)})
 	userGroup.GET("/verify/:token", func(c *gin.Context) {handlers.Verify(c, db)})
 	userGroup.POST("/forgotpassword", func(c *gin.Context) {handlers.ForgotPassword(c, db)})
-	userGroup.POST("/resetpassword/:token", func(c *gin.Context) {handlers.ResetPassword(c, db)})
+	userGroup.POST("/resetpassword", func(c *gin.Context) {handlers.ResetPassword(c, db)})
 
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
 

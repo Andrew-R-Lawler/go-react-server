@@ -12,9 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card"
+import { AlertCircle } from "lucide-react"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 function ForgotPassword() {
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
 
     const handleForgotPassword = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -23,15 +30,26 @@ function ForgotPassword() {
         const postData = {
             email: email
         }
-        setIsLoading(true)
         try {
+            setError('')
+            setIsLoading(true)
             const response = await axios.post('/api/user/forgotpassword', postData)
-            setIsLoading(false)
             return response.data
         } catch (err) {
             console.error(err)
+                if (axios.isAxiosError(err)) {
+                    const response = err.response;
+                    if (response) {
+                        setError(response.data.error || 'An unknown error occured');
+                    } else {
+                        setError('Network error, please try again later')
+                    }
+                } else {
+                    setError("Failed create password reset request, an uknown error has occured.")
+                }
+                setIsLoading(false)
         }
-        console.log(postData)
+        setIsLoading(false)
     }
 
     return (
@@ -47,6 +65,13 @@ function ForgotPassword() {
             <div className="flex flex-col space-y-1.5 pt-2">
               <Label htmlFor="name">E-Mail Address</Label>
               <Input id="email" name='email' type='email' disabled={isLoading} placeholder="name@example.com" className='border-none'/>
+              { error && 
+                  <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
+              </Alert>
+              }
             </div>
             </div>
             </CardContent>
