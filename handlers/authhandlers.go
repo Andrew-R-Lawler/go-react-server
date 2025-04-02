@@ -306,7 +306,7 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 		return
 	}
 	resetToken := generateVerificationToken()
-	expiration := time.Now().Add(2 * time.Hour)
+	expiration := time.Now().UTC().Add(2 * time.Hour)
 	query := `
 		INSERT INTO password_reset (user_id, token, expires_at)
 		VALUES ($1, $2, $3)
@@ -345,12 +345,11 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 		}
 	}
 	log.Printf("User ID: %d", resetToken.UserID)
-	if time.Now().After(resetToken.TokenExpiration) {
+	if time.Now().UTC().Before(resetToken.TokenExpiration) {
+		fmt.Println("The token is still valid.")
+	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Your password reset token has expired."})
 		return
-	} else {
-		fmt.Println("The token is still valid.")
-
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Reset Password Hit",
