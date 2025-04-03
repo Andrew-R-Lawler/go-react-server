@@ -34,7 +34,10 @@ function ForgotPassword() {
             setError('')
             setIsLoading(true)
             const response = await axios.post('/api/user/forgotpassword', postData)
-            return response.data
+            console.log(response.data)
+            if (response.data.message === 'Email sent to user!') {
+                window.location.href = '/email-sent'
+            }
         } catch (err) {
             console.error(err)
                 if (axios.isAxiosError(err)) {

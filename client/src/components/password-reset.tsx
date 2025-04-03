@@ -36,7 +36,9 @@ function PasswordReset() {
                 setIsLoading(true)
                 // run axios PUT to update user's password with newPassword
                 const response = await axios.post('/api/user/resetpassword', { token, newPassword })
-                console.log(response.data)
+                if (response.data.message === 'Password reset successful!') {
+                    window.location.href = '/reset-success'
+                }
             } catch (err) {
                 if (axios.isAxiosError(err)) {
                     const response = err.response;
