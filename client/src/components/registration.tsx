@@ -24,7 +24,7 @@ function UserRegistration() {
         setIsLoading(true)
         try {
             const response = await axios.post("/api/user/register", newUser)
-            window.location.href = '/login'
+            window.location.href = '/registrationsuccess'
             return response.data
         } catch (error) {
             console.error(error)

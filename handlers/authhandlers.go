@@ -316,6 +316,7 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create password reset request"})
 	}
 	SendResetEmail(resetToken, user.Email)
+	c.JSON(http.StatusAccepted, gin.H{"message": "Email sent to user!"})
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
@@ -331,7 +332,6 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
 		return
 	}
-	log.Printf("Hashed Password: %s", hashedPassword)
 	var resetToken struct {
 		UserID	int	`json:"user_id"`
 		TokenExpiration	time.Time `json:"expires_at`
@@ -339,19 +339,28 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 	err = db.QueryRow("SELECT user_id, expires_at FROM password_reset WHERE token = $1", request.Token).Scan(&resetToken.UserID, &resetToken.TokenExpiration)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Fatalln("No password reset request found with given token.")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "No password reset request found with the given token."})
 		} else {
+			log.Println("number 1")
 			log.Fatal(err)
 		}
 	}
-	log.Printf("User ID: %d", resetToken.UserID)
 	if time.Now().UTC().Before(resetToken.TokenExpiration) {
-		fmt.Println("The token is still valid.")
+		query := `UPDATE users SET password = $1 WHERE id = $2`
+		_, err := db.Exec(query, hashedPassword, resetToken.UserID)
+		if err != nil {
+			log.Println("number 2")
+			log.Fatal(err)
+		}
+		query = `UPDATE password_reset SET used = $1 WHERE token = $2`
+		_, err = db.Exec(query, true, request.Token)
+		if err != nil {
+			log.Println("number 3")
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusAccepted, gin.H{"message": "Password reset successful!"})
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Your password reset token has expired."})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Reset Password Hit",
-	})
 }

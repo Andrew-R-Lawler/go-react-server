@@ -9,6 +9,8 @@ import Verification from './components/verification'
 import PasswordReset from './components/password-reset'
 import ForgotPassword from './components/forgotpassword'
 import ResetSuccess from './components/reset-success'
+import EmailSent from './components/email-sent'
+import RegisterSuccess from './components/register-success'
 import logo from '../src/assets/icons8-checkmark.svg'
 import { CookiesProvider } from 'react-cookie'
 import { useAuth } from './components/authentication'
@@ -105,7 +107,9 @@ function App() {
           <Route path="/verify" element={<Verification />} />
           <Route path="/passwordreset/:token" element={<PasswordReset />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
-          <Route path="/resetsuccess" element={<ResetSuccess />} />
+          <Route path="/reset-success" element={<ResetSuccess />} />
+          <Route path="/email-sent" element={<EmailSent />} />
+          <Route path='/registrationsuccess' element={<RegisterSuccess />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
