@@ -23,8 +23,9 @@ type User struct {
 }
 
 type Claims struct {
-	ID 		int		`json:"id"`
-	Email 	string 	`json:"email"`
+	ID 			int		`json:"id"`
+	Email 		string 	`json:"email"`
+	Verified 	bool	`json:"verified"`
 	jwt.StandardClaims
 }
 
@@ -181,9 +182,22 @@ func generateVerificationToken() string {
 }
 
 func validatePassword(password string) bool {
-	passwordRegex := `^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
-	re := regexp.MustCompile(passwordRegex)
-	return re.MatchString(password)
+	if len(password) < 8 {
+		return false
+	}
+	uppercasePattern := `[A-Z]`
+	if !regexp.MustCompile(uppercasePattern).MatchString(password) {
+		return false
+	}
+	digitPattern := `\d`
+	if !regexp.MustCompile(digitPattern).MatchString(password) {
+		return false
+	}
+	specialCharPattern := `[@$!%*?&]`
+	if !regexp.MustCompile(specialCharPattern).MatchString(password) {
+		return false
+	}
+	return true
 }
 
 func Register(c *gin.Context, db *sql.DB) {
@@ -195,6 +209,7 @@ func Register(c *gin.Context, db *sql.DB) {
 	}
 	if !validatePassword(user.Password) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements"})
+		return
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -336,9 +351,11 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+		return
 	}
 	if !validatePassword(request.NewPassword) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements."})
+		return
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
 	if err != nil {

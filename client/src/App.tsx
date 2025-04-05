@@ -11,6 +11,7 @@ import ForgotPassword from './components/forgotpassword'
 import ResetSuccess from './components/reset-success'
 import EmailSent from './components/email-sent'
 import RegisterSuccess from './components/register-success'
+import Forbidden from './components/forbidden'
 import logo from '../src/assets/icons8-checkmark.svg'
 import { CookiesProvider } from 'react-cookie'
 import { useAuth } from './components/authentication'
@@ -61,12 +62,12 @@ function App() {
   return (
       <CookiesProvider>
       <Router>
-      <div>
+      <div className='chakra-petch-regular'>
         <nav className='nav-bar bg-black'>
           <ul className='nav-list'>
             <li className='nav-item'>
                 <Link to="/">
-                <img src={logo} width="40" height="40"/>
+                <img src={logo} width="30" height="30"/>
                 </Link>
             </li>
             { cookies.verified === true && 
@@ -98,7 +99,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/todo" element={isAuthenticated() && cookies.verified ? <Todo /> : <Login />} />
+          <Route path="/todo" element={isAuthenticated() && cookies.verified ? <Todo /> : <Forbidden />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
