@@ -1,26 +1,16 @@
 import '../App.css'
-import { useParams } from 'react-router-dom'
 import React, { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card"
 import { AlertCircle } from "lucide-react"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import axios from 'axios';
 
 function PasswordReset() {
+
     const { token } = useParams();
     const [isLoading, setIsLoading] = useState(false)
     const [styles, setStyles] = useState('border-none')
@@ -50,7 +40,7 @@ function PasswordReset() {
                         setError('Network error, please try again later')
                     }
                 } else {
-                    setError("Failed to reset password, an uknown error has occured.")
+                    setError("Failed to reset password, an unknown error has occured.")
                 }
                 setIsLoading(false)
                 setStyles('border-none')

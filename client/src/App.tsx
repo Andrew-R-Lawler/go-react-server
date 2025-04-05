@@ -72,15 +72,12 @@ function App() {
             { cookies.verified === true && 
                 <>
                 <li className='nav-item'>
-                    <Link to="/todo">Verified: {String(cookies.user.verified)}</Link>
+                    <Link to="/todo">Todo</Link>
                 </li>
                 </>
             }
             { cookies.user && 
                 <>
-                <li className='nav-item'>
-                    <Link to="/todo">Todo</Link>
-                </li>
                 <li className='nav-item'>
                     <p className='text-white'>Hello! {cookies.user.email}</p>
                 </li>
@@ -101,7 +98,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/todo" element={isAuthenticated() ? <Todo /> : <Login />} />
+          <Route path="/todo" element={isAuthenticated() && cookies.verified ? <Todo /> : <Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
