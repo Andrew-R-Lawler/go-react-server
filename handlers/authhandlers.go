@@ -217,7 +217,7 @@ func Register(c *gin.Context, db *sql.DB) {
 		return
 	}
 	verificationToken := generateVerificationToken()
-	currentTime := time.Now()
+	currentTime := time.Now().UTC()
 	tokenExpiration := currentTime.Add(24 * time.Hour) 
 
 	_, err = db.Exec(query, user.Email, hashedPassword, verificationToken, tokenExpiration, false)
