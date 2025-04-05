@@ -7,10 +7,17 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 function UserRegistration() {
 
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
 
     const passwordPattern = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 
@@ -30,6 +37,17 @@ function UserRegistration() {
             return response.data
         } catch (error) {
             console.error(error)
+            if (axios.isAxiosError(error)) {
+                const response = error.response;
+                if (response) {
+                    setError(response.data.error || 'An unknown error occured');
+                } else {
+                    setError('Network error, please try again later')
+                }
+            } else {
+                setError("Failed to register user, an unknown error has occured.")
+            }
+            setIsLoading(false)
         }
     }
 
@@ -49,6 +67,13 @@ function UserRegistration() {
                             <li className='pl-1'>One special character</li>
                             </ul>
                     </CardHeader>
+                      { error && 
+                          <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
+                      </Alert>
+                      }
                     <CardContent>
                         <form onSubmit={handleRegister} className="space-y-4 text-white chakra-petch-regular">
                         <div className="space-y-2">
