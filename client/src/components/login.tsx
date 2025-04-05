@@ -2,7 +2,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { AlertCircle } from "lucide-react"
 import '../App.css'
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -23,6 +23,7 @@ function Login() {
         const email = formData.get('email')
         const password = formData.get('password')
         try {
+            setError('')
             const token = await login(email, password)
             if (token !== undefined) {
                 saveToken(token)
@@ -45,12 +46,13 @@ function Login() {
                 </CardHeader>
                 <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                  { error && 
+                      <Alert variant="destructive" className='border-red-600 text-red-600 pb-2 bg-red-300'>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
+                  </Alert>
+                  }
                 <div className="space-y-2 text-white chakra-petch-regular">
                 <Label htmlFor="email"><h2>Email</h2></Label>
                 <Input className='border-none' id="email" type="email" name="email" placeholder="name@example.com" required autoComplete="email" />
@@ -70,7 +72,7 @@ function Login() {
                 <p className='text-stone-900'>Don't have an account?</p><Link to="/register">Sign Up</Link>
                 </div>
             </Card>
-            <div className="p-2 flex nav-item chakra-petch-regular">
+            <div className="p-2 flex nav-item">
                 <p className='text-stone-600'>Forgot your password?</p><Link to="/forgotpassword" className='pl-1'>Click Here</Link>
             </div>
         </div>
