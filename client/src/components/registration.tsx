@@ -12,6 +12,8 @@ function UserRegistration() {
 
     const [isLoading, setIsLoading] = useState(false)
 
+    const passwordPattern = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+
     const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
@@ -37,7 +39,15 @@ function UserRegistration() {
                 <Card className="w-full max-w-sm bg-stone-600 border-none">
                     <CardHeader className="chakra-petch-regular space-y-1 text-white">
                         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-                        <CardDescription className='text-white'>Enter your email and password to create your account</CardDescription>
+                        <CardDescription className='text-white'>
+                            Enter your email and password to create your account, your password must have:
+                        </CardDescription>
+                            <ul className='list-disc pl-4 text-sm'>
+                            <li>At least 8 characters</li> 
+                            <li>One uppercase letter</li>
+                            <li>One number</li>
+                            <li>One special character</li>
+                            </ul>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleRegister} className="space-y-4 text-white chakra-petch-regular">
@@ -47,7 +57,7 @@ function UserRegistration() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="password">Password</Label>
-                          <Input className='border-none' id="password" name="password" required type="password" autoComplete="password" />
+                          <Input className='border-none' id="password" name="password" required type="password" autoComplete="password" pattern={passwordPattern} />
                         </div>
                         <Button className="w-full" type="submit">
                             {isLoading ? "Signing up..." : "Sign up"}
