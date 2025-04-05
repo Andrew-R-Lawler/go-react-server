@@ -310,7 +310,7 @@ func Verify(c *gin.Context, db *sql.DB) {
 	if rowsAffected == 0 {
 		log.Fatalf("verification token not found, or expired")
 	}
-	c.Redirect(302, "http://localhost:3000/verify")
+	c.Redirect(302, "http://webserver.lawlerlabs.duckdns.org/verify")
 }
 
 func ForgotPassword(c *gin.Context, db *sql.DB) {
