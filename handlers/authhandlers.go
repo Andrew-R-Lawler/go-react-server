@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 	"fmt"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -179,12 +180,21 @@ func generateVerificationToken() string {
 	return hex.EncodeToString(bytes)
 }
 
+func validatePassword(password string) bool {
+	passwordRegex := `^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
+	re := regexp.MustCompile(passwordRegex)
+	return re.MatchString(password)
+}
+
 func Register(c *gin.Context, db *sql.DB) {
 	var user User
 	query := "INSERT INTO users (email, password, verification_token, token_expiration, verified) VALUES ($1, $2, $3, $4, $5)"
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input"})
 		return
+	}
+	if !validatePassword(user.Password) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements"})
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -326,6 +336,9 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+	}
+	if !validatePassword(request.NewPassword) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements"})
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
 	if err != nil {

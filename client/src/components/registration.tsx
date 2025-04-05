@@ -42,11 +42,11 @@ function UserRegistration() {
                         <CardDescription className='text-white'>
                             Enter your email and password to create your account, your password must have:
                         </CardDescription>
-                            <ul className='list-disc pl-4 text-sm'>
-                            <li>At least 8 characters</li> 
-                            <li>One uppercase letter</li>
-                            <li>One number</li>
-                            <li>One special character</li>
+                            <ul className='list-disc pl-5 text-sm'>
+                            <li className='pl-1'>At least 8 characters</li> 
+                            <li className='pl-1'>One uppercase letter</li>
+                            <li className='pl-1'>One number</li>
+                            <li className='pl-1'>One special character</li>
                             </ul>
                     </CardHeader>
                     <CardContent>
