@@ -60,7 +60,7 @@ func SendVerificationEmail(token string, email string) {
 		<body>
 			<h2>Welcome to Our Service!</h2>
 			<p>Thank you for registering. Please verify your email address by clicking the button below:</p>
-			<a href="http://localhost:3000/api/user/verify/%s" class="button" style="color: white; text-decoration: none;">Verify Email</a>
+			<a href="http://webserver.lawlerlabs.duckdns.org/api/user/verify/%s" class="button" style="color: white; text-decoration: none;">Verify Email</a>
 		</body>
 		</html>
 	`, token)
@@ -116,7 +116,7 @@ func SendResetEmail(token string, email string) {
 		<body>
 			<h2>Password Reset Request Header</h2>
 			<p>Password Reset Request Body</p>
-			<a href="http://localhost:3000/passwordreset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
+			<a href="http://webserver.lawlerlabs.duckdns.org/passwordreset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
 		</body>
 		</html>
 	`, token)
