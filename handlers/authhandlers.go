@@ -301,14 +301,17 @@ func Verify(c *gin.Context, db *sql.DB) {
 	`
 	result, err := db.Exec(query, token)
 	if err != nil {
-		log.Fatalf("could not update verification status: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not update verifications status"})
+		return
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Fatalf("could not get affected rows: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get affected rows"})
+		return
 	}
 	if rowsAffected == 0 {
-		log.Fatalf("verification token not found, or expired")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "verification token not found or expired"})
+		return
 	}
 	c.Redirect(302, "http://webserver.lawlerlabs.duckdns.org/verify")
 }
@@ -325,10 +328,11 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "No user found with the given email."})
+			return
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "An unknown error has occured."})
+			return
 		}
-		return
 	}
 	resetToken := generateVerificationToken()
 	expiration := time.Now().UTC().Add(2 * time.Hour)
@@ -339,6 +343,7 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 	_, err = db.Exec(query, userID, resetToken, expiration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create password reset request"})
+		return
 	}
 	SendResetEmail(resetToken, user.Email)
 	c.JSON(http.StatusAccepted, gin.H{"message": "Email sent to user!"})
@@ -370,23 +375,24 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "No password reset request found with the given token."})
+			return
 		} else {
-			log.Println("number 1")
-			log.Fatal(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
 	}
 	if time.Now().UTC().Before(resetToken.TokenExpiration) {
 		query := `UPDATE users SET password = $1 WHERE id = $2`
 		_, err := db.Exec(query, hashedPassword, resetToken.UserID)
 		if err != nil {
-			log.Println("number 2")
-			log.Fatal(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
 		query = `UPDATE password_reset SET used = $1 WHERE token = $2`
 		_, err = db.Exec(query, true, request.Token)
 		if err != nil {
-			log.Println("number 3")
-			log.Fatal(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
 		c.JSON(http.StatusAccepted, gin.H{"message": "Password reset successful!"})
 	} else {
