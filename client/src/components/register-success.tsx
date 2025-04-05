@@ -16,7 +16,7 @@ function RegisterSuccess() {
         <form>
             <CardHeader>
                 <CardTitle className='text-xl'>Thank you for signing up!</CardTitle>
-                    <Separator className='mt-2 text-grey-800'/>
+                    <Separator className='mt-2'/>
                 <CardDescription className='text-white py-2'>You will receive a verification email shortly. Check your spam folder if it doesn't show up within one or two minutes.</CardDescription>
             </CardHeader>
             <CardContent>
