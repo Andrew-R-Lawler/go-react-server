@@ -29,7 +29,9 @@ func GetTodos(c *gin.Context, db *sql.DB) {
 		
 		rows, err := db.Query(`SELECT * FROM "todos" WHERE user_id = $1 ORDER BY id;`, userId)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
 		defer rows.Close()
 		var todos []Todo
@@ -43,6 +45,7 @@ func GetTodos(c *gin.Context, db *sql.DB) {
 		}
 		if err := rows.Err(); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while iterating todos"})
+			return
 		}
 		c.JSON(http.StatusOK, todos)
 	}
@@ -53,10 +56,11 @@ func DeleteTodo(c *gin.Context, db *sql.DB) {
 		query := "DELETE FROM todos WHERE id = $1"
 		_, err := db.Exec(query, todoId)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "todo successfully deleted"})
-		return
 	}
 
 func PostTodo(c *gin.Context, db *sql.DB) {
@@ -66,6 +70,7 @@ func PostTodo(c *gin.Context, db *sql.DB) {
 		userId := c.DefaultQuery("user_id", "")
 		if userId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+			return
 		}
 		err := c.ShouldBindJSON(&todo)
 		if err != nil {
@@ -73,15 +78,13 @@ func PostTodo(c *gin.Context, db *sql.DB) {
 			return
 		}
 		body := todo.Name
-		fmt.Printf("body: %v", body)
-		fmt.Printf("userId: %v", userId)
 		_, err = db.Exec(query, body, false, userId)
 		if err != nil {
+			log.Printf("error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			return
 		}
-		c.JSON(http.StatusCreated, gin.H{
-			"message": "Added todo",
-		})
+		c.JSON(http.StatusCreated, gin.H{ "message": "Added todo", })
 	}
 
 func UpdateTodo(c *gin.Context, db *sql.DB) {
