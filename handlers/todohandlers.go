@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"database/sql"
 	"io"
-	"fmt"
 
 
 	"github.com/gin-gonic/gin"
