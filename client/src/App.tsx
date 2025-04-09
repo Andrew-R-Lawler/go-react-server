@@ -12,6 +12,7 @@ import ResetSuccess from './components/reset-success'
 import EmailSent from './components/email-sent'
 import RegisterSuccess from './components/register-success'
 import Forbidden from './components/forbidden'
+import AddProducts from './components/add-products'
 import Shop from './components/shop'
 import logo from '../src/assets/icons8-checkmark.svg'
 import { CookiesProvider } from 'react-cookie'
@@ -71,6 +72,12 @@ function App() {
                 <img src={logo} width="30" height="30"/>
                 </Link>
             </li>
+            <li className='nav-item'>
+                <Link to="/shop">Shop</Link>
+            </li>
+            <li className='nav-item'>
+                <Link to="/add-products">Add Products</Link>
+            </li>
             { cookies.verified === true && 
                 <>
                 <li className='nav-item'>
@@ -110,6 +117,7 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path='/registrationsuccess' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
+          <Route path='/add-products' element={<AddProducts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
