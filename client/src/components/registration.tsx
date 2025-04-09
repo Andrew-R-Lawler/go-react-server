@@ -33,7 +33,7 @@ function UserRegistration() {
         setIsLoading(true)
         try {
             const response = await axios.post("/api/user/register", newUser)
-            window.location.href = '/registrationsuccess'
+            window.location.href = '/registration-success'
             return response.data
         } catch (error) {
             console.error(error)

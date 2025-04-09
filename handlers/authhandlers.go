@@ -116,7 +116,7 @@ func SendResetEmail(token string, email string) {
 		<body>
 			<h2>Password Reset Request Header</h2>
 			<p>Password Reset Request Body</p>
-			<a href="https://webserver.lawlerlabs.duckdns.org/passwordreset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
+			<a href="https://webserver.lawlerlabs.duckdns.org/password-reset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
 		</body>
 		</html>
 	`, token)
