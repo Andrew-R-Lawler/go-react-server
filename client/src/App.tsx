@@ -111,11 +111,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
-          <Route path="/passwordreset/:token" element={<PasswordReset />} />
-          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/password-reset/:token" element={<PasswordReset />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-success" element={<ResetSuccess />} />
           <Route path="/email-sent" element={<EmailSent />} />
-          <Route path='/registrationsuccess' element={<RegisterSuccess />} />
+          <Route path='/registration-success' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
           <Route path='/add-products' element={<AddProducts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
