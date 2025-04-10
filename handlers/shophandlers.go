@@ -11,3 +11,7 @@ func GetProducts (c *gin.Context, db *sql.DB) {
 	fmt.Println("GetProducts endpoint hit")
 	log.Println("GetProducts endpoint hit")
 }
+
+func AddProduct (c *gin.Context, db *sql.DB) {
+	log.Println("Add Product endpoint hit")
+}
