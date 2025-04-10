@@ -5,12 +5,14 @@ import { Input } from './ui/input';
 import { Label } from "@/components/ui/label";
 import { Textarea } from './ui/textarea';
 import { AlertCircle } from "lucide-react"
+import { useAuth } from '../components/authentication'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-// import axios from 'axios'
+import axios from 'axios'
 
 function AddProducts() {
 
+    const { getToken } = useAuth()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -25,6 +27,26 @@ function AddProducts() {
             description: formData.get('description'),
             price: formData.get('price'),
             stockQuantity: formData.get('stock-quantity')
+        }
+        const token = getToken()
+        try {
+            setError('')
+            setIsLoading(true)
+            const response = await axios.post('/api/admin/products', postData, { headers: { Authorization: `Bearer ${token}`,},})
+            console.log(response.data)
+        } catch (err) {
+            console.error(err)
+                if (axios.isAxiosError(err)) {
+                    const response = err.response;
+                    if (response) {
+                        setError(response.data.error || 'An unknown error occured');
+                    } else {
+                        setError('Network error, please try again later')
+                    }
+                } else {
+                    setError("Failed create product, an uknown error has occured.")
+                }
+                setIsLoading(false)
         }
         console.log('postData:', postData)
         const form = document.getElementById('product-form') as HTMLFormElement

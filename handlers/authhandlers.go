@@ -268,8 +268,6 @@ func Login(c *gin.Context, db *sql.DB) {
 		}
 		return
 	}
-	log.Printf("User admin status: %v", user.Admin)
-	log.Printf("User verified status: %v", user.Verified)
 	token, err := GenerateToken(user.Email, user.Admin, user.Verified)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})

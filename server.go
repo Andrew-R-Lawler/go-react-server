@@ -66,6 +66,7 @@ func main() {
 	todoGroup := r.Group("/api/todo")
 	userGroup := r.Group("/api/user")
 	protectedGroup := r.Group("/api/protected", func(c *gin.Context) {authMiddleware(c)})
+	adminGroup := r.Group("/api/admin", func(c *gin.Context) {authMiddleware(c)})
 	shopGroup := r.Group("/api/shop")
 
 	todoGroup.GET("/", func(c *gin.Context) {handlers.GetTodos(c, db)})
@@ -81,6 +82,8 @@ func main() {
 	userGroup.POST("/resetpassword", func(c *gin.Context) {handlers.ResetPassword(c, db)})
 
 	shopGroup.GET("/products", func(c *gin.Context) {handlers.GetProducts(c, db)})
+
+	adminGroup.POST("/products", func(c *gin.Context) {handlers.AddProduct(c, db)})
 
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
 

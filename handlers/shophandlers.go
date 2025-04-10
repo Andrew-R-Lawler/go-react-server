@@ -14,4 +14,6 @@ func GetProducts (c *gin.Context, db *sql.DB) {
 
 func AddProduct (c *gin.Context, db *sql.DB) {
 	log.Println("Add Product endpoint hit")
+	admin, _ := c.Get("admin")
+	log.Printf("admin: %v", admin)
 }
