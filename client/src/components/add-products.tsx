@@ -23,10 +23,10 @@ function AddProducts() {
         const formData = new FormData(event.currentTarget)
         const postData = {
             name: formData.get('name'),
-            imageUrl: formData.get('image-url'),
+            image_url: formData.get('image-url'),
             description: formData.get('description'),
-            price: formData.get('price'),
-            stockQuantity: formData.get('stock-quantity')
+            price: Number(formData.get('price')),
+            stock_quantity: Number(formData.get('stock-quantity'))
         }
         const token = getToken()
         try {
