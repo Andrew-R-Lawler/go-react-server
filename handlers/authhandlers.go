@@ -20,12 +20,15 @@ import (
 type User struct {
 	Email 		string 	`json:"email"`
 	Password	string	`json:"password"`
+	Verified	bool	`json:"verified"`
+	Admin		bool	`json:"admin"`
 }
 
 type Claims struct {
 	ID 			int		`json:"id"`
 	Email 		string 	`json:"email"`
 	Verified 	bool	`json:"verified"`
+	Admin		bool	`json:"admin"`
 	jwt.StandardClaims
 }
 
@@ -142,9 +145,11 @@ func SendResetEmail(token string, email string) {
 	}
 }
 
-func GenerateToken(email string) (string, error) {
+func GenerateToken(email string, admin bool, verified bool) (string, error) {
 	claims := Claims{
 		Email: email,
+		Admin: admin,
+		Verified: verified,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
 			Issuer:    "to-do app",
@@ -253,7 +258,19 @@ func Login(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})	
 		return
 	}
-	token, err := GenerateToken(user.Email)
+	query = "SELECT admin, verified FROM users WHERE email = $1"
+	err = db.QueryRow(query, user.Email).Scan(&user.Admin, &user.Verified)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
+		return
+	}
+	log.Printf("User admin status: %v", user.Admin)
+	log.Printf("User verified status: %v", user.Verified)
+	token, err := GenerateToken(user.Email, user.Admin, user.Verified)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
