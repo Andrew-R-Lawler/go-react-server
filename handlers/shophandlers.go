@@ -33,6 +33,14 @@ func AddProduct (c *gin.Context, db *sql.DB) {
 	}
 	log.Printf("product name: %v", product.Name)
 	log.Printf("product description: %v", product.Description)
-	// query := `INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity")
-	// VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity")
+	VALUES ($1, $2, $3, $4, $5)`
+	_, err = db.Exec(query, product.Name, product.Description, product.ImageUrl, product.Price, product.StockQuantity)
+	if err != nil {
+		log.Printf("error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println("Added Product Successfully")
+	c.JSON(http.StatusCreated, gin.H{ "message": "Added Product", })
 }
