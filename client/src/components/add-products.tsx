@@ -19,17 +19,12 @@ function AddProducts() {
         setIsLoading(true)
         setError('')
         const formData = new FormData(event.currentTarget)
-        const name = formData.get('name')
-        const imageUrl = formData.get('image-url')
-        const description = formData.get('description')
-        const price = formData.get('price')
-        const stockQuantity = formData.get('stock-quantity')
         const postData = {
-            name: name,
-            imageUrl: imageUrl,
-            description: description,
-            price: price,
-            stockQuantity: stockQuantity
+            name: formData.get('name'),
+            imageUrl: formData.get('image-url'),
+            description: formData.get('description'),
+            price: formData.get('price'),
+            stockQuantity: formData.get('stock-quantity')
         }
         console.log('postData:', postData)
         const form = document.getElementById('product-form') as HTMLFormElement
@@ -41,7 +36,7 @@ function AddProducts() {
         <div className='flex-container chakra-petch-regular'>
         <Card className="w-[60%] bg-stone-600 border-none text-white">
         <form id='product-form' onSubmit={handleAddProduct} autoComplete='on' >
-            <CardHeader>image
+            <CardHeader>
                 <CardTitle className='pb-3'>Add new product</CardTitle>
             </CardHeader>
             <CardContent>
@@ -75,10 +70,12 @@ function AddProducts() {
                 </div>
             </div>    
             </CardContent>
-            <CardFooter className="pt-2">
-                <Button className='w-full' type='submit' disabled={isLoading}>
+            <CardFooter className="pt-2 justify-center">
+                <div className='w-[75%]'>
+                    <Button className='w-full' type='submit' disabled={isLoading}>
                     {isLoading ? "Adding Product..." : "Add Product"}
-                </Button>
+                    </Button>
+                </div>
             </CardFooter>
         </form>
         </Card>
