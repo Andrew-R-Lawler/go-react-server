@@ -1,19 +1,38 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 	"database/sql"
 	"github.com/gin-gonic/gin"
 )
 
+type Product struct {
+	Name			string	`json:"name"`	
+	Description		string	`json:"description"`
+	ImageUrl		string	`json:"image_url"`
+	Price			float32	`json:"price"`
+	StockQuantity	int		`json:"stock_quantity"`
+}
+
 func GetProducts (c *gin.Context, db *sql.DB) {
-	fmt.Println("GetProducts endpoint hit")
 	log.Println("GetProducts endpoint hit")
 }
 
 func AddProduct (c *gin.Context, db *sql.DB) {
-	log.Println("Add Product endpoint hit")
 	admin, _ := c.Get("admin")
-	log.Printf("admin: %v", admin)
+	if admin == false {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Only admins can add products"})
+		return
+	}
+	var product Product
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Printf("product name: %v", product.Name)
+	log.Printf("product description: %v", product.Description)
+	// query := `INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity")
+	// VALUES ($1, $2, $3, $4, $5)`
 }
