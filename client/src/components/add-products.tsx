@@ -32,7 +32,7 @@ function AddProducts() {
         try {
             setError('')
             setIsLoading(true)
-            const response = await axios.post('/api/admin/products', postData, { headers: { Authorization: `Bearer ${token}`,},})
+            const response = await axios.post('/api/protected/products', postData, { headers: { Authorization: `Bearer ${token}`,},})
             console.log(response.data)
         } catch (err) {
             console.error(err)
