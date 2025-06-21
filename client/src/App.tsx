@@ -23,7 +23,7 @@ import { Button } from './components/ui/button'
 
 function App() {
     const { getToken, deleteToken, isAuthenticated } = useAuth()
-    const [cookies, setCookie, removeCookie] = useCookies(['user', 'verified'])
+    const [cookies, setCookie, removeCookie] = useCookies(['user', 'verified', 'admin'])
 
     const getUser = async (token: string) => {
         try {
@@ -43,6 +43,14 @@ function App() {
                     httpOnly: false,
                 })
             }
+            if (user.admin === true) {
+                setCookie('admin', true, {
+                    path: '/',
+                    maxAge: 24*60*60,
+                    secure: false,
+                    httpOnly: false,
+                })
+            }
         } catch (err) {
             console.error(err)
         }
@@ -51,6 +59,7 @@ function App() {
         console.log('signOut fired')
         removeCookie('user')
         removeCookie('verified')
+        removeCookie('admin')
         deleteToken()
         window.location.href = '/'
     }
@@ -75,9 +84,11 @@ function App() {
             <li className='nav-item'>
                 <Link to="/shop">Shop</Link>
             </li>
-            <li className='nav-item'>
-                <Link to="/add-products">Add Products</Link>
-            </li>
+            { cookies.admin === true && 
+                <li className='nav-item'>
+                    <Link to="/add-products">Add Products</Link>
+                </li>
+            }
             { cookies.verified === true && 
                 <>
                 <li className='nav-item'>
