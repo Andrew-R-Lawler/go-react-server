@@ -33,6 +33,16 @@ import {
   DropdownMenuPortal,
   DropdownMenuSubContent,
 } from "./components/ui/dropdown-menu"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
+} from "./components/ui/navigation-menu"
 
 function App() {
     const { getToken, deleteToken, isAuthenticated } = useAuth()
@@ -99,6 +109,18 @@ function App() {
             </li>
             { cookies.user && 
                 <>
+                <li className='nav-item'>
+                <NavigationMenu className='text-white outline-none'>
+                  <NavigationMenuList>
+                    <NavigationMenuItem className='border-none outline-none'>
+                      <NavigationMenuTrigger>Account</NavigationMenuTrigger>
+                      <NavigationMenuContent className='bg-stone-700 text-white outline-none w-56'>
+                        <NavigationMenuLink className='link w-56 border-none' href="/todo">To-Do List</NavigationMenuLink>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
+                </li>
                 <li className='nav-item'>
                     <DropdownMenu>
                     <DropdownMenuTrigger className='text-white'>Account</DropdownMenuTrigger>
