@@ -72,8 +72,8 @@ function Login() {
                 <p className='text-stone-900'>Don't have an account?</p><Link to="/register">Sign Up</Link>
                 </div>
             </Card>
-            <div className="p-2 flex nav-item">
-                <p className='text-stone-600'>Forgot your password?</p><Link to="/forgotpassword" className='pl-1'>Click Here</Link>
+            <div className="p-2 flex">
+                <p className='text-stone-600'>Forgot your password?</p><Link to="/forgotpassword" className='pl-1 link'>Click Here</Link>
             </div>
         </div>
     )
