@@ -56,7 +56,7 @@ function AddProducts() {
 
     return (
         <div className='flex-container chakra-petch-regular'>
-        <Card className="w-[60%] bg-stone-600 border-none text-white">
+        <Card className="bg-stone-600 border-none text-white m-2">
         <form id='product-form' onSubmit={handleAddProduct} autoComplete='on' >
             <CardHeader>
                 <CardTitle className='pb-3'>Add new product</CardTitle>

@@ -27,9 +27,13 @@
     text-decoration:none;
     color:white;
 }
+.link {
+    text-decoration:none;
+    color:white;
+}
 
 .nav-item:first-child{
-    margin-right:1rem;
+    margin-right:.5rem;
     margin-left:1rem;
 }
 

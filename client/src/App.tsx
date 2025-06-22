@@ -28,6 +28,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
 } from "./components/ui/dropdown-menu"
 
 function App() {
@@ -93,18 +97,6 @@ function App() {
             <li className='nav-item'>
                 <Link to="/shop">Shop</Link>
             </li>
-            { cookies.admin === true && 
-                <li className='nav-item'>
-                    <Link to="/add-products">Add Products</Link>
-                </li>
-            }
-            { cookies.verified === true && 
-                <>
-                <li className='nav-item'>
-                    <Link to="/todo">Todo</Link>
-                </li>
-                </>
-            }
             { cookies.user && 
                 <>
                 <li className='nav-item'>
@@ -115,6 +107,23 @@ function App() {
                     <DropdownMenuLabel>{cookies.user.email}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
+                    { cookies.admin && 
+                        <>
+                            <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Administration</DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                            <DropdownMenuSubContent className='z-1002 bg-stone-800 text-white border-none'>
+                            <DropdownMenuItem>
+                            <Link to="/add-products" className='link'>Manage Products</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                            <Link to="/todo" className='link'>To-Do List</Link>
+                            </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                            </DropdownMenuSub>
+                        </> 
+                    }
                     <DropdownMenuItem onClick={signOut}>
                         Sign Out
                     </DropdownMenuItem>
@@ -127,7 +136,9 @@ function App() {
             { !cookies.user &&
                 <>
                 <li className='nav-item'>
-                    <Link to="/login">Login</Link>
+                    <Button>
+                        <Link to="/login">Login</Link>
+                    </Button>
                 </li>
                 </>
             }
