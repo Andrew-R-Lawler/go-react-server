@@ -29,11 +29,11 @@
 }
 
 .nav-item:first-child{
-    margin-right:auto;
+    margin-right:1rem;
     margin-left:1rem;
 }
 
-.nav-item:second-child{
+.nav-item:nth-child(2){
     margin-right:auto;
     margin-left:1rem;
 }
