@@ -20,6 +20,15 @@ import { useAuth } from './components/authentication'
 import axios from 'axios'
 import { useCookies } from 'react-cookie'
 import { Button } from './components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./components/ui/dropdown-menu"
 
 function App() {
     const { getToken, deleteToken, isAuthenticated } = useAuth()
@@ -99,10 +108,19 @@ function App() {
             { cookies.user && 
                 <>
                 <li className='nav-item'>
-                    <p className='text-white'>Hello! {cookies.user.email}</p>
-                </li>
-                <li className='nav-item'>
-                    <Button onClick={signOut}>Sign Out</Button>
+                    <DropdownMenu>
+                    <DropdownMenuTrigger className='text-white'>Account</DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 z-1001 nav-item text-white bg-stone-700 border-none p-3 mt-4" align="start">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{cookies.user.email}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={signOut}>
+                        Sign Out
+                    </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                    </DropdownMenu>
                 </li>
                 </>
             }
