@@ -157,7 +157,7 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path='/registration-success' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
-          <Route path='/add-products' element={<AddProducts />} />
+          <Route path='/add-products' element={isAuthenticated() && cookies.admin ? <AddProducts /> : <Forbidden />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
