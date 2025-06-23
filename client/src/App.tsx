@@ -110,48 +110,24 @@ function App() {
             { cookies.user && 
                 <>
                 <li className='nav-item'>
-                <NavigationMenu className='text-white outline-none'>
+                <NavigationMenu>
                   <NavigationMenuList>
-                    <NavigationMenuItem className='border-none outline-none'>
+                    <NavigationMenuItem className='text-white'>
                       <NavigationMenuTrigger>Account</NavigationMenuTrigger>
-                      <NavigationMenuContent className='bg-stone-700 text-white outline-none w-56'>
-                        <NavigationMenuLink className='link w-56 border-none' href="/todo">To-Do List</NavigationMenuLink>
+                      <NavigationMenuContent className='bg-stone-700 text-white rounded-md'>
+                        { cookies.verified && 
+                            <Link to="/todo" className='link'>
+                                <NavigationMenuLink className='link border-none w-30'>To-Do List</NavigationMenuLink>
+                            </Link>
+                        }
+                        { cookies.admin && 
+                            <NavigationMenuLink className='link border-none w-30' href="/add-products">Add Products</NavigationMenuLink>
+                        }
+                        <NavigationMenuLink className='link border-none w-30' onClick={signOut}>Sign Out</NavigationMenuLink>
                       </NavigationMenuContent>
                     </NavigationMenuItem>
                   </NavigationMenuList>
                 </NavigationMenu>
-                </li>
-                <li className='nav-item'>
-                    <DropdownMenu>
-                    <DropdownMenuTrigger className='text-white'>Account</DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 z-1001 nav-item text-white bg-stone-700 border-none p-3 mt-4" align="start">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuLabel>{cookies.user.email}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                    { cookies.admin && 
-                        <>
-                            <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>Administration</DropdownMenuSubTrigger>
-                            <DropdownMenuPortal>
-                            <DropdownMenuSubContent className='z-1002 bg-stone-800 text-white border-none'>
-                            <DropdownMenuItem>
-                            <Link to="/add-products" className='link'>Manage Products</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                            <Link to="/todo" className='link'>To-Do List</Link>
-                            </DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                            </DropdownMenuPortal>
-                            </DropdownMenuSub>
-                        </> 
-                    }
-                    <DropdownMenuItem onClick={signOut}>
-                        Sign Out
-                    </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                    </DropdownMenu>
                 </li>
                 </>
             }
