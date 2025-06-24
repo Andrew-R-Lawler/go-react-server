@@ -1,5 +1,5 @@
 import '../App.css'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,11 @@ function AddProducts() {
     const { getToken } = useAuth()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
+
+    const fetchProducts = async () => {
+        const response = await axios.get('/api/shop/products');
+        return response
+    }
 
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -53,6 +58,10 @@ function AddProducts() {
         form.reset()
         setIsLoading(false)
     } 
+
+    useEffect(() => {
+        fetchProducts();
+    }, [])
 
     return (
         <div className='flex-container chakra-petch-regular'>

@@ -22,7 +22,6 @@ function Login() {
         const formData = new FormData(event.currentTarget)
         const email = formData.get('email')
         const formattedEmail = email.toLowerCase();
-        console.log(formattedEmail)
         const password = formData.get('password')
         try {
             setError('')
