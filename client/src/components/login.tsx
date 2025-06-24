@@ -21,10 +21,12 @@ function Login() {
         setIsLoading(true)
         const formData = new FormData(event.currentTarget)
         const email = formData.get('email')
+        const formattedEmail = email.toLowerCase();
+        console.log(formattedEmail)
         const password = formData.get('password')
         try {
             setError('')
-            const token = await login(email, password)
+            const token = await login(formattedEmail, password)
             if (token !== undefined) {
                 saveToken(token)
                 window.location.href = '/'

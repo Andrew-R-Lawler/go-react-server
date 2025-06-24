@@ -14,34 +14,19 @@ import RegisterSuccess from './components/register-success'
 import Forbidden from './components/forbidden'
 import AddProducts from './components/add-products'
 import Shop from './components/shop'
-import logo from '../src/assets/icons8-checkmark.svg'
+import logo from '../src/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
 import { useAuth } from './components/authentication'
 import axios from 'axios'
 import { useCookies } from 'react-cookie'
 import { Button } from './components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
-} from "./components/ui/dropdown-menu"
-import {
   NavigationMenu,
   NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NavigationMenuViewport,
 } from "./components/ui/navigation-menu"
 
 function App() {
@@ -142,7 +127,6 @@ function App() {
             }
           </ul>
         </nav>
-
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/todo" element={isAuthenticated() && cookies.verified ? <Todo /> : <Forbidden />} />

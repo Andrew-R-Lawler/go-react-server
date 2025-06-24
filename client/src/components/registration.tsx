@@ -25,9 +25,10 @@ function UserRegistration() {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const email = formData.get('email')
+        const formattedEmail = email.toLowerCase();
         const password = formData.get('password')
         const newUser = {
-            email: email,
+            email: formattedEmail,
             password: password
         }
         setIsLoading(true)
