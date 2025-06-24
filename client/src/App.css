@@ -8,6 +8,7 @@
     position:sticky;
     top:0;
     z-index:1000;
+    background-color: #1a1a1a;
 }
 .nav-list {
     margin:0;
