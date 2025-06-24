@@ -273,6 +273,15 @@ func Login(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
+	c.SetCookie(
+		"auth_token", 	// cookie name
+		token,			// value
+		3600*24,		// max age in seconds
+		"/",			// path
+		"localhost",	// domain
+		false,			// secure (true in production with HTTPS)
+		true,			// HttpOnly
+	)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful", 
 		"token": token,
