@@ -24,8 +24,11 @@ func init() {
 }
 
 func authMiddleware(c *gin.Context) {
-	tokenStr := c.GetHeader("Authorization")
-	tokenStr = strings.Replace(tokenStr, "Bearer ", "", 1)
+	tokenStr, err := c.Cookie("auth_token")
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "No token"})
+		return
+	}
 	claims, err := handlers.ValidateToken(tokenStr)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -35,6 +38,7 @@ func authMiddleware(c *gin.Context) {
 	c.Set("email", claims.Email)
 	c.Set("admin", claims.Admin)
 	c.Set("verified", claims.Verified)
+	c.Set("id", claims.ID)
 	c.Next()
 }
 

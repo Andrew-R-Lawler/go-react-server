@@ -18,6 +18,7 @@ import (
 )
 
 type User struct {
+	ID			int		`json:"id"`
 	Email 		string 	`json:"email"`
 	Password	string	`json:"password"`
 	Verified	bool	`json:"verified"`
@@ -145,37 +146,7 @@ func SendResetEmail(token string, email string) {
 	}
 }
 
-func GenerateToken(email string, admin bool, verified bool) (string, error) {
-	claims := Claims{
-		Email: email,
-		Admin: admin,
-		Verified: verified,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
-			Issuer:    "to-do app",
-		},
-	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
-}
-
-func ValidateToken(tokenStr string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	return claims, nil
-}
 
 func generateVerificationToken() string {
 	bytes := make([]byte, 32)
@@ -258,8 +229,8 @@ func Login(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})	
 		return
 	}
-	query = "SELECT admin, verified FROM users WHERE email = $1"
-	err = db.QueryRow(query, user.Email).Scan(&user.Admin, &user.Verified)
+	query = "SELECT admin, verified, id FROM users WHERE email = $1"
+	err = db.QueryRow(query, user.Email).Scan(&user.Admin, &user.Verified, &user.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
@@ -268,7 +239,7 @@ func Login(c *gin.Context, db *sql.DB) {
 		}
 		return
 	}
-	token, err := GenerateToken(user.Email, user.Admin, user.Verified)
+	token, err := GenerateToken(user.Email, user.Admin, user.Verified, user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
@@ -288,26 +259,53 @@ func Login(c *gin.Context, db *sql.DB) {
 	})
 }
 
-func GetUser(c *gin.Context, db *sql.DB) {
+func GenerateToken(email string, admin bool, verified bool, id int) (string, error) {
+	claims := Claims{
+		ID: id,
+		Email: email,
+		Admin: admin,
+		Verified: verified,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
+			Issuer:    "to-do app",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+func ValidateToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
+}
+
+func GetUser(c *gin.Context) {
 	email, _ := c.Get("email")
+	admin, _ := c.Get("admin")
+	verified, _ := c.Get("verified")
+	id, _ := c.Get("id")
 	if email == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
 	}
-	var ID int
-	var Verified bool
-	var Admin bool
-	query := "SELECT id, verified, admin FROM users WHERE email = $1"
-	err := db.QueryRow(query, email).Scan(&ID, &Verified, &Admin)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
 	c.JSON(http.StatusOK, gin.H{
 		"email": email,
-		"ID": ID,
-		"verified": Verified,
-		"admin": Admin,
+		"ID": id,
+		"verified": verified,
+		"admin": admin,
 	})
 
 }
