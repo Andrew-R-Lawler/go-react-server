@@ -5,14 +5,12 @@ import { Input } from './ui/input';
 import { Label } from "@/components/ui/label";
 import { Textarea } from './ui/textarea';
 import { AlertCircle } from "lucide-react"
-import { useAuth } from '../components/authentication'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import axios from 'axios'
 
 function AddProducts() {
 
-    const { getToken } = useAuth()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -33,11 +31,10 @@ function AddProducts() {
             price: Number(formData.get('price')),
             stock_quantity: Number(formData.get('stock-quantity'))
         }
-        const token = getToken()
         try {
             setError('')
             setIsLoading(true)
-            const response = await axios.post('/api/protected/products', postData, { headers: { Authorization: `Bearer ${token}`,},})
+            const response = await axios.post('/api/protected/products', postData, { withCredentials: true })
             console.log(response.data)
         } catch (err) {
             console.error(err)

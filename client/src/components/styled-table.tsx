@@ -64,7 +64,7 @@ export function StyledTable({ items, setItems, fetchTodos }: StyledTableProps) {
   }
 
   const editItem = (id: number) => {
-    // Placeholder for edit functionality
+    setInputValue('')
     setItems(items.map((item) => (item.id === id ? { ...item, editable: !item.editable } : item)))
     setError('')
   }

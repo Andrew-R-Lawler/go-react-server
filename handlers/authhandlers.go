@@ -254,8 +254,7 @@ func Login(c *gin.Context, db *sql.DB) {
 		true,			// HttpOnly
 	)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful", 
-		"token": token,
+		"message": "Success", 
 	})
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import Todo from './components/todo'
@@ -16,9 +16,7 @@ import AddProducts from './components/add-products'
 import Shop from './components/shop'
 import logo from '../src/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
-import { useAuth } from './components/authentication'
 import axios from 'axios'
-import { useCookies } from 'react-cookie'
 import { Button } from './components/ui/button'
 import {
   NavigationMenu,
@@ -30,53 +28,33 @@ import {
 } from "./components/ui/navigation-menu"
 
 function App() {
-    const { getToken, deleteToken, isAuthenticated } = useAuth()
-    const [cookies, setCookie, removeCookie] = useCookies(['user', 'verified', 'admin'])
 
-    const getUser = async (token: string) => {
+    interface User {
+        id: number;
+        email: string;
+        admin: boolean;
+        verified: boolean;
+    }
+
+    const [ user, setUser ] = useState<User | null>(null);
+
+    const getUser = async () => {
         try {
-            const response = await axios.get('/api/protected/user', { headers: { Authorization: `Bearer ${token}`,},})
+            const response = await axios.get('/api/protected/user', { withCredentials: true })
             const user = response.data 
-            setCookie('user', user, {
-                path: '/',
-                maxAge: 24 * 60 * 60,
-                secure: false,
-                httpOnly: false,
-            })
-            if (user.verified === true) {
-                setCookie('verified', true, {
-                    path: '/',
-                    maxAge: 24*60*60,
-                    secure: false,
-                    httpOnly: false,
-                })
-            }
-            if (user.admin === true) {
-                setCookie('admin', true, {
-                    path: '/',
-                    maxAge: 24*60*60,
-                    secure: false,
-                    httpOnly: false,
-                })
-            }
+            setUser(user)
         } catch (err) {
             console.error(err)
         }
     }
+    
     const signOut = () => {
-        console.log('signOut fired')
-        removeCookie('user')
-        removeCookie('verified')
-        removeCookie('admin')
-        deleteToken()
-        window.location.href = '/'
+        window.location.href = '/'    
     }
 
     useEffect(() => {
-        const token = getToken()
-        getUser(token)
+        getUser()
     }, [])
-
 
   return (
       <CookiesProvider>
@@ -92,7 +70,7 @@ function App() {
             <li className='nav-item'>
                 <Link to="/shop">Shop</Link>
             </li>
-            { cookies.user && 
+            { user && 
                 <>
                 <li className='nav-item'>
                 <NavigationMenu>
@@ -100,12 +78,12 @@ function App() {
                     <NavigationMenuItem className='text-white'>
                       <NavigationMenuTrigger>Account</NavigationMenuTrigger>
                       <NavigationMenuContent className='bg-stone-700 text-white rounded-md'>
-                        { cookies.verified && 
+                        { user.verified && 
                             <Link to="/todo" className='link'>
                                 <NavigationMenuLink className='link border-none w-30'>To-Do List</NavigationMenuLink>
                             </Link>
                         }
-                        { cookies.admin && 
+                        { user.admin && 
                             <NavigationMenuLink className='link border-none w-30' href="/add-products">Add Products</NavigationMenuLink>
                         }
                         <NavigationMenuLink className='link border-none w-30' onClick={signOut}>Sign Out</NavigationMenuLink>
@@ -116,7 +94,7 @@ function App() {
                 </li>
                 </>
             }
-            { !cookies.user &&
+            { !user &&
                 <>
                 <li className='nav-item'>
                     <Button>
@@ -129,7 +107,7 @@ function App() {
         </nav>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/todo" element={isAuthenticated() && cookies.verified ? <Todo /> : <Forbidden />} />
+          <Route path="/todo" element={<Todo />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
@@ -139,7 +117,7 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path='/registration-success' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
-          <Route path='/add-products' element={isAuthenticated() && cookies.admin ? <AddProducts /> : <Forbidden />} />
+          <Route path='/add-products' element={<AddProducts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

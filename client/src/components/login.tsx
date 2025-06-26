@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { login, useAuth } from './authentication'
+import { login } from './authentication'
 import { Link } from 'react-router-dom'
 
 function Login() {
 
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const { saveToken } = useAuth()
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -25,9 +24,9 @@ function Login() {
         const password = formData.get('password')
         try {
             setError('')
-            const token = await login(formattedEmail, password)
-            if (token !== undefined) {
-                saveToken(token)
+            const message = await login(formattedEmail, password)
+            if (message !== 'Success') {
+                console.log("Login Success")
                 window.location.href = '/'
             } else {
                 setError('Email or Password is incorrect')

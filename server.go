@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"os"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
-	"strings"
 	"net/http"
 	"path/filepath"
 
@@ -67,7 +66,7 @@ func main() {
 		c.File(filepath.Join("./client/dist", "index.html"))
 	})
 
-	todoGroup := r.Group("/api/todo")
+	todoGroup := r.Group("/api/todo", func(c *gin.Context) {authMiddleware(c)})
 	userGroup := r.Group("/api/user")
 	protectedGroup := r.Group("/api/protected", func(c *gin.Context) {authMiddleware(c)})
 	shopGroup := r.Group("/api/shop")
@@ -86,7 +85,7 @@ func main() {
 
 	shopGroup.GET("/products", func(c *gin.Context) {handlers.GetProducts(c, db)})
 
-	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c, db)})
+	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c)})
 	protectedGroup.POST("/products", func(c *gin.Context) {handlers.AddProduct(c, db)})
 
 	r.Run()
