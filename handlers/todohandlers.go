@@ -20,7 +20,12 @@ type Todo struct {
 }
 
 func GetTodos(c *gin.Context, db *sql.DB) {
-		userId := c.DefaultQuery("user_id", "")
+		admin, _ := c.Get("admin")
+		if admin == false {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+			return
+		}
+		userId, _ := c.Get("id")
 		if userId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 			return
@@ -51,6 +56,11 @@ func GetTodos(c *gin.Context, db *sql.DB) {
 
 
 func DeleteTodo(c *gin.Context, db *sql.DB) {
+		admin, _ := c.Get("admin")
+		if admin == false {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+			return
+		}
 		todoId := c.Param("id")
 		query := "DELETE FROM todos WHERE id = $1"
 		_, err := db.Exec(query, todoId)
@@ -63,10 +73,15 @@ func DeleteTodo(c *gin.Context, db *sql.DB) {
 	}
 
 func PostTodo(c *gin.Context, db *sql.DB) {
+		admin, _ := c.Get("admin")
+		if admin == false {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+			return
+		}
 		query := `INSERT INTO "todos" ("name", "created_at", "completed", "user_id")
 		VALUES ($1, now(), $2, $3)`
 		var todo Todo
-		userId := c.DefaultQuery("user_id", "")
+		userId, _ := c.Get("id")
 		if userId == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 			return
@@ -87,6 +102,11 @@ func PostTodo(c *gin.Context, db *sql.DB) {
 	}
 
 func UpdateTodo(c *gin.Context, db *sql.DB) {
+		admin, _ := c.Get("admin")
+		if admin == false {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+			return
+		}
 		query := `UPDATE "todos"
 		SET name = $1
 		WHERE id = $2`
@@ -111,6 +131,11 @@ func UpdateTodo(c *gin.Context, db *sql.DB) {
 	}
 
 func CompleteTodo(c *gin.Context, db *sql.DB) {
+		admin, _ := c.Get("admin")
+		if admin == false {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+			return
+		}
 		query := `UPDATE "todos"
 		SET completed = $1
 		WHERE id = $2`

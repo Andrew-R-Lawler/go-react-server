@@ -5,7 +5,6 @@ import { Input } from './ui/input';
 import { Plus } from 'lucide-react';
 import { StyledTable } from './styled-table';
 import axios from 'axios'
-import { useCookies } from 'react-cookie';
 
 function Todo() {
 
@@ -16,7 +15,6 @@ function Todo() {
         editable: boolean
     }
 
-    const [cookies] = useCookies(['user'])
     const [inputValue, setInputValue] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [items, setItems] = useState<Item[]>([
@@ -26,8 +24,7 @@ function Todo() {
     ]);
 
     const fetchTodos = async () => {
-        const userId = cookies.user.ID
-        const response = await axios.get('/api/todo', { params: { user_id: userId }});
+        const response = await axios.get('/api/todo', { withCredentials: true });
         if (response.data === null) {
             setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
         } else (
@@ -50,7 +47,7 @@ function Todo() {
             setError('Input Cannot be empty');
         } else {
             try {
-                const response = await axios.post('/api/todo', postBody, { params: { user_id: cookies.user.ID }})
+                const response = await axios.post('/api/todo', postBody, { withCredentials: true })
                 setInputValue("") 
                 setError("")
                 fetchTodos()
@@ -63,7 +60,7 @@ function Todo() {
 
     useEffect(() => {
         fetchTodos();
-    }, [cookies.user])
+    }, [])
     
   return (
     <div className="flex-container">
