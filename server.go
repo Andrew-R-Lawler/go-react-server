@@ -68,8 +68,8 @@ func main() {
 
 	todoGroup := r.Group("/api/todo", func(c *gin.Context) {authMiddleware(c)})
 	userGroup := r.Group("/api/user")
-	protectedGroup := r.Group("/api/protected", func(c *gin.Context) {authMiddleware(c)})
 	shopGroup := r.Group("/api/shop")
+	protectedGroup := r.Group("/api/protected", func(c *gin.Context) {authMiddleware(c)})
 
 	todoGroup.GET("/", func(c *gin.Context) {handlers.GetTodos(c, db)})
 	todoGroup.DELETE("/:id", func(c *gin.Context) {handlers.DeleteTodo(c, db)})

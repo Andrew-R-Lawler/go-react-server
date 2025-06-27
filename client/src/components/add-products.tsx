@@ -34,8 +34,7 @@ function AddProducts() {
         try {
             setError('')
             setIsLoading(true)
-            const response = await axios.post('/api/protected/products', postData, { withCredentials: true })
-            console.log(response.data)
+            await axios.post('/api/protected/products', postData, { withCredentials: true })
         } catch (err) {
             console.error(err)
                 if (axios.isAxiosError(err)) {
@@ -50,7 +49,6 @@ function AddProducts() {
                 }
                 setIsLoading(false)
         }
-        console.log('postData:', postData)
         const form = document.getElementById('product-form') as HTMLFormElement
         form.reset()
         setIsLoading(false)
