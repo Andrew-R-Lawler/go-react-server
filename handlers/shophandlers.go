@@ -8,6 +8,7 @@ import (
 )
 
 type Product struct {
+	ID				int		`json:"id"`
 	Name			string	`json:"name"`	
 	Description		string	`json:"description"`
 	ImageUrl		string	`json:"image_url"`
@@ -17,6 +18,29 @@ type Product struct {
 
 func GetProducts (c *gin.Context, db *sql.DB) {
 	log.Println("GetProducts endpoint hit")
+	
+	rows, err := db.Query(`SELECT * FROM "products" ORDER BY id;`)
+	if err != nil {
+		log.Printf("error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	defer rows.Close()
+	var products []Product
+	for rows.Next() {
+		var product Product
+		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.ImageUrl, &product.Price, &product.StockQuantity); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
+			return
+		}
+		products = append(products, product)
+	}
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while iterating products"})
+		return
+	}
+	log.Printf("products: %v", products)
+	c.JSON(http.StatusOK, products)
 }
 
 func AddProduct (c *gin.Context, db *sql.DB) {
