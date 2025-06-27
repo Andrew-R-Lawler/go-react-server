@@ -48,8 +48,15 @@ function App() {
         }
     }
     
-    const signOut = () => {
-        window.location.href = '/'    
+    const signOut = async () => {
+        try {
+            const response = await axios.post('/api/protected/logout', { withCredentials:true })
+            if (response.data.message === "Logged out") {
+                window.location.href = '/'    
+            }
+        } catch (error) {
+            console.error('Logout failed:', error)
+        } 
     }
 
     useEffect(() => {

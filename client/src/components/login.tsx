@@ -25,7 +25,7 @@ function Login() {
         try {
             setError('')
             const message = await login(formattedEmail, password)
-            if (message !== 'Success') {
+            if (message.toString !== 'Success') {
                 console.log("Login Success")
                 window.location.href = '/'
             } else {
