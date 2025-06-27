@@ -24,13 +24,17 @@ function Todo() {
     ]);
 
     const fetchTodos = async () => {
-        const response = await axios.get('/api/todo', { withCredentials: true });
-        if (response.data === null) {
-            setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
-        } else (
-            setItems(response.data)
-        )
-        return response.data;
+        try {
+            const response = await axios.get('/api/todo', { withCredentials: true });
+            if (response.data === null) {
+                setItems([{id: 1, name: "start adding to-dos", completed: false, editable: false }]);  
+            } else (
+                setItems(response.data)
+            )
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     }
 
 

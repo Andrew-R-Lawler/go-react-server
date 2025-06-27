@@ -11,12 +11,22 @@ import axios from 'axios'
 
 function AddProducts() {
 
+    interface Product {
+        id: number
+        name: string
+        description: string
+        image_url: string
+        price: number
+        stock_quantity: number
+    }
+    
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
+    const [products, setProducts] = useState<Product[]>([]);
 
     const fetchProducts = async () => {
         const response = await axios.get('/api/shop/products');
-        return response
+        setProducts(response.data)
     }
 
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -32,8 +42,6 @@ function AddProducts() {
             stock_quantity: Number(formData.get('stock-quantity'))
         }
         try {
-            setError('')
-            setIsLoading(true)
             await axios.post('/api/protected/products', postData, { withCredentials: true })
         } catch (err) {
             console.error(err)
@@ -50,6 +58,7 @@ function AddProducts() {
                 setIsLoading(false)
         }
         const form = document.getElementById('product-form') as HTMLFormElement
+        fetchProducts()
         form.reset()
         setIsLoading(false)
     } 
@@ -58,6 +67,10 @@ function AddProducts() {
         fetchProducts();
     }, [])
 
+    useEffect(() => {
+        console.log("products:", products)
+    })
+    
     return (
         <div className='flex-container chakra-petch-regular'>
         <Card className="bg-stone-600 border-none text-white m-2">

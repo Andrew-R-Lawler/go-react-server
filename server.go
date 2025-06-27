@@ -86,6 +86,7 @@ func main() {
 	shopGroup.GET("/products", func(c *gin.Context) {handlers.GetProducts(c, db)})
 
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c)})
+	protectedGroup.POST("/logout", func(c *gin.Context) {handlers.Logout(c)})
 	protectedGroup.POST("/products", func(c *gin.Context) {handlers.AddProduct(c, db)})
 
 	r.Run()

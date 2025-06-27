@@ -258,6 +258,19 @@ func Login(c *gin.Context, db *sql.DB) {
 	})
 }
 
+func Logout(c *gin.Context) {
+	c.SetCookie(
+		"auth_token",
+		"",
+		-1,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
+}
+
 func GenerateToken(email string, admin bool, verified bool, id int) (string, error) {
 	claims := Claims{
 		ID: id,
