@@ -26,7 +26,6 @@ function Login() {
             setError('')
             const message = await login(formattedEmail, password)
             if (message.toString !== 'Success') {
-                console.log("Login Success")
                 window.location.href = '/'
             } else {
                 setError('Email or Password is incorrect')
