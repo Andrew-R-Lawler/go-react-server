@@ -64,3 +64,24 @@ func AddProduct (c *gin.Context, db *sql.DB) {
 	}
 	c.JSON(http.StatusCreated, gin.H{ "message": "Added Product", })
 }
+
+func DeleteProduct (c *gin.Context, db *sql.DB) {
+	admin, _ := c.Get("admin")
+	if admin == false {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user is not an admin"})
+		return
+	}
+	productId := c.Param("id")
+	query := "DELETE FROM products WHERE id = $1"
+	_, err := db.Exec(query, productId)
+	if err != nil {
+		log.Printf("error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "product successfully deleted"})
+}
+
+func EditProduct (c *gin.Context, db *sql.DB) {
+	log.Println("Edit Product endpoint hit")
+}
