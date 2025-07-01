@@ -88,6 +88,8 @@ func main() {
 	protectedGroup.GET("/user", func(c *gin.Context) {handlers.GetUser(c)})
 	protectedGroup.POST("/logout", func(c *gin.Context) {handlers.Logout(c)})
 	protectedGroup.POST("/products", func(c *gin.Context) {handlers.AddProduct(c, db)})
+	protectedGroup.DELETE("/deleteproduct/:id", func(c *gin.Context) {handlers.DeleteProduct(c, db)})
+	protectedGroup.PUT("/editproduct/:id", func(c *gin.Context) {handlers.EditProduct(c, db)})
 
 	r.Run()
 }

@@ -8,11 +8,11 @@ import { AlertCircle } from "lucide-react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import axios from 'axios'
+import { Trash2, Edit2 } from "lucide-react"
 import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -41,6 +41,23 @@ function AddProducts() {
     const fetchProducts = async () => {
         const response = await axios.get('/api/shop/products');
         setProducts(response.data)
+    }
+
+    const handleDeleteProduct = async (product: Product) => {
+        console.log('handle delete fired')
+        console.log('product id:', product.id)
+        try {
+            const response = await axios.delete(`/api/protected/deleteproduct/${product.id}`, {withCredentials:true});
+            fetchProducts()
+            return response
+        } catch (error) {
+            console.error('Error deleting item:', error)
+        };
+    }
+
+    const handleEditProduct = async (product: Product) => {
+        console.log('handle edit fired')
+        console.log('product:', product)
     }
 
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -96,6 +113,7 @@ function AddProducts() {
                         <TableHead className='text-white'>Description</TableHead>
                         <TableHead className='text-white w-25'>Price</TableHead>
                         <TableHead className='text-white'>Stock Quantity</TableHead>
+                        <TableHead className='text-white'>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -104,8 +122,26 @@ function AddProducts() {
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.image_url}</TableCell>
                         <TableCell>{product.description}</TableCell>
-                        <TableCell>{product.price}</TableCell>
+                        <TableCell>{product.price.toFixed(2)}</TableCell>
                         <TableCell>{product.stock_quantity}</TableCell>
+                          <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
+                                  <Button
+                                  className="bg-stone-900 text-white border-none p-2 w-8 h-8"
+                                  aria-label={`Edit`}
+                                  onClick={() => handleEditProduct(product)}
+                                  >
+                                      <Edit2 className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                  className="bg-stone-900 text-white border-none p-2 w-8 h-8"
+                                  aria-label={`Delete`}
+                                  onClick={() => handleDeleteProduct(product)}
+                                  >
+                                      <Trash2 className="w-4 h-4" />
+                                  </Button>
+                              </div>
+                          </TableCell>
                     </TableRow>
                 ))}
                 </TableBody>
