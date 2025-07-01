@@ -53,6 +53,16 @@
   background-color: #2b2b2b;
 }
 
+.new-container {
+  display: flex;
+  justify-content: start; /* Horizontally center */
+  place-self: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  width: 100vw;
+  background-color: #2b2b2b;
+}
+
 .flex-item {
   text-align: center;
 }
