@@ -17,7 +17,6 @@ type Product struct {
 }
 
 func GetProducts (c *gin.Context, db *sql.DB) {
-	log.Println("GetProducts endpoint hit")
 	rows, err := db.Query(`SELECT * FROM "products" ORDER BY id;`)
 	if err != nil {
 		log.Printf("error: %v", err)
@@ -38,7 +37,6 @@ func GetProducts (c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while iterating products"})
 		return
 	}
-	log.Printf("products: %v", products)
 	c.JSON(http.StatusOK, products)
 }
 
