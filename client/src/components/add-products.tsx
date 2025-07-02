@@ -53,9 +53,36 @@ function AddProducts() {
         };
     }
 
-    const handleEditProduct = async (product: Product) => {
-        console.log('handle edit fired')
-        console.log('product:', product)
+    const handleEditProduct = async (event: React.FormEvent<HTMLFormElement>, product: Product) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const putData = {
+            name: formData.get('name'),
+            image_url: formData.get('image-url'),
+            description: formData.get('description'),
+            price: Number(formData.get('price')),
+            stock_quantity: Number(formData.get('stock-quantity'))
+        }
+        try {
+            const response = await axios.put(`/api/protected/editproduct/${product.id}`, putData, {withCredentials:true})
+        } catch (err) {
+            console.error(err)
+                if (axios.isAxiosError(err)) {
+                    const response = err.response;
+                    if (response) {
+                        setError(response.data.error || 'An unknown error occured')
+                    } else {
+                        setError('Network error, please try again')
+                    }
+                } else {
+                    setError("Failed to update product, an unknown error has occured.")
+                }
+            setIsLoading(false)
+        }
+        const form = document.getElementById('edit-product-form') as HTMLFormElement
+        fetchProducts()
+        form.reset()
+        setIsLoading(false)
     }
 
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -126,7 +153,7 @@ function AddProducts() {
                                 </PopoverTrigger>
                                 <PopoverContent className='text-white m-3 p-0 w-auto bg-stone-600'>
                                     <Card className="bg-stone-600 border-none text-white">
-                                    <form id='edit-product-form' onSubmit={() => handleEditProduct(product)} autoComplete='on' >
+                                    <form id='edit-product-form' onSubmit={(event) => handleEditProduct(event, product)} autoComplete='on' >
                                     <CardHeader>
                                     <CardTitle className='pb-3'>Edit Product</CardTitle>
                                     </CardHeader>
@@ -141,23 +168,23 @@ function AddProducts() {
                                     <div className='grid grid-cols-2'>
                                     <div className="col-span-1">
                                     <Label htmlFor="name" className='pl-2'>Name</Label>
-                                    <Input value={product.name} id="name" name='name' type='text' placeholder="Lavender Lemon Shampoo Bar" className='border-none justify-self-center' disabled={isLoading} required />
+                                    <Input defaultValue={product.name} id="name" name='name' type='text' placeholder="Lavender Lemon Shampoo Bar" className='border-none justify-self-center' disabled={isLoading} required />
                                     </div>
                                     <div className="pl-1 col-span-1">
                                     <Label htmlFor="image-url" className='pl-2'>Image URL</Label>
-                                    <Input value={product.image_url} id="image-url" name='image-url' type='url' placeholder="google.com" className='border-none justify-self-center'  disabled={isLoading} required/>
+                                    <Input defaultValue={product.image_url} id="image-url" name='image-url' type='url' placeholder="google.com" className='border-none justify-self-center'  disabled={isLoading} required/>
                                     </div>
                                     <div className="pl-1 pb-2 col-span-2">
                                     <Label htmlFor="">Description</Label>
-                                    <Textarea value={product.description} id="description" name='description' placeholder="Description here..." className='border-none justify-self-center bg-stone-700' disabled={isLoading} required />
+                                    <Textarea defaultValue={product.description} id="description" name='description' placeholder="Description here..." className='border-none justify-self-center bg-stone-700' disabled={isLoading} required />
                                     </div>
                                     <div className="pl-1 col-span-1">
                                     <Label htmlFor="image-url">Price</Label>
-                                    <Input value={product.price} id="price" name='price' type='number' step="0.01" min="0" placeholder="Enter Price" className='border-none justify-self-center' disabled={isLoading} required />
+                                    <Input defaultValue={product.price} id="price" name='price' type='number' step="0.01" min="0" placeholder="Enter Price" className='border-none justify-self-center' disabled={isLoading} required />
                                     </div>
                                     <div className="pl-1 col-span-1">
                                     <Label htmlFor="image-url" className='pl-2'>Stock Quantity</Label>
-                                    <Input value={product.stock_quantity} id="stock-quantity" name='stock-quantity' type='number' min='0' placeholder='0' className='border-none justify-self-center' disabled={isLoading} required />
+                                    <Input defaultValue={product.stock_quantity} id="stock-quantity" name='stock-quantity' type='number' min='0' placeholder='0' className='border-none justify-self-center' disabled={isLoading} required />
                                     </div>
                                     </div>    
                                     </CardContent>
