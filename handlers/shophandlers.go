@@ -81,5 +81,32 @@ func DeleteProduct (c *gin.Context, db *sql.DB) {
 }
 
 func EditProduct (c *gin.Context, db *sql.DB) {
-	log.Println("Edit Product endpoint hit")
+	admin, _ := c.Get("admin")
+	if admin == false {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Only admins can edit products"})
+	}
+	var product Product
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	productId := c.Param("id")
+	query := `UPDATE "products"
+	SET name = $1,
+		description = $2,
+		image_url = $3,
+		price = $4,
+		stock_quantity = $5
+	WHERE id = $6
+	`
+	result, err := db.Exec(query, product.Name, product.Description, product.ImageUrl, product.Price, product.StockQuantity, productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": 	"product updated successfully",
+		"result": result,
+	})
 }
