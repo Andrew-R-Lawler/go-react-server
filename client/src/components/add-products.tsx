@@ -64,7 +64,7 @@ function AddProducts() {
             stock_quantity: Number(formData.get('stock-quantity'))
         }
         try {
-            const response = await axios.put(`/api/protected/editproduct/${product.id}`, putData, {withCredentials:true})
+            await axios.put(`/api/protected/editproduct/${product.id}`, putData, {withCredentials:true})
         } catch (err) {
             console.error(err)
                 if (axios.isAxiosError(err)) {
@@ -81,8 +81,8 @@ function AddProducts() {
         }
         const form = document.getElementById('edit-product-form') as HTMLFormElement
         fetchProducts()
-        form.reset()
         setIsLoading(false)
+        form.reset()
     }
 
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
