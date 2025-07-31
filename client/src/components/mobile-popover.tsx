@@ -76,7 +76,7 @@ function MobilePopover({product, fetchProducts}: MobilePopoverProps) {
                 </button>
             </PopoverTrigger>
             <PopoverContent className='text-white m-3 p-0 w-full bg-stone-600'>
-                <Card className="bg-stone-600 border-none text-white">
+                <Card className="bg-stone-600 border-none text-white fixed">
                     <form id='edit-product-form' onSubmit={(event) => handleEditProduct(event, product)} autoComplete='on' >
                         <CardHeader>
                             <CardTitle className='pb-3'>Edit Product</CardTitle>
