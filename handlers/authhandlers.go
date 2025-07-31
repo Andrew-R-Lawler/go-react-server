@@ -1,40 +1,40 @@
-package handlers 
+package handlers
 
 import (
 	"crypto/rand"
-	"encoding/hex"
-	"log"
 	"database/sql"
+	"encoding/hex"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"time"
-	"fmt"
 	"regexp"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/wneessen/go-mail"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID			int		`json:"id"`
-	Email 		string 	`json:"email"`
-	Password	string	`json:"password"`
-	Verified	bool	`json:"verified"`
-	Admin		bool	`json:"admin"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Verified bool   `json:"verified"`
+	Admin    bool   `json:"admin"`
 }
 
 type Claims struct {
-	ID 			int		`json:"id"`
-	Email 		string 	`json:"email"`
-	Verified 	bool	`json:"verified"`
-	Admin		bool	`json:"admin"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Verified bool   `json:"verified"`
+	Admin    bool   `json:"admin"`
 	jwt.StandardClaims
 }
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
- 
+
 func SendVerificationEmail(token string, email string) {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
@@ -80,7 +80,7 @@ func SendVerificationEmail(token string, email string) {
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
-	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory), 
+	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
 		log.Fatalf("failed to create mail client: %s", err)
@@ -146,8 +146,6 @@ func SendResetEmail(token string, email string) {
 	}
 }
 
-
-
 func generateVerificationToken() string {
 	bytes := make([]byte, 32)
 	_, err := rand.Read(bytes)
@@ -194,13 +192,13 @@ func Register(c *gin.Context, db *sql.DB) {
 	}
 	verificationToken := generateVerificationToken()
 	currentTime := time.Now().UTC()
-	tokenExpiration := currentTime.Add(24 * time.Hour) 
+	tokenExpiration := currentTime.Add(24 * time.Hour)
 
 	_, err = db.Exec(query, user.Email, hashedPassword, verificationToken, tokenExpiration, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
-	}	
+	}
 	SendVerificationEmail(verificationToken, user.Email)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
@@ -208,7 +206,7 @@ func Register(c *gin.Context, db *sql.DB) {
 }
 
 func Login(c *gin.Context, db *sql.DB) {
-	var user User 
+	var user User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
@@ -226,7 +224,7 @@ func Login(c *gin.Context, db *sql.DB) {
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(user.Password))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})	
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
 	query = "SELECT admin, verified, id FROM users WHERE email = $1"
@@ -245,16 +243,16 @@ func Login(c *gin.Context, db *sql.DB) {
 		return
 	}
 	c.SetCookie(
-		"auth_token", 	// cookie name
-		token,			// value
-		3600*24,		// max age in seconds
-		"/",			// path
-		"localhost",	// domain
-		false,			// secure (true in production with HTTPS)
-		true,			// HttpOnly
+		"auth_token", // cookie name
+		token,        // value
+		3600*24,      // max age in seconds
+		"/",          // path
+		"localhost",  // domain
+		false,        // secure (true in production with HTTPS)
+		true,         // HttpOnly
 	)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Success", 
+		"message": "Success",
 	})
 }
 
@@ -273,9 +271,9 @@ func Logout(c *gin.Context) {
 
 func GenerateToken(email string, admin bool, verified bool, id int) (string, error) {
 	claims := Claims{
-		ID: id,
-		Email: email,
-		Admin: admin,
+		ID:       id,
+		Email:    email,
+		Admin:    admin,
 		Verified: verified,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
@@ -314,10 +312,10 @@ func GetUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"email": email,
-		"ID": id,
+		"email":    email,
+		"ID":       id,
 		"verified": verified,
-		"admin": admin,
+		"admin":    admin,
 	})
 
 }
@@ -358,7 +356,7 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to read request body"})
 		return
-	}	
+	}
 	var userID int
 	err = db.QueryRow("SELECT id FROM users WHERE email = $1", user.Email).Scan(&userID)
 	if err != nil {
@@ -387,8 +385,8 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
 	var request struct {
-		Token		string	`json:"token"`
-		NewPassword	string	`json:"newPassword`
+		Token       string `json:"token"`
+		NewPassword string `json:"newPassword`
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
@@ -404,8 +402,8 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 		return
 	}
 	var resetToken struct {
-		UserID	int	`json:"user_id"`
-		TokenExpiration	time.Time `json:"expires_at`
+		UserID          int       `json:"user_id"`
+		TokenExpiration time.Time `json:"expires_at`
 	}
 	err = db.QueryRow("SELECT user_id, expires_at FROM password_reset WHERE token = $1", request.Token).Scan(&resetToken.UserID, &resetToken.TokenExpiration)
 	if err != nil {
