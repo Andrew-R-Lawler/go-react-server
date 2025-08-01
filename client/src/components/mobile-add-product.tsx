@@ -1,5 +1,5 @@
 import '../App.css'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -7,21 +7,23 @@ import { Label } from "./ui/label";
 import { Textarea } from './ui/textarea';
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "./ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 
-type MobileProductcardProps = {
+type MobileProductCardProps = {
     handleAddProduct: (event: React.FormEvent<HTMLFormElement>) => void
     error: string
     isLoading: boolean
 }
 
-function MobileAddProduct({handleAddProduct, error, isLoading}: MobileProductcardProps) {
+function MobileAddProduct({ handleAddProduct, error, isLoading }: MobileProductCardProps) {
 
     const [open, setOpen] = useState(false)
+    
+    useEffect(() => {
+        if (error) {
+            setOpen(true)
+        }
+    }, [error])
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
