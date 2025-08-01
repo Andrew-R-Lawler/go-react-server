@@ -1,5 +1,6 @@
 import '../App.css'
 import MobilePopover from './mobile-popover'
+import MobileDeleteDialog from './mobile-delete-dialog'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "./ui/card"
 
 type Product = {
@@ -36,13 +37,7 @@ function MobileProductCard({product, fetchProducts, handleDeleteProduct}: Mobile
                 </CardContent>
                 <CardFooter className='flex flex-col'>
                     <MobilePopover product={product} fetchProducts={fetchProducts} />
-                    <button
-                        className="bg-stone-900 text-white border-none p-2 mt-2 w-full"
-                        aria-label={`Delete`}
-                        onClick={() => handleDeleteProduct(product)}
-                    >
-                        Delete Product
-                    </button>
+                    <MobileDeleteDialog product={product} handleDeleteProduct={handleDeleteProduct} />
                 </CardFooter>
             </Card>
         </div>

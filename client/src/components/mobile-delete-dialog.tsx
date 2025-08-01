@@ -1,9 +1,7 @@
 import '../App.css'
-import { Trash2 } from "lucide-react"
-import { Button } from './ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
-type DesktopDeleteDialogProps = {
+type MobileDeleteDialogProps = {
     handleDeleteProduct: (product: Product) => void
     product: Product
 }
@@ -17,17 +15,17 @@ type Product = {
     stock_quantity: number
 }
 
-function DesktopDeleteDialog({ handleDeleteProduct, product }: DesktopDeleteDialogProps) {
+function MobileDeleteDialog({ handleDeleteProduct, product }: MobileDeleteDialogProps) {
 
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button
-                    className="bg-stone-900 text-white border-none p-2 w-8 h-8"
+                <button
+                    className="bg-stone-900 text-white border-none p-2 mt-2 w-full"
                     aria-label={`Delete`}
                 >
-                    <Trash2 className="w-4 h-4" />
-                </Button>
+                    Delete Product
+                </button>
             </AlertDialogTrigger>
             <AlertDialogContent className='bg-stone-800 text-white'>
                 <AlertDialogHeader>
@@ -45,4 +43,4 @@ function DesktopDeleteDialog({ handleDeleteProduct, product }: DesktopDeleteDial
     )
 }
 
-export default DesktopDeleteDialog
+export default MobileDeleteDialog
