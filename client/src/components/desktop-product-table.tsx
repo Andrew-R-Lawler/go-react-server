@@ -1,8 +1,7 @@
 import '../App.css'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
-import { Button } from './ui/button';
-import { Trash2 } from "lucide-react"
 import DesktopPopover from './desktop-popover';
+import DesktopDeleteDialog from './desktop-delete-dialog';
 
 type DesktopProductTableProps = {
     handleDeleteProduct: (product: Product) => void
@@ -44,13 +43,7 @@ function DesktopProductTable({products, handleDeleteProduct, fetchProducts}: Des
                         <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
                                 <DesktopPopover product={product} fetchProducts={fetchProducts} />
-                                <Button
-                                    className="bg-stone-900 text-white border-none p-2 w-8 h-8"
-                                    aria-label={`Delete`}
-                                    onClick={() => handleDeleteProduct(product)}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <DesktopDeleteDialog handleDeleteProduct={handleDeleteProduct} product={product} />
                             </div>
                         </TableCell>
                     </TableRow>
