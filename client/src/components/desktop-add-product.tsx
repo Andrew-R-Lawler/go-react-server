@@ -9,13 +9,13 @@ import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 
-type DesktopProductCardProps = {
+type DesktopAddProductProps = {
     handleAddProduct: (event: React.FormEvent<HTMLFormElement>) => void
     error: string
     isLoading: boolean
 }
 
-function DesktopAddProduct({handleAddProduct, error, isLoading}: DesktopProductCardProps) {
+function DesktopAddProduct({handleAddProduct, error, isLoading}: DesktopAddProductProps) {
 
     const [open, setOpen] = useState(false)
     
