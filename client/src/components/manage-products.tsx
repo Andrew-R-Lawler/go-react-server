@@ -4,35 +4,17 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from "@/components/ui/label";
 import { Textarea } from './ui/textarea';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { AlertCircle } from "lucide-react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import axios from 'axios'
 import { Trash2, Edit2 } from "lucide-react"
-import MobilePopover from './mobile-popover'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "./ui/table"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "./ui/popover"
-import { set } from 'react-hook-form';
+import MobileProductCard from './mobile-product-card';
+import MobileAddProduct from './mobile-add-product';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "./ui/table"
+import {Popover, PopoverContent, PopoverTrigger} from "./ui/popover"
 
-function AddProducts() {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+function ManageProducts() {
 
     interface Product {
         id: number
@@ -43,7 +25,7 @@ function AddProducts() {
         stock_quantity: number
     }
 
-    const [open, setOpen] = useState(false)
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [products, setProducts] = useState<Product[]>([]);
@@ -127,93 +109,26 @@ function AddProducts() {
         fetchProducts()
         form.reset()
         setIsLoading(false)
-        setOpen(false)
     }
 
     useEffect(() => {
         fetchProducts();
     }, [])
 
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <div className='new-container chakra-petch-regular flex-col'>
             {isMobile &&
                 <div className='p-2 m-2'>
                     {products.map((product) => (
-                        <Card className='bg-stone-700 text-white m-2 mt-4'>
-                            <CardHeader>
-                                <CardTitle>{product.name}</CardTitle>
-                                <CardDescription className='text-white'>{product.description}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <CardTitle>Image URL</CardTitle>
-                                <a className='link' href={product.image_url}>{product.image_url}</a>
-                            </CardContent>
-                            <CardContent>
-                                <CardTitle>Price</CardTitle>
-                                <p>{product.price.toFixed(2)}</p>
-                            </CardContent>
-                            <CardFooter className='flex flex-col'>
-                                <MobilePopover product={product} fetchProducts={fetchProducts} />
-                                <button
-                                    className="bg-stone-900 text-white border-none p-2 mt-2 w-full"
-                                    aria-label={`Delete`}
-                                    onClick={() => handleDeleteProduct(product)}
-                                >
-                                    Delete Product
-                                </button>
-                            </CardFooter>
-                        </Card>
+                        <MobileProductCard product={product} fetchProducts={fetchProducts} handleDeleteProduct={handleDeleteProduct} />
                     ))}
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger className='text-white ml-auto mt-2' asChild>
-                            <button className='w-full' onClick={() => setOpen(!open)}>Add Product</button>
-                        </PopoverTrigger>
-                        <PopoverContent className='m-3 p-0 w-auto bg-stone-600'>
-                            <Card className="bg-stone-600 border-none text-white">
-                                <form id='product-form' onSubmit={handleAddProduct} autoComplete='on' >
-                                    <CardHeader>
-                                        <CardTitle className='pb-3'>Add new product</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {error &&
-                                            <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
-                                                <AlertCircle className="h-4 w-4" />
-                                                <AlertTitle>Error</AlertTitle>
-                                                <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
-                                            </Alert>
-                                        }
-                                        <div>
-                                            <Label htmlFor="name" className='pl-2'>Name</Label>
-                                            <Input id="name" name='name' type='text' placeholder="Lavender Lemon Shampoo Bar" className='border-none justify-self-center' disabled={isLoading} required />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="image-url" className='pl-2'>Image URL</Label>
-                                            <Input id="image-url" name='image-url' type='url' placeholder="google.com" className='border-none justify-self-center' disabled={isLoading} required />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="">Description</Label>
-                                            <Textarea id="description" name='description' placeholder="Description here..." className='border-none justify-self-center bg-stone-700' disabled={isLoading} required />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="image-url">Price</Label>
-                                            <Input id="price" name='price' type='number' step="0.01" min="0" placeholder="Enter Price" className='border-none justify-self-center' disabled={isLoading} required />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="image-url" className='pl-2'>Stock Quantity</Label>
-                                            <Input id="stock-quantity" name='stock-quantity' type='number' min='0' placeholder='0' className='border-none justify-self-center' disabled={isLoading} required />
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="pt-2 justify-center">
-                                        <div className='w-[75%]'>
-                                            <Button className='w-full' type='submit' disabled={isLoading}>
-                                                {isLoading ? "Adding Product..." : "Add Product"}
-                                            </Button>
-                                        </div>
-                                    </CardFooter>
-                                </form>
-                            </Card>
-                        </PopoverContent>
-                    </Popover>
+                    <MobileAddProduct handleAddProduct={handleAddProduct} error={error} isLoading={isLoading} />
                 </div>
             }
             {
@@ -361,4 +276,4 @@ function AddProducts() {
     )
 }
 
-export default AddProducts
+export default ManageProducts
