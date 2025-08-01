@@ -12,7 +12,7 @@ import ResetSuccess from './components/reset-success'
 import EmailSent from './components/email-sent'
 import RegisterSuccess from './components/register-success'
 import Forbidden from './components/forbidden'
-import AddProducts from './components/add-products'
+import ManageProducts from './components/manage-products'
 import Shop from './components/shop'
 import logo from '../src/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
@@ -91,7 +91,7 @@ function App() {
                             </Link>
                         }
                         { user.admin && 
-                            <NavigationMenuLink className='link border-none w-30' href="/add-products">Add Products</NavigationMenuLink>
+                            <NavigationMenuLink className='link border-none w-30' href="/add-products">Manage Products</NavigationMenuLink>
                         }
                         <NavigationMenuLink className='link border-none w-30' onClick={signOut}>Sign Out</NavigationMenuLink>
                       </NavigationMenuContent>
@@ -124,7 +124,7 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path='/registration-success' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
-          <Route path='/add-products' element={<AddProducts />} />
+          <Route path='/add-products' element={<ManageProducts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
