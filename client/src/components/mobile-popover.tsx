@@ -1,5 +1,5 @@
 import '../App.css'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
@@ -33,6 +33,12 @@ function MobilePopover({product, fetchProducts}: MobilePopoverProps) {
     const [open, setOpen] = useState(false)
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        if (error) {
+            setOpen(true)
+        }
+    }, [error])
 
     const handleEditProduct = async (event: React.FormEvent<HTMLFormElement>, product: Product) => {
         event.preventDefault()
