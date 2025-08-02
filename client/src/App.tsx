@@ -47,6 +47,18 @@ function App() {
             console.error(err)
         }
     }
+
+    const isAdmin = () => {
+        if (!user) {
+            return false
+        }
+        if (user.admin ===false) {
+            return false
+        }
+        if (user.admin === true) {
+            return true
+        }
+    }
     
     const signOut = async () => {
         try {
@@ -91,7 +103,7 @@ function App() {
                             </Link>
                         }
                         { user.admin && 
-                            <NavigationMenuLink className='link border-none w-30' href="/add-products">Manage Products</NavigationMenuLink>
+                            <NavigationMenuLink className='link border-none w-30' href="/manage-products">Manage Products</NavigationMenuLink>
                         }
                         <NavigationMenuLink className='link border-none w-30' onClick={signOut}>Sign Out</NavigationMenuLink>
                       </NavigationMenuContent>
@@ -114,7 +126,7 @@ function App() {
         </nav>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/todo" element={<Todo />} />
+          <Route path="/todo" element={isAdmin() ? <Todo /> : <Forbidden />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<UserRegistration />} />
           <Route path="/verify" element={<Verification />} />
@@ -124,7 +136,7 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path='/registration-success' element={<RegisterSuccess />} />
           <Route path='/shop' element={<Shop />} />
-          <Route path='/add-products' element={<ManageProducts />} />
+          <Route path='/manage-products' element={isAdmin() ? <ManageProducts /> : <Forbidden />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
