@@ -3,11 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/andrew-r-lawler/go-react-server/handlers"
+	"github.com/stripe/stripe-go/v74"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -18,7 +20,7 @@ import (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 }
 
@@ -59,6 +61,33 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Migrate: Add featured column if not exists
+	_, err = db.Exec(`
+		ALTER TABLE products 
+		ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add featured column (might already exist):", err)
+	}
+
+	// Create Orders Table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS orders (
+			id SERIAL PRIMARY KEY,
+			payment_intent_id TEXT UNIQUE NOT NULL,
+			amount BIGINT NOT NULL,
+			currency TEXT NOT NULL,
+			status TEXT NOT NULL,
+			items JSONB NOT NULL,
+			shipping_method TEXT,
+			receipt_email TEXT,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+	`)
+	if err != nil {
+		log.Fatal("Failed to create orders table:", err)
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
@@ -66,16 +95,16 @@ func main() {
 		c.File(filepath.Join("./client/dist", "index.html"))
 	})
 
-	todoGroup := r.Group("/api/todo", func(c *gin.Context) { authMiddleware(c) })
+	// todoGroup := r.Group("/api/todo", func(c *gin.Context) { authMiddleware(c) })
 	userGroup := r.Group("/api/user")
 	shopGroup := r.Group("/api/shop")
 	protectedGroup := r.Group("/api/protected", func(c *gin.Context) { authMiddleware(c) })
 
-	todoGroup.GET("/", func(c *gin.Context) { handlers.GetTodos(c, db) })
-	todoGroup.DELETE("/:id", func(c *gin.Context) { handlers.DeleteTodo(c, db) })
-	todoGroup.POST("/", func(c *gin.Context) { handlers.PostTodo(c, db) })
-	todoGroup.PUT("/:id", func(c *gin.Context) { handlers.UpdateTodo(c, db) })
-	todoGroup.PUT("/completed/:id", func(c *gin.Context) { handlers.CompleteTodo(c, db) })
+	// todoGroup.GET("/", func(c *gin.Context) { handlers.GetTodos(c, db) })
+	// todoGroup.DELETE("/:id", func(c *gin.Context) { handlers.DeleteTodo(c, db) })
+	// todoGroup.POST("/", func(c *gin.Context) { handlers.PostTodo(c, db) })
+	// todoGroup.PUT("/:id", func(c *gin.Context) { handlers.UpdateTodo(c, db) })
+	// todoGroup.PUT("/completed/:id", func(c *gin.Context) { handlers.CompleteTodo(c, db) })
 
 	userGroup.POST("/register", func(c *gin.Context) { handlers.Register(c, db) })
 	userGroup.POST("/login", func(c *gin.Context) { handlers.Login(c, db) })
@@ -84,12 +113,19 @@ func main() {
 	userGroup.POST("/resetpassword", func(c *gin.Context) { handlers.ResetPassword(c, db) })
 
 	shopGroup.GET("/products", func(c *gin.Context) { handlers.GetProducts(c, db) })
+	shopGroup.GET("/featured", func(c *gin.Context) { handlers.GetFeaturedProducts(c, db) })
 
 	protectedGroup.GET("/user", func(c *gin.Context) { handlers.GetUser(c) })
 	protectedGroup.POST("/logout", func(c *gin.Context) { handlers.Logout(c) })
 	protectedGroup.POST("/products", func(c *gin.Context) { handlers.AddProduct(c, db) })
 	protectedGroup.DELETE("/deleteproduct/:id", func(c *gin.Context) { handlers.DeleteProduct(c, db) })
 	protectedGroup.PUT("/editproduct/:id", func(c *gin.Context) { handlers.EditProduct(c, db) })
+	protectedGroup.GET("/orders", func(c *gin.Context) { handlers.GetOrders(c, db) })
+
+	// Stripe
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	r.POST("/api/create-payment-intent", func(c *gin.Context) { handlers.CreatePaymentIntent(c, db) })
+	r.POST("/api/confirm-order", func(c *gin.Context) { handlers.ConfirmOrder(c, db) })
 
 	r.Run()
 }

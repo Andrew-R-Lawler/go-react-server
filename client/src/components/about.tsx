@@ -1,0 +1,68 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+function AboutUs() {
+    return (
+        <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+            {/* Hero Section */}
+            <div className="bg-muted py-16 md:py-24 animate-in fade-in duration-700">
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                    <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">About Us</h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        We are building the future of [Your Industry]. Driven by passion, innovation, and a commitment to excellence.
+                    </p>
+                </div>
+            </div>
+
+            <main className="max-w-7xl mx-auto px-6 py-16 space-y-24">
+                {/* Our Mission */}
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold border-l-4 border-primary pl-4">Our Mission</h2>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        </p>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </p>
+                    </div>
+                    <div className="bg-muted aspect-video rounded-lg flex items-center justify-center text-muted-foreground bg-stone-100 dark:bg-stone-800">
+                        {/* Placeholder for an image */}
+                        <span className="italic">Mission Image Placeholder</span>
+                    </div>
+                </section>
+
+                {/* Our Values - 3 Card Grid */}
+                <section>
+                    <h2 className="text-3xl font-bold text-center mb-12">Core Values</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { title: "Sustainability", icon: "🌱", desc: "Dedicated to eco-friendly practices and reducing our environmental footprint" },
+                            { title: "Integrity", icon: "🤝", desc: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua" },
+                            { title: "Quality", icon: "✨", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco" }
+                        ].map((value, index) => (
+                            <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 bg-card border-border">
+                                <CardHeader>
+                                    <div className="text-4xl mb-4">{value.icon}</div>
+                                    <CardTitle>{value.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">{value.desc}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Our Story */}
+                <section className="bg-muted/30 p-8 md:p-12 rounded-2xl border border-border">
+                    <h2 className="text-3xl font-bold mb-6 text-center">Our Story</h2>
+                    <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
+                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+                    </p>
+                </section>
+            </main>
+        </div>
+    )
+}
+
+export default AboutUs
