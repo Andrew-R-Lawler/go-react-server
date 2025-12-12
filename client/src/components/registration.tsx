@@ -8,9 +8,9 @@ import { Label } from './ui/label'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
+    Alert,
+    AlertDescription,
+    AlertTitle,
 } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
@@ -24,7 +24,12 @@ function UserRegistration() {
     const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
-        const email = formData.get('email')
+        const email = formData.get('email') as string | null
+        if (!email) {
+            setError('Email is required')
+            setIsLoading(false)
+            return
+        }
         const formattedEmail = email.toLowerCase();
         const password = formData.get('password')
         const newUser = {
@@ -53,46 +58,46 @@ function UserRegistration() {
     }
 
     return (
-        <div className='flex-container'>
-            <main className="flex min-h-screen items-center justify-center p-4">
-                <Card className="w-full max-w-sm bg-stone-600 border-none">
-                    <CardHeader className="chakra-petch-regular space-y-1 text-white">
+        <div className="min-h-screen flex items-center justify-center bg-background">
+            <main className="flex w-full justify-center p-4">
+                <Card className="w-full max-w-sm bg-card border border-border text-card-foreground">
+                    <CardHeader className="space-y-1 text-card-foreground border-b border-border pb-4 mb-4">
                         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-                        <CardDescription className='text-white'>
+                        <CardDescription className='text-muted-foreground'>
                             Enter your email and password to create your account, your password must have:
                         </CardDescription>
-                            <ul className='list-disc pl-5 text-sm'>
-                            <li className='pl-1'>At least 8 characters</li> 
+                        <ul className='list-disc pl-5 text-sm text-muted-foreground pt-2'>
+                            <li className='pl-1'>At least 8 characters</li>
                             <li className='pl-1'>One uppercase letter</li>
                             <li className='pl-1'>One number</li>
                             <li className='pl-1'>One special character</li>
-                            </ul>
+                        </ul>
                     </CardHeader>
-                      { error && 
-                          <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
-                      </Alert>
-                      }
+                    {error &&
+                        <Alert variant="destructive" className='border-red-900 bg-red-900/20 text-red-200 mx-6'>
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription><p className='text-red-200'>{error}</p></AlertDescription>
+                        </Alert>
+                    }
                     <CardContent>
-                        <form onSubmit={handleRegister} className="space-y-4 text-white chakra-petch-regular">
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input className='border-none' id="email" name="email" placeholder="name@example.com" required type="email" autoComplete="email" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="password">Password</Label>
-                          <Input className='border-none' id="password" name="password" required type="password" autoComplete="password" pattern={passwordPattern} />
-                        </div>
-                        <Button className="w-full" type="submit">
-                            {isLoading ? "Signing up..." : "Sign up"}
-                        </Button>
+                        <form onSubmit={handleRegister} className="space-y-4 text-card-foreground">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-muted-foreground">Email</Label>
+                                <Input className='bg-background border-input text-foreground placeholder:text-muted-foreground' id="email" name="email" placeholder="name@example.com" required type="email" autoComplete="email" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className="text-muted-foreground">Password</Label>
+                                <Input className='bg-background border-input text-foreground' id="password" name="password" required type="password" autoComplete="password" pattern={passwordPattern} />
+                            </div>
+                            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" type="submit">
+                                {isLoading ? "Signing up..." : "Sign up"}
+                            </Button>
                         </form>
-                    </CardContent>
-                        <div className="flex-item nav-item">
-                            <p>Already Signed up?</p><Link to="/login">Sign In</Link>
+                        <div className="mt-4 text-center text-sm text-muted-foreground">
+                            Already Signed up? <Link to="/login" className="text-primary hover:underline transition-all pl-1">Sign In</Link>
                         </div>
+                    </CardContent>
                 </Card>
             </main>
         </div>

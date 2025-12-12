@@ -2,77 +2,7 @@
 
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:is(.dark *));
-
-.nav-bar {
-    position:sticky;
-    top:0;
-    z-index:1000;
-    background-color: #1a1a1a;
-}
-.nav-list {
-    margin:0;
-    padding:1rem 0;
-    display:flex;
-    justify-content:flex-end;
-    align-items:center;
-    z-index:1000;
-}
-
-.nav-item {
-    list-style:none;
-    margin-right:1rem;
-}
-
-.nav-item a {
-    text-decoration:none;
-    color:white;
-}
-.link {
-    text-decoration:none;
-    color:white;
-}
-
-.nav-item:first-child{
-    margin-right:.5rem;
-    margin-left:1rem;
-}
-
-.nav-item:nth-child(2){
-    margin-right:auto;
-    margin-left:1rem;
-}
-
-.flex-container {
-  display: flex;
-  justify-content: center; /* Horizontally center */
-  place-self: center;
-  align-items: center;
-  height: 100vh; /* Full viewport height */
-  width: 100vw;
-  background-color: #2b2b2b;
-}
-
-.new-container {
-  display: flex;
-  justify-content: start; /* Horizontally center */
-  place-self: center;
-  align-items: center;
-  height: 100vh; /* Full viewport height */
-  width: 100vw;
-  background-color: #2b2b2b;
-}
-
-.flex-item {
-  text-align: center;
-}
-
-.header1 {
-    padding: 5px;
-    margin: 5px;
-    font-weight: 600;
-    font-style: normal;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 .chakra-petch-light {
   font-family: "Chakra Petch", serif;
@@ -139,10 +69,10 @@
   --foreground: hsl(0 0% 3.9%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(0 0% 3.9%);
-  --popover: hsl(0 0% 1%);
+  --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 0% 3.9%);
-  --primary: hsl(0 0% 9%);
-  --primary-foreground: hsl(0 0% 98%);
+  --primary: hsl(24 5.7% 44.7%);
+  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(0 0% 96.1%);
   --secondary-foreground: hsl(0 0% 9%);
   --muted: hsl(0 0% 96.1%);
@@ -169,8 +99,8 @@
   --card-foreground: hsl(0 0% 98%);
   --popover: hsl(0 0% 3.9%);
   --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(0 0% 9%);
+  --primary: hsl(24 5.4% 26%);
+  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(0 0% 14.9%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(0 0% 14.9%);
@@ -221,10 +151,10 @@
 }
 
 @layer base {
-  * {
-    @apply border-none outline-ring/50;
-  }
+
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Chakra Petch", serif;
   }
 }

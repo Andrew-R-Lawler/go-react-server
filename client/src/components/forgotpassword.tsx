@@ -29,51 +29,51 @@ function ForgotPassword() {
             }
         } catch (err) {
             console.error(err)
-                if (axios.isAxiosError(err)) {
-                    const response = err.response;
-                    if (response) {
-                        setError(response.data.error || 'An unknown error occured');
-                    } else {
-                        setError('Network error, please try again later')
-                    }
+            if (axios.isAxiosError(err)) {
+                const response = err.response;
+                if (response) {
+                    setError(response.data.error || 'An unknown error occured');
                 } else {
-                    setError("Failed create password reset request, an uknown error has occured.")
+                    setError('Network error, please try again later')
                 }
-                setIsLoading(false)
+            } else {
+                setError("Failed create password reset request, an uknown error has occured.")
+            }
+            setIsLoading(false)
         }
         setIsLoading(false)
     }
 
     return (
-        <div className='flex-container chakra-petch-regular'>
-        <Card className="w-[350px] bg-stone-600 border-none text-white">
-        <form onSubmit={handleForgotPassword}>
-            <CardHeader>
-                <CardTitle>Reset your password</CardTitle>
-                <CardDescription>Enter your email address and we'll send you a link to reset your password.</CardDescription>
-            </CardHeader>
-            <CardContent>
-            <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5 pt-2">
-              <Label htmlFor="name">E-Mail Address</Label>
-              <Input id="email" name='email' type='email' disabled={isLoading} placeholder="name@example.com" className='border-none'/>
-              { error && 
-                  <Alert variant="destructive" className='border-red-600 text-red-600 p-2 my-2 bg-red-300'>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription><p className='text-red-600'>{error}</p></AlertDescription>
-              </Alert>
-              }
-            </div>
-            </div>
-            </CardContent>
-            <CardFooter className="flex justify-end pt-2">
-                <Button className='w-full' type='submit' disabled={isLoading}>
-                    {isLoading ? "Sending Reset Link..." : "Send Reset Link"}
-                </Button>
-            </CardFooter>
-            </form>
-        </Card>
+        <div className='min-h-screen flex items-center justify-center bg-background'>
+            <Card className="w-[350px] bg-card border border-border text-card-foreground">
+                <form onSubmit={handleForgotPassword}>
+                    <CardHeader className="border-b border-border pb-4 mb-4">
+                        <CardTitle>Reset your password</CardTitle>
+                        <CardDescription className="text-muted-foreground">Enter your email address and we'll send you a link to reset your password.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid w-full items-center gap-4">
+                            <div className="flex flex-col space-y-1.5 pt-2">
+                                <Label htmlFor="name" className="text-muted-foreground">E-Mail Address</Label>
+                                <Input id="email" name='email' type='email' disabled={isLoading} placeholder="name@example.com" className='bg-background border-input text-foreground placeholder:text-muted-foreground' />
+                                {error &&
+                                    <Alert variant="destructive" className='border-red-900 bg-red-900/20 text-red-200 mt-2 p-3'>
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription><p className='text-red-200'>{error}</p></AlertDescription>
+                                    </Alert>
+                                }
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-end pt-2">
+                        <Button className='w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors' type='submit' disabled={isLoading}>
+                            {isLoading ? "Sending Reset Link..." : "Send Reset Link"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     )
 }

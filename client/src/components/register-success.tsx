@@ -1,32 +1,36 @@
 import '../App.css'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "./ui/card"
-import { Separator } from './ui/separator'
+import { Button } from "./ui/button"
+import { Link } from 'react-router-dom'
+
 function RegisterSuccess() {
 
     return (
-        <div className='flex-container chakra-petch-regular'>
-        <Card className="w-xl bg-stone-600 border-none text-white">
-        <form>
-            <CardHeader>
-                <CardTitle className='text-xl'>Thank you for signing up!</CardTitle>
-                    <Separator className='mt-2'/>
-                <CardDescription className='text-white py-2'>You will receive a verification email shortly. Check your spam folder if it doesn't show up within one or two minutes.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Separator className='my-2'/>
-                <p className='pt-2 text-sm'>If it the email hasn't appeared in your inbox try registering again or reach out to our support.</p>
-            </CardContent>
-            <CardFooter className="flex justify-end pt-2">
-            </CardFooter>
-            </form>
-        </Card>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+            <Card className="w-full max-w-sm mx-auto bg-card border-border text-card-foreground">
+                <CardHeader>
+                    <CardTitle className='text-2xl'>Thank you for signing up!</CardTitle>
+                    <CardDescription>
+                        Registration successful.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className='flex flex-col gap-4'>
+                    <p className='text-sm text-muted-foreground'>
+                        You will receive a verification email shortly. Please verify your account to continue.
+                        <br /><br />
+                        Check your spam folder if it doesn't show up within a few minutes.
+                    </p>
+                    <Link to="/login" className="w-full">
+                        <Button className="w-full">Proceed to Login</Button>
+                    </Link>
+                </CardContent>
+            </Card>
         </div>
     )
 }

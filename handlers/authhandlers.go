@@ -33,117 +33,121 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
+func GetJwtSecret() []byte {
+	secret := os.Getenv("JWT_SECRET_KEY")
+	if secret == "" {
+		return []byte("secret") // Default fallback or error in prod
+	}
+	return []byte(secret)
+}
 
-func SendVerificationEmail(token string, email string) {
+func SendVerificationEmail(token string, email string) error {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
 
 	if smtpUser == "" || smtpPass == "" {
-		log.Fatalf("SMTP user or password is missing")
+		return fmt.Errorf("SMTP config missing. User: '%s', Pass set: %v", smtpUser, smtpPass != "")
+	}
+
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		appURL = "http://localhost:3000"
 	}
 	body := fmt.Sprintf(`
 		<html>
-		<head>
-			<style>
-				.button {
-					background-color: blue;
-					border: none;
-					color: white;
-					padding: 10px;
-					text-align: center;
-					text-decoration: none;
-					display: inline-block;
-					font-size: 16px;
-					margin: 10px 0;
-					cursor: pointer;
-					border-radius: 5px;
-				}
-			</style>
-		</head>
-		<body>
-			<h2>Welcome to Our Service!</h2>
-			<p>Thank you for registering. Please verify your email address by clicking the button below:</p>
-			<a href="https://webserver.lawlerlabs.duckdns.org/api/user/verify/%s" class="button" style="color: white; text-decoration: none;">Verify Email</a>
+		<body style="background-color: #1c1917; color: #e7e5e4; font-family: 'Courier New', Courier, monospace; padding: 20px;">
+			<div style="max-width: 600px; margin: 0 auto; background-color: #292524; padding: 24px; border-radius: 8px; border: 1px solid #44403c;">
+				<h2 style="color: #ffffff; border-bottom: 2px solid #57534e; padding-bottom: 12px;">Verify Your Email</h2>
+				<p style="font-size: 16px;">Welcome!</p>
+				<p style="color: #a8a29e; font-size: 14px;">Thank you for registering. Please verify your email address by clicking the button below:</p>
+				
+				<div style="text-align: center; margin-top: 32px;">
+					<a href="%s/api/user/verify/%s" style="background-color: #57534e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email</a>
+				</div>
+				
+				<p style="text-align: center; margin-top: 32px; font-size: 12px; color: #57534e;">
+					&copy; 2025 Go React Server. All rights reserved.
+				</p>
+			</div>
 		</body>
 		</html>
-	`, token)
+	`, appURL, token)
 	subject := "Verify your e-mail address!"
 	to := email
 
 	m := mail.NewMsg()
 	if err := m.From(smtpUser); err != nil {
-		log.Fatalf("failed to set From address: %s", err)
+		return fmt.Errorf("failed to set From address: %s", err)
 	}
 	if err := m.To(to); err != nil {
-		log.Fatalf("failed to set To address: %s", err)
+		return fmt.Errorf("failed to set To address: %s", err)
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
 	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
-		log.Fatalf("failed to create mail client: %s", err)
+		return fmt.Errorf("failed to create mail client: %s", err)
 	}
 	if err := client.DialAndSend(m); err != nil {
-		log.Fatalf("failed to send mail: %s", err)
+		return fmt.Errorf("failed to send mail: %s", err)
 	}
+	return nil
 }
 
-func SendResetEmail(token string, email string) {
+func SendResetEmail(token string, email string) error {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
 
 	if smtpUser == "" || smtpPass == "" {
-		log.Fatalf("SMTP user or password is missing")
+		return fmt.Errorf("SMTP config missing. User: '%s', Pass set: %v", smtpUser, smtpPass != "")
 	}
 
+	// Using env var for domain
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		appURL = "http://localhost:3000" // Fallback for dev
+	}
 	body := fmt.Sprintf(`
 		<html>
-		<head>
-			<style>
-				.button {
-					background-color: blue;
-					border: none;
-					color: white;
-					padding: 10px;
-					text-align: center;
-					text-decoration: none;
-					display: inline-block;
-					font-size: 16px;
-					margin: 10px 0;
-					cursor: pointer;
-					border-radius: 5px;
-				}
-			</style>
-		</head>
-		<body>
-			<h2>Password Reset Request Header</h2>
-			<p>Password Reset Request Body</p>
-			<a href="https://webserver.lawlerlabs.duckdns.org/password-reset/%s" class="button" style="color: white; text-decoration: none;">Reset Password</a>
+		<body style="background-color: #1c1917; color: #e7e5e4; font-family: 'Courier New', Courier, monospace; padding: 20px;">
+			<div style="max-width: 600px; margin: 0 auto; background-color: #292524; padding: 24px; border-radius: 8px; border: 1px solid #44403c;">
+				<h2 style="color: #ffffff; border-bottom: 2px solid #57534e; padding-bottom: 12px;">Reset Password</h2>
+				<p style="font-size: 16px;">We received a request to reset your password.</p>
+				<p style="color: #a8a29e; font-size: 14px;">If this was you, please click the button below to proceed:</p>
+				
+				<div style="text-align: center; margin-top: 32px;">
+					<a href="%s/password-reset/%s" style="background-color: #57534e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
+				</div>
+				
+				<p style="text-align: center; margin-top: 32px; font-size: 12px; color: #57534e;">
+					&copy; 2025 Go React Server. All rights reserved.
+				</p>
+			</div>
 		</body>
 		</html>
-	`, token)
+	`, appURL, token)
 	subject := "Password Reset Request"
 	to := email
 
 	m := mail.NewMsg()
 	if err := m.From(smtpUser); err != nil {
-		log.Fatalf("failed to set From address: %s", err)
+		return fmt.Errorf("failed to set From address: %s", err)
 	}
 	if err := m.To(to); err != nil {
-		log.Fatalf("failed to set To address: %s", err)
+		return fmt.Errorf("failed to set To address: %s", err)
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
 	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
-		log.Fatalf("failed to create mail client: %s", err)
+		return fmt.Errorf("failed to create mail client: %s", err)
 	}
 	if err := client.DialAndSend(m); err != nil {
-		log.Fatalf("failed to sennd mail: %s", err)
+		return fmt.Errorf("failed to sennd mail: %s", err)
 	}
+	return nil
 }
 
 func generateVerificationToken() string {
@@ -199,7 +203,10 @@ func Register(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not register user"})
 		return
 	}
-	SendVerificationEmail(verificationToken, user.Email)
+	if err := SendVerificationEmail(verificationToken, user.Email); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send verification email: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User registered successfully",
 	})
@@ -277,17 +284,17 @@ func GenerateToken(email string, admin bool, verified bool, id int) (string, err
 		Verified: verified,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
-			Issuer:    "to-do app",
+			Issuer:    "go-react-server",
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	return token.SignedString(GetJwtSecret())
 }
 
 func ValidateToken(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		return GetJwtSecret(), nil
 	})
 
 	if err != nil {
@@ -347,7 +354,11 @@ func Verify(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "verification token not found or expired"})
 		return
 	}
-	c.Redirect(302, "http://webserver.lawlerlabs.duckdns.org/verify")
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		appURL = "http://localhost:3000"
+	}
+	c.Redirect(302, fmt.Sprintf("%s/verify", appURL))
 }
 
 func ForgotPassword(c *gin.Context, db *sql.DB) {
@@ -379,14 +390,17 @@ func ForgotPassword(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create password reset request"})
 		return
 	}
-	SendResetEmail(resetToken, user.Email)
+	if err := SendResetEmail(resetToken, user.Email); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send reset email: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusAccepted, gin.H{"message": "Email sent to user!"})
 }
 
 func ResetPassword(c *gin.Context, db *sql.DB) {
 	var request struct {
 		Token       string `json:"token"`
-		NewPassword string `json:"newPassword`
+		NewPassword string `json:"newPassword"`
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
@@ -403,7 +417,7 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 	}
 	var resetToken struct {
 		UserID          int       `json:"user_id"`
-		TokenExpiration time.Time `json:"expires_at`
+		TokenExpiration time.Time `json:"expires_at"`
 	}
 	err = db.QueryRow("SELECT user_id, expires_at FROM password_reset WHERE token = $1", request.Token).Scan(&resetToken.UserID, &resetToken.TokenExpiration)
 	if err != nil {
