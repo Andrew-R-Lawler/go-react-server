@@ -24,13 +24,11 @@ import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
 import { Button } from './components/ui/button'
 import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-
-    NavigationMenuList,
-    NavigationMenuTrigger,
-} from "./components/ui/navigation-menu"
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 import { CartProvider, useCart } from "@/context/cart-context"
@@ -119,33 +117,32 @@ function App() {
                                     {user &&
                                         <>
                                             <li>
-                                                <NavigationMenu>
-                                                    <NavigationMenuList>
-                                                        <NavigationMenuItem>
-                                                            <NavigationMenuTrigger className="bg-transparent hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent/50">Account</NavigationMenuTrigger>
-                                                            <NavigationMenuContent className='min-w-[150px] p-2'>
-                                                                {user.verified &&
-                                                                    <>
-                                                                        {/* <Link to="/todo" className='block p-2 hover:bg-accent rounded-sm text-sm'>
-                                                                        To-Do List
-                                                                    </Link> */}
-                                                                        <Link to="/orders" className='block p-2 hover:bg-accent rounded-sm text-sm'>
-                                                                            My Orders
-                                                                        </Link>
-                                                                    </>
-                                                                }
-                                                                {user.admin &&
-                                                                    <Link to="/manage-products" className='block p-2 hover:bg-accent rounded-sm text-sm'>
-                                                                        Manage Products
-                                                                    </Link>
-                                                                }
-                                                                <div className='block p-2 hover:bg-accent rounded-sm text-sm cursor-pointer' onClick={signOut}>
-                                                                    Sign Out
-                                                                </div>
-                                                            </NavigationMenuContent>
-                                                        </NavigationMenuItem>
-                                                    </NavigationMenuList>
-                                                </NavigationMenu>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost">
+                                                            Account
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="bg-card border-border">
+                                                        {user.verified && (
+                                                            <DropdownMenuItem asChild>
+                                                                <Link to="/orders" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                                                    My Orders
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {user.admin && (
+                                                            <DropdownMenuItem asChild>
+                                                                <Link to="/manage-products" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                                                    Manage Products
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/10">
+                                                            Logout
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </li>
                                         </>
                                     }
