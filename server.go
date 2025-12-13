@@ -138,5 +138,12 @@ func main() {
 	r.POST("/api/create-payment-intent", func(c *gin.Context) { handlers.CreatePaymentIntent(c, db) })
 	r.POST("/api/confirm-order", func(c *gin.Context) { handlers.ConfirmOrder(c, db) })
 
+	// Public Config
+	r.GET("/api/config", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"stripePublishableKey": os.Getenv("VITE_STRIPE_PUBLISHABLE_KEY"),
+		})
+	})
+
 	r.Run()
 }
