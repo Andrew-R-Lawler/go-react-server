@@ -42,7 +42,6 @@ ask_var() {
     local is_secret=$3
     
     echo -e "\n$prompt_text"
-    echo -e "\n$prompt_text"
     read -u 3 input_val
     
     if [ -z "$input_val" ]; then
