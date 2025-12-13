@@ -56,7 +56,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             return [...prev, {
                 id: product.id,
                 name: product.name,
-                price: product.price,
+                price: product.on_sale ? product.sale_price : product.price,
                 image_url: product.image_url,
                 quantity: 1
             }];

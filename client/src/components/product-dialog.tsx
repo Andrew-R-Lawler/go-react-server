@@ -165,6 +165,34 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                                 </div>
                             </div>
                         </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="sale-price">Sale Price ($)</Label>
+                                <Input
+                                    id="sale-price"
+                                    name="sale-price"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    defaultValue={product?.sale_price}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="on-sale">On Sale</Label>
+                                <div className="flex items-center space-x-2 pt-2">
+                                    <Checkbox id="on-sale" name="on-sale" defaultChecked={product?.on_sale} disabled={isLoading} />
+                                    <label
+                                        htmlFor="on-sale"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Active Sale
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <DialogFooter>

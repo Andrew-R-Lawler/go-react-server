@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -13,7 +13,9 @@ import { User, Lock } from "lucide-react"
 // Make sure to add VITE_STRIPE_PUBLISHABLE_KEY to your .env
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
+// Revert to standard function to ensure render stability
 function CheckoutForm({ total, userEmail, isPaymentUpdating }: { total: number, userEmail?: string, isPaymentUpdating: boolean }) {
+    console.log("Rendering CheckoutForm", { total, userEmail, isPaymentUpdating })
     const stripe = useStripe()
     const elements = useElements()
     const [message, setMessage] = useState<string | null>(null)
@@ -65,7 +67,7 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating }: { total: number, 
 
             <div className="space-y-4">
                 <h3 className="text-lg font-medium">Payment Details</h3>
-                <PaymentElement id="payment-element" />
+                <PaymentElement id="payment-element" options={{ layout: "tabs" }} />
             </div>
 
             <Button disabled={isLoading || !stripe || !elements || isPaymentUpdating} id="submit" className="w-full text-lg py-6">
@@ -98,6 +100,7 @@ function Checkout() {
     const total = cartTotal + shippingCost
 
     const [clientSecret, setClientSecret] = useState("")
+    console.log("Checkout State:", { itemsLength: items.length, clientSecret, total })
     const [initError, setInitError] = useState<string | null>(null)
     const [isPaymentUpdating, setIsPaymentUpdating] = useState(false)
 
@@ -239,8 +242,8 @@ function Checkout() {
                                         <div
                                             key={option.id}
                                             className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${selectedShipping === option.id
-                                                    ? 'border-primary ring-2 ring-primary'
-                                                    : 'border-border'
+                                                ? 'border-primary ring-2 ring-primary'
+                                                : 'border-border'
                                                 }`}
                                             onClick={() => setSelectedShipping(option.id)}
                                         >
@@ -268,26 +271,17 @@ function Checkout() {
                                     <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
                                 </div>
                             ) : clientSecret ? (
-                                <Elements key={clientSecret + (isDarkMode ? 'dark' : 'light')} options={{
+                                <Elements key={clientSecret} options={{
                                     clientSecret,
                                     appearance: {
                                         theme: isDarkMode ? 'night' : 'stripe',
                                         variables: {
-                                            colorPrimary: isDarkMode ? '#57534e' : '#0f172a',
-                                            colorBackground: isDarkMode ? '#09090b' : '#ffffff',
-                                            colorText: isDarkMode ? '#ffffff' : '#09090b',
-                                            colorDanger: '#ef4444',
+                                            colorPrimary: '#16a34a',
+                                            colorBackground: isDarkMode ? '#0a0a0a' : '#ffffff',
+                                            colorText: isDarkMode ? '#fafafa' : '#0a0a0a',
+                                            borderRadius: '0.5rem',
                                         },
-                                        rules: {
-                                            '.Input': {
-                                                borderColor: isDarkMode ? '#27272a' : '#e4e4e7',
-                                                backgroundColor: isDarkMode ? '#09090b' : '#ffffff',
-                                                color: isDarkMode ? '#ffffff' : '#09090b',
-                                            },
-                                            '.Label': {
-                                                color: isDarkMode ? '#a1a1aa' : '#71717a',
-                                            }
-                                        }
+                                        labels: 'floating',
                                     }
                                 }} stripe={stripePromise}>
                                     <div className="min-h-[300px]">

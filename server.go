@@ -70,6 +70,16 @@ func main() {
 		log.Println("Migration warning: failed to add featured column (might already exist):", err)
 	}
 
+	// Migrate: Add sale columns if not exist
+	_, err = db.Exec(`
+		ALTER TABLE products
+		ADD COLUMN IF NOT EXISTS on_sale BOOLEAN DEFAULT FALSE,
+		ADD COLUMN IF NOT EXISTS sale_price DECIMAL(10, 2) DEFAULT 0.00;
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add sale columns:", err)
+	}
+
 	// Create Orders Table
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS orders (
@@ -114,6 +124,7 @@ func main() {
 
 	shopGroup.GET("/products", func(c *gin.Context) { handlers.GetProducts(c, db) })
 	shopGroup.GET("/featured", func(c *gin.Context) { handlers.GetFeaturedProducts(c, db) })
+	shopGroup.GET("/new-arrivals", func(c *gin.Context) { handlers.GetNewArrivals(c, db) })
 
 	protectedGroup.GET("/user", func(c *gin.Context) { handlers.GetUser(c) })
 	protectedGroup.POST("/logout", func(c *gin.Context) { handlers.Logout(c) })
