@@ -140,8 +140,12 @@ func main() {
 
 	// Public Config
 	r.GET("/api/config", func(c *gin.Context) {
+		key := os.Getenv("VITE_STRIPE_PUBLISHABLE_KEY")
+		if key == "" {
+			log.Println("WARNING: VITE_STRIPE_PUBLISHABLE_KEY is empty")
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"stripePublishableKey": os.Getenv("VITE_STRIPE_PUBLISHABLE_KEY"),
+			"stripePublishableKey": key,
 		})
 	})
 
