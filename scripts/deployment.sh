@@ -14,6 +14,15 @@ print_error() {
     echo -e "\e[31m[ERROR]\e[0m $1"
 }
 
+# Ensure /dev/tty is available
+if [ ! -t 0 ] && [ ! -e /dev/tty ]; then
+    print_error "Interactive terminal required. Cannot read from /dev/tty."
+    exit 1
+fi
+
+# Open /dev/tty on FD 3
+exec 3< /dev/tty
+
 # Check for required tools
 for cmd in wget unzip; do
     if ! command -v $cmd &> /dev/null; then
@@ -34,9 +43,9 @@ ask_var() {
     
     echo -e "\n$prompt_text"
     if [ "$is_secret" = "true" ]; then
-        read -s input_val < /dev/tty
+        read -u 3 -s input_val
     else
-        read input_val < /dev/tty
+        read -u 3 input_val
     fi
     
     if [ -z "$input_val" ]; then
@@ -97,7 +106,7 @@ chmod +x "$BINARY_PATH"
 # --- Systemd Service Setup (Optional) ---
 
 echo -e "\nWould you like to set up a Systemd service to keep the app running in the background? (y/n)"
-read setup_service < /dev/tty
+read -u 3 setup_service
 
 if [[ "$setup_service" =~ ^[Yy]$ ]]; then
     SERVICE_NAME="go-react-server"
