@@ -5,13 +5,10 @@ import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/context/cart-context"
 import { Link } from "react-router-dom"
 import { useTheme } from "@/components/theme-provider"
-import { loadStripe } from "@stripe/stripe-js"
+import { loadStripe, Stripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, AddressElement, LinkAuthenticationElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import axios from "axios"
 import { User, Lock } from "lucide-react"
-
-// Make sure to add VITE_STRIPE_PUBLISHABLE_KEY to your .env
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 // Revert to standard function to ensure render stability
 function CheckoutForm({ total, userEmail, isPaymentUpdating }: { total: number, userEmail?: string, isPaymentUpdating: boolean }) {
@@ -110,6 +107,9 @@ function Checkout() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
+    // Stripe State
+    const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
+
     // Theme State
     const { theme } = useTheme()
     const [isDarkMode, setIsDarkMode] = useState(false)
@@ -119,6 +119,19 @@ function Checkout() {
             (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
         setIsDarkMode(isDark)
     }, [theme])
+
+    useEffect(() => {
+        // Fetch Stripe Key
+        const fetchConfig = async () => {
+            try {
+                const { data } = await axios.get("/api/config")
+                setStripePromise(loadStripe(data.stripePublishableKey))
+            } catch (error) {
+                console.error("Error fetching stripe config:", error)
+            }
+        }
+        fetchConfig()
+    }, [])
 
     useEffect(() => {
         // Build robust auth check
@@ -168,8 +181,8 @@ function Checkout() {
         )
     }
 
-    // Loading State for Auth Check
-    if (isCheckingAuth) {
+    // Loading State for Auth Check or Stripe Key
+    if (isCheckingAuth || !stripePromise) {
         return (
             <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -270,7 +283,7 @@ function Checkout() {
                                     <p>{initError}</p>
                                     <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
                                 </div>
-                            ) : clientSecret ? (
+                            ) : clientSecret && stripePromise ? (
                                 <Elements key={clientSecret} options={{
                                     clientSecret,
                                     appearance: {
