@@ -125,7 +125,15 @@ function Checkout() {
         const fetchConfig = async () => {
             try {
                 const { data } = await axios.get("/api/config")
-                setStripePromise(loadStripe(data.stripePublishableKey))
+                const key = data.stripePublishableKey
+                console.log("Stripe Config Fetched:", { key: key ? "PRESENT" : "MISSING", keyLength: key?.length })
+
+                if (key) {
+                    setStripePromise(loadStripe(key))
+                } else {
+                    console.error("Stripe key is missing from backend config")
+                    // Optionally set an error state here
+                }
             } catch (error) {
                 console.error("Error fetching stripe config:", error)
             }
