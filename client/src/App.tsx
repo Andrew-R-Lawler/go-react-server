@@ -176,7 +176,7 @@ function AppContent() {
                                 <ModeToggle />
                             </li>
                             <li>
-                                <span className="text-xs text-muted-foreground">v1.1.8</span>
+                                <span className="text-xs text-muted-foreground">v1.1.9</span>
                             </li>
                             <li>
                                 <CartTrigger />
