@@ -16,25 +16,30 @@ interface Product {
     sale_price: number
 }
 
-function Shop() {
+function NewArrivals() {
     const [products, setProducts] = useState<Product[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const { addToCart } = useCart()
 
-    const fetchProducts = async () => {
+    const fetchNewArrivals = async () => {
         setIsLoading(true)
         try {
-            const response = await axios.get('/api/shop/products')
-            setProducts(response.data)
+            const response = await axios.get('/api/shop/new-arrivals')
+            if (Array.isArray(response.data)) {
+                setProducts(response.data)
+            } else {
+                console.error("Received unexpected data format:", response.data);
+                setProducts([]);
+            }
         } catch (error) {
-            console.error('Error fetching products:', error)
+            console.error('Error fetching new arrivals:', error)
         } finally {
             setIsLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchProducts()
+        fetchNewArrivals()
     }, [])
 
     return (
@@ -42,9 +47,9 @@ function Shop() {
             {/* Hero Header */}
             <div className="bg-muted py-12 mb-8">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Our Collection</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">New Arrivals</h1>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Explore our premium selection of products, curated just for you.
+                        Discover the latest additions to our collection. The freshest styles, just for you.
                     </p>
                 </div>
             </div>
@@ -57,8 +62,8 @@ function Shop() {
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-16">
-                        <p className="text-xl text-muted-foreground">No products available at the moment.</p>
-                        <p className="text-sm text-muted-foreground mt-2">Please check back soon!</p>
+                        <p className="text-xl text-muted-foreground">No new arrivals yet.</p>
+                        <p className="text-sm text-muted-foreground mt-2">Check back soon for updates!</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -76,6 +81,9 @@ function Shop() {
                                             No Image
                                         </div>
                                     )}
+                                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                                        NEW
+                                    </div>
                                 </div>
                                 <CardHeader>
                                     <div className="flex justify-between items-start gap-2">
@@ -110,4 +118,4 @@ function Shop() {
     )
 }
 
-export default Shop
+export default NewArrivals

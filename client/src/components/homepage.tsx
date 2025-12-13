@@ -1,5 +1,6 @@
 import '../App.css'
 import { Link } from 'react-router-dom'
+import showcaseImg from '@/assets/home_showcase.png'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { useEffect, useState } from 'react'
@@ -47,7 +48,7 @@ function HomePage() {
             </section>
 
             {/* Featured Products Section */}
-            <section className="py-16 px-6 md:px-12 lg:px-24">
+            <section id="featured" className="py-16 px-6 md:px-12 lg:px-24">
                 <div className="mb-12 text-center">
                     <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Collection</h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -61,20 +62,33 @@ function HomePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {featuredProducts.length > 0 ? featuredProducts.map((product) => (
                             <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col">
-                                <div className="aspect-video w-full overflow-hidden bg-muted">
-                                    {product.image_url ? (
-                                        <img
-                                            src={product.image_url}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 dark:invert"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
-                                    )}
-                                </div>
+                                <Link to="/shop" className="block cursor-pointer">
+                                    <div className="aspect-video w-full overflow-hidden bg-muted">
+                                        {product.image_url ? (
+                                            <img
+                                                src={product.image_url}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 dark:invert"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                                        )}
+                                    </div>
+                                </Link>
                                 <CardHeader>
-                                    <CardTitle className="text-card-foreground text-xl line-clamp-1" title={product.name}>{product.name}</CardTitle>
-                                    <CardDescription className="text-muted-foreground">${product.price.toFixed(2)}</CardDescription>
+                                    <Link to="/shop" className="block cursor-pointer">
+                                        <CardTitle className="text-card-foreground text-xl line-clamp-1 hover:underline" title={product.name}>{product.name}</CardTitle>
+                                    </Link>
+                                    <CardDescription className="text-muted-foreground">
+                                        {product.on_sale ? (
+                                            <div className="flex gap-2 items-center">
+                                                <span className="text-green-500 font-bold">${product.sale_price.toFixed(2)}</span>
+                                                <span className="text-xs line-through text-muted-foreground">${product.price.toFixed(2)}</span>
+                                            </div>
+                                        ) : (
+                                            <span>${product.price.toFixed(2)}</span>
+                                        )}
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex-grow">
                                     <p className="text-muted-foreground text-sm line-clamp-3">
@@ -96,6 +110,40 @@ function HomePage() {
                         )}
                     </div>
                 )}
+            </section>
+
+            {/* Content Showcase Section */}
+            <section className="py-20 px-6 md:px-12 lg:px-24 bg-background border-t border-border transition-colors duration-300">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                        <h2 className="text-3xl md:text-4xl font-bold text-foreground">Discover Our Philosophy</h2>
+                        <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                            </p>
+                            <p>
+                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+                            </p>
+                            <p>
+                                Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+                            </p>
+                        </div>
+                        <div className="pt-4">
+                            <Link to="/about">
+                                <Button variant="outline" className="text-lg px-8 py-6">
+                                    Learn More
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="relative h-[400px] lg:h-[600px] rounded-2xl overflow-hidden shadow-xl border border-border">
+                        <img
+                            src={showcaseImg}
+                            alt="Workspace Showcase"
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                    </div>
+                </div>
             </section>
 
             {/* Features/Benefits Section (Optional Middle) */}
@@ -125,24 +173,24 @@ function HomePage() {
                     <div>
                         <h4 className="text-foreground font-bold mb-4">Shop</h4>
                         <ul className="space-y-2">
-                            <li>All Products</li>
-                            <li>Featured</li>
-                            <li>New Arrivals</li>
+                            <li><Link to="/shop" className="hover:text-foreground transition-colors">All Products</Link></li>
+                            <li><a href="#featured" className="hover:text-foreground transition-colors">Featured</a></li>
+                            <li><Link to="/new-arrivals" className="hover:text-foreground transition-colors">New Arrivals</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="text-foreground font-bold mb-4">Support</h4>
                         <ul className="space-y-2">
-                            <li>FAQ</li>
-                            <li>Shipping</li>
-                            <li>Returns</li>
+                            <li><Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
+                            <li><Link to="/returns" className="hover:text-foreground transition-colors">Returns</Link></li>
+                            <li><Link to="/shipping" className="hover:text-foreground transition-colors">Shipping</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="text-foreground font-bold mb-4">Company</h4>
                         <ul className="space-y-2">
                             <li><Link to="/about" className="hover:text-foreground transition-colors">About Us</Link></li>
-                            <li>Careers</li>
+                            <li><Link to="/careers" className="hover:text-foreground transition-colors">Careers</Link></li>
                             <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
                         </ul>
                     </div>

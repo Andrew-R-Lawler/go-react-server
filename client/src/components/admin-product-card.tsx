@@ -22,6 +22,8 @@ export interface Product {
     price: number
     stock_quantity: number
     featured: boolean
+    sale_price: number
+    on_sale: boolean
 }
 
 import { ProductDialog } from "./product-dialog"
