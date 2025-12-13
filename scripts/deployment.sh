@@ -34,9 +34,9 @@ ask_var() {
     
     echo -e "\n$prompt_text"
     if [ "$is_secret" = "true" ]; then
-        read -s input_val
+        read -s input_val < /dev/tty
     else
-        read input_val
+        read input_val < /dev/tty
     fi
     
     if [ -z "$input_val" ]; then
@@ -97,7 +97,7 @@ chmod +x "$BINARY_PATH"
 # --- Systemd Service Setup (Optional) ---
 
 echo -e "\nWould you like to set up a Systemd service to keep the app running in the background? (y/n)"
-read setup_service
+read setup_service < /dev/tty
 
 if [[ "$setup_service" =~ ^[Yy]$ ]]; then
     SERVICE_NAME="go-react-server"
