@@ -74,6 +74,7 @@ if [ -f "$ENV_FILE" ]; then
         ask_var "SMTP_USER" "Enter SMTP_USER (Email):" "false"
         ask_var "SMTP_PASS" "Enter SMTP_PASS (Email Password):" "true"
         ask_var "STRIPE_SECRET_KEY" "Enter STRIPE_SECRET_KEY:" "true"
+        ask_var "VITE_STRIPE_PUBLISHABLE_KEY" "Enter VITE_STRIPE_PUBLISHABLE_KEY:" "false"
         
         print_success ".env file created successfully."
     fi
@@ -90,6 +91,7 @@ else
     ask_var "SMTP_USER" "Enter SMTP_USER (Email):" "false"
     ask_var "SMTP_PASS" "Enter SMTP_PASS (Email Password):" "true"
     ask_var "STRIPE_SECRET_KEY" "Enter STRIPE_SECRET_KEY:" "true"
+    ask_var "VITE_STRIPE_PUBLISHABLE_KEY" "Enter VITE_STRIPE_PUBLISHABLE_KEY:" "false"
     
     print_success ".env file created successfully."
 fi
