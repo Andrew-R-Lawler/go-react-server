@@ -171,3 +171,90 @@ func TestGetNewArrivals(t *testing.T) {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
+
+func TestAddProduct_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)).
+		WithArgs("New Product", "Description", "http://image.com", 10.0, 50, false, false, 0.0).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.POST("/api/products", func(c *gin.Context) {
+		// Mock Admin Middleware
+		c.Set("admin", true)
+		handlers.AddProduct(c, db)
+	})
+
+	payload := `{"name":"New Product", "description":"Description", "image_url":"http://image.com", "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0}`
+	req, _ := http.NewRequest(http.MethodPost, "/api/products", strings.NewReader(payload))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestDeleteProduct_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM products WHERE id = $1`)).
+		WithArgs("1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.DELETE("/api/products/:id", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.DeleteProduct(c, db)
+	})
+
+	req, _ := http.NewRequest(http.MethodDelete, "/api/products/1", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestEditProduct_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "products" SET name = $1, description = $2, image_url = $3, price = $4, stock_quantity = $5, featured = $6, on_sale = $7, sale_price = $8 WHERE id = $9`)).
+		WithArgs("Updated Product", "Desc", "img", 20.0, 10, true, true, 15.0, "1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.PUT("/api/products/:id", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.EditProduct(c, db)
+	})
+
+	payload := `{"name":"Updated Product", "description":"Desc", "image_url":"img", "price":20.0, "stock_quantity":10, "featured":true, "on_sale":true, "sale_price":15.0}`
+	req, _ := http.NewRequest(http.MethodPut, "/api/products/1", strings.NewReader(payload))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
