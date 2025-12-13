@@ -42,11 +42,8 @@ ask_var() {
     local is_secret=$3
     
     echo -e "\n$prompt_text"
-    if [ "$is_secret" = "true" ]; then
-        read -u 3 -s input_val
-    else
-        read -u 3 input_val
-    fi
+    echo -e "\n$prompt_text"
+    read -u 3 input_val
     
     if [ -z "$input_val" ]; then
         print_error "$var_name cannot be empty."
@@ -57,25 +54,46 @@ ask_var() {
 
 ENV_FILE=".env"
 if [ -f "$ENV_FILE" ]; then
-    print_info "Found existing .env file. Backing it up to .env.bak"
-    mv "$ENV_FILE" ".env.bak"
+    print_info "Found existing .env file."
+    echo -e "Do you want to use the existing .env file? (y/n)"
+    read -u 3 use_existing
+    
+    if [[ "$use_existing" =~ ^[Yy]$ ]]; then
+        print_success "Using existing .env file."
+    else
+        print_info "Backing up existing .env to .env.bak"
+        mv "$ENV_FILE" ".env.bak"
+        touch "$ENV_FILE"
+        print_info "Configuring Environment Variables:"
+        
+        ask_var "PORT" "Enter the PORT to run the server on (e.g., 8080):" "false"
+        ask_var "DB_HOST" "Enter DB_HOST (e.g., localhost):" "false"
+        ask_var "DB_NAME" "Enter DB_NAME:" "false"
+        ask_var "DB_USER" "Enter DB_USER:" "false"
+        ask_var "DB_PASSWORD" "Enter DB_PASSWORD:" "true"
+        ask_var "JWT_SECRET" "Enter JWT_SECRET (for session signing):" "true"
+        ask_var "SMTP_USER" "Enter SMTP_USER (Email):" "false"
+        ask_var "SMTP_PASS" "Enter SMTP_PASS (Email Password):" "true"
+        ask_var "STRIPE_SECRET_KEY" "Enter STRIPE_SECRET_KEY:" "true"
+        
+        print_success ".env file created successfully."
+    fi
+else
+    touch "$ENV_FILE"
+    print_info "Configuring Environment Variables:"
+    
+    ask_var "PORT" "Enter the PORT to run the server on (e.g., 8080):" "false"
+    ask_var "DB_HOST" "Enter DB_HOST (e.g., localhost):" "false"
+    ask_var "DB_NAME" "Enter DB_NAME:" "false"
+    ask_var "DB_USER" "Enter DB_USER:" "false"
+    ask_var "DB_PASSWORD" "Enter DB_PASSWORD:" "true"
+    ask_var "JWT_SECRET" "Enter JWT_SECRET (for session signing):" "true"
+    ask_var "SMTP_USER" "Enter SMTP_USER (Email):" "false"
+    ask_var "SMTP_PASS" "Enter SMTP_PASS (Email Password):" "true"
+    ask_var "STRIPE_SECRET_KEY" "Enter STRIPE_SECRET_KEY:" "true"
+    
+    print_success ".env file created successfully."
 fi
-
-touch "$ENV_FILE"
-
-print_info "Configuring Environment Variables:"
-
-ask_var "PORT" "Enter the PORT to run the server on (e.g., 8080):" "false"
-ask_var "DB_HOST" "Enter DB_HOST (e.g., localhost):" "false"
-ask_var "DB_NAME" "Enter DB_NAME:" "false"
-ask_var "DB_USER" "Enter DB_USER:" "false"
-ask_var "DB_PASSWORD" "Enter DB_PASSWORD:" "true"
-ask_var "JWT_SECRET" "Enter JWT_SECRET (for session signing):" "true"
-ask_var "SMTP_USER" "Enter SMTP_USER (Email):" "false"
-ask_var "SMTP_PASS" "Enter SMTP_PASS (Email Password):" "true"
-ask_var "STRIPE_SECRET_KEY" "Enter STRIPE_SECRET_KEY:" "true"
-
-print_success ".env file created successfully."
 
 # --- Application Download ---
 
