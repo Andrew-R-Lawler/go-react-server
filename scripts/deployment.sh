@@ -42,11 +42,8 @@ ask_var() {
     local is_secret=$3
     
     echo -e "\n$prompt_text"
-    if [ "$is_secret" = "true" ]; then
-        read -u 3 -s input_val
-    else
-        read -u 3 input_val
-    fi
+    echo -e "\n$prompt_text"
+    read -u 3 input_val
     
     if [ -z "$input_val" ]; then
         print_error "$var_name cannot be empty."
