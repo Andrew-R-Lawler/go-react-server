@@ -91,11 +91,21 @@ func main() {
 			items JSONB NOT NULL,
 			shipping_method TEXT,
 			receipt_email TEXT,
+			tracking_number TEXT,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 	`)
 	if err != nil {
 		log.Fatal("Failed to create orders table:", err)
+	}
+
+	// Migrate: Add tracking_number column if not exists
+	_, err = db.Exec(`
+		ALTER TABLE orders
+		ADD COLUMN IF NOT EXISTS tracking_number TEXT;
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add tracking_number column:", err)
 	}
 
 	r := gin.Default()
@@ -132,6 +142,8 @@ func main() {
 	protectedGroup.DELETE("/deleteproduct/:id", func(c *gin.Context) { handlers.DeleteProduct(c, db) })
 	protectedGroup.PUT("/editproduct/:id", func(c *gin.Context) { handlers.EditProduct(c, db) })
 	protectedGroup.GET("/orders", func(c *gin.Context) { handlers.GetOrders(c, db) })
+	protectedGroup.GET("/admin/orders", func(c *gin.Context) { handlers.GetAllOrders(c, db) })
+	protectedGroup.PUT("/admin/orders/:id/status", func(c *gin.Context) { handlers.UpdateOrderStatus(c, db) })
 
 	// Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
