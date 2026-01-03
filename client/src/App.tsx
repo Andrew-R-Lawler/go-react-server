@@ -26,6 +26,7 @@ import Shipping from './components/shipping'
 import Returns from './components/returns'
 import NewArrivals from './components/new-arrivals'
 import Careers from './components/careers'
+import OrderFulfillment from './components/order-fulfillment'
 import logo from '@/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
@@ -155,6 +156,13 @@ function AppContent() {
                                                         </Link>
                                                     </DropdownMenuItem>
                                                 )}
+                                                {user.admin && (
+                                                    <DropdownMenuItem asChild>
+                                                        <Link to="/order-fulfillment" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                                            Order Fulfillment
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                )}
                                                 <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/10">
                                                     Logout
                                                 </DropdownMenuItem>
@@ -198,6 +206,7 @@ function AppContent() {
                         <Route path="/contact" element={<Contact />} />
                         <Route path='/checkout' element={<Checkout />} />
                         <Route path='/manage-products' element={isAdmin() ? <ManageProducts /> : <Forbidden />} />
+                        <Route path='/order-fulfillment' element={isAdmin() ? <OrderFulfillment /> : <Forbidden />} />
                         <Route path='/orders' element={<Orders />} />
                         <Route path="/faq" element={<FAQ />} />
                         <Route path="/shipping" element={<Shipping />} />

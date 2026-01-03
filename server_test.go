@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/andrew-r-lawler/go-react-server/handlers"
@@ -257,4 +258,85 @@ func TestEditProduct_Admin(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
+}
+
+func TestGetAllOrders_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// Use time.Time for created_at to avoid scan errors
+	createdAt := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+	rows := sqlmock.NewRows([]string{"id", "amount", "status", "items", "shipping_method", "created_at", "receipt_email", "tracking_number"}).
+		AddRow(1, 1000, "paid", []byte("[]"), "standard", createdAt, "user@example.com", "TRACK123")
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, amount, status, items, shipping_method, created_at, receipt_email, COALESCE(tracking_number, '') FROM orders ORDER BY created_at DESC`)).
+		WillReturnRows(rows)
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.GET("/api/admin/orders", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.GetAllOrders(c, db)
+	})
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/admin/orders", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "user@example.com")
+	assert.Contains(t, w.Body.String(), "TRACK123")
+}
+
+func TestGetAllOrders_NonAdmin(t *testing.T) {
+	db, _, _ := sqlmock.New()
+	defer db.Close()
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.GET("/api/admin/orders", func(c *gin.Context) {
+		// No admin claim or admin=false
+		handlers.GetAllOrders(c, db)
+	})
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/admin/orders", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func TestUpdateOrderStatus_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// Expect receipt email lookup
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT receipt_email FROM orders WHERE id = $1`)).
+		WithArgs("1").
+		WillReturnRows(sqlmock.NewRows([]string{"receipt_email"}).AddRow("customer@example.com"))
+
+	// Expect update with tracking number
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE orders SET status = $1, tracking_number = $2 WHERE id = $3`)).
+		WithArgs("shipped", "TRACK123", "1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.PUT("/api/admin/orders/:id/status", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.UpdateOrderStatus(c, db)
+	})
+
+	payload := `{"status": "shipped", "tracking_number": "TRACK123"}`
+	req, _ := http.NewRequest(http.MethodPut, "/api/admin/orders/1/status", strings.NewReader(payload))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
 }

@@ -1,0 +1,10 @@
+=== RUN   TestGetAllOrders_Admin
+[GIN] 2026/01/03 - 16:17:20 | 200 |       510.6µs |                 | GET      "/api/admin/orders"
+    server_test.go:287: 
+        	Error Trace:	F:/dev/go-react-server/server_test.go:287
+        	Error:      	"[]" does not contain "user@example.com"
+        	Test:       	TestGetAllOrders_Admin
+--- FAIL: TestGetAllOrders_Admin (0.00s)
+FAIL
+exit status 1
+FAIL	github.com/andrew-r-lawler/go-react-server	0.449s

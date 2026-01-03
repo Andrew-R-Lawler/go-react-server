@@ -150,6 +150,68 @@ func SendResetEmail(token string, email string) error {
 	return nil
 }
 
+func SendShippingEmail(email string, orderID int, trackingNumber string) error {
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
+
+	if smtpUser == "" || smtpPass == "" {
+		return fmt.Errorf("SMTP config missing")
+	}
+
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		appURL = "http://localhost:3000"
+	}
+
+	trackingHTML := ""
+	if trackingNumber != "" {
+		trackingHTML = fmt.Sprintf(`
+			<p style="font-size: 16px; color: #e7e5e4;">Tracking Number: <a href="https://tools.usps.com/go/TrackConfirmAction?tLabels=%s" style="color: #3b82f6; text-decoration: none;"><strong>%s</strong></a></p>
+			<p style="font-size: 14px; color: #a8a29e;">You can track your package via USPS.</p>
+		`, trackingNumber, trackingNumber)
+	}
+
+	body := fmt.Sprintf(`
+		<html>
+		<body style="background-color: #1c1917; color: #e7e5e4; font-family: 'Courier New', Courier, monospace; padding: 20px;">
+			<div style="max-width: 600px; margin: 0 auto; background-color: #292524; padding: 24px; border-radius: 8px; border: 1px solid #44403c;">
+				<h2 style="color: #ffffff; border-bottom: 2px solid #57534e; padding-bottom: 12px;">Order Shipped!</h2>
+				<p style="font-size: 16px;">Good news! Your order #%d has been shipped.</p>
+				%s
+				<div style="text-align: center; margin-top: 32px;">
+					<a href="%s/orders" style="background-color: #57534e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">View Order</a>
+				</div>
+				<p style="text-align: center; margin-top: 32px; font-size: 12px; color: #57534e;">
+					&copy; 2025 Go React Server. All rights reserved.
+				</p>
+			</div>
+		</body>
+		</html>
+	`, orderID, trackingHTML, appURL)
+
+	subject := fmt.Sprintf("Order #%d Confirmation", orderID)
+	to := email
+
+	m := mail.NewMsg()
+	if err := m.From(smtpUser); err != nil {
+		return fmt.Errorf("failed to set From address: %s", err)
+	}
+	if err := m.To(to); err != nil {
+		return fmt.Errorf("failed to set To address: %s", err)
+	}
+	m.Subject(subject)
+	m.SetBodyString(mail.TypeTextHTML, body)
+	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
+	if err != nil {
+		return fmt.Errorf("failed to create mail client: %s", err)
+	}
+	if err := client.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send mail: %s", err)
+	}
+	return nil
+}
+
 func generateVerificationToken() string {
 	bytes := make([]byte, 32)
 	_, err := rand.Read(bytes)
