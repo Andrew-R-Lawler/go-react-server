@@ -9,8 +9,6 @@ import {
 import { ModeToggle } from "@/components/mode-toggle"
 import { useCart } from "@/context/cart-context"
 import { ShoppingBag } from "lucide-react"
-import logo from '@/assets/path6.svg'
-
 interface HeaderProps {
     user: {
         id: number;
@@ -29,13 +27,14 @@ export function Header({ user, signOut }: HeaderProps) {
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src={logo} width="30" height="30" alt="Logo" className="hover:opacity-80 transition-opacity invert dark:invert-0" />
+                        <img src="/assets/path6.svg" width="30" height="30" alt="Logo" className="hover:opacity-80 transition-opacity invert dark:invert-0" />
                     </Link>
-                </li>
+                </li >
                 <li>
                     <Link to="/shop" className='hover:text-muted-foreground transition-colors'>Shop</Link>
                 </li>
-                {user &&
+                {
+                    user &&
                     <>
                         <li>
                             <DropdownMenu>
@@ -74,7 +73,8 @@ export function Header({ user, signOut }: HeaderProps) {
                         </li>
                     </>
                 }
-                {!user &&
+                {
+                    !user &&
                     <>
                         <li>
                             <Button variant="outline" className="bg-transparent border-input hover:bg-accent hover:text-accent-foreground transition-colors">
@@ -98,7 +98,7 @@ export function Header({ user, signOut }: HeaderProps) {
                         <span className="sr-only">Open cart</span>
                     </Button>
                 </li>
-            </ul>
-        </nav>
+            </ul >
+        </nav >
     )
 }

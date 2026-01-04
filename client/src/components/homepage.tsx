@@ -1,6 +1,6 @@
 import '../App.css'
 import { Link } from 'react-router-dom'
-import showcaseImg from '@/assets/home_showcase.png'
+
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { useEffect, useState } from 'react'
@@ -62,14 +62,14 @@ function HomePage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {featuredProducts.length > 0 ? featuredProducts.map((product) => (
-                            <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col">
+                            <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col pt-0">
                                 <Link to={`/product/${product.id}`} className="block cursor-pointer">
                                     <div className="aspect-video w-full overflow-hidden bg-muted">
                                         {product.image_url ? (
                                             <img
                                                 src={product.image_url}
                                                 alt={product.name}
-                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 dark:invert"
+                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                                             />
                                         ) : (
                                             <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
@@ -139,7 +139,7 @@ function HomePage() {
                     </div>
                     <div className="relative h-[400px] lg:h-[600px] rounded-2xl overflow-hidden shadow-xl border border-border">
                         <img
-                            src={showcaseImg}
+                            src="/assets/home_showcase.png"
                             alt="Workspace Showcase"
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out"
                         />
