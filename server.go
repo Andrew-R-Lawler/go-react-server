@@ -80,6 +80,15 @@ func main() {
 		log.Println("Migration warning: failed to add sale columns:", err)
 	}
 
+	// Migrate: Add long_description column if not exists
+	_, err = db.Exec(`
+		ALTER TABLE products
+		ADD COLUMN IF NOT EXISTS long_description TEXT DEFAULT '';
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add long_description column:", err)
+	}
+
 	// Create Orders Table
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS orders (
@@ -135,6 +144,7 @@ func main() {
 	shopGroup.GET("/products", func(c *gin.Context) { handlers.GetProducts(c, db) })
 	shopGroup.GET("/featured", func(c *gin.Context) { handlers.GetFeaturedProducts(c, db) })
 	shopGroup.GET("/new-arrivals", func(c *gin.Context) { handlers.GetNewArrivals(c, db) })
+	shopGroup.GET("/product/:id", func(c *gin.Context) { handlers.GetProduct(c, db) })
 
 	protectedGroup.GET("/user", func(c *gin.Context) { handlers.GetUser(c) })
 	protectedGroup.POST("/logout", func(c *gin.Context) { handlers.Logout(c) })

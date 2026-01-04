@@ -127,13 +127,25 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Short Description</Label>
                             <Textarea
                                 id="description"
                                 name="description"
-                                placeholder="Product description..."
+                                placeholder="Brief summary for product card..."
                                 defaultValue={product?.description}
                                 required
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="long-description">Long Description</Label>
+                            <Textarea
+                                id="long-description"
+                                name="long-description"
+                                placeholder="Detailed description for product page..."
+                                defaultValue={product?.long_description}
+                                className="min-h-[100px]"
                                 disabled={isLoading}
                             />
                         </div>

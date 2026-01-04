@@ -14,6 +14,7 @@ interface Product {
     stock_quantity: number
     on_sale: boolean
     sale_price: number
+    long_description?: string
 }
 
 function NewArrivals() {
