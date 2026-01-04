@@ -36,14 +36,20 @@ describe('CartContext', () => {
 
     it('adds an item to the cart', async () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
         });
 
         expect(result.current.items).toHaveLength(1);
-        expect(result.current.items[0]).toMatchObject({ ...product, quantity: 1 });
+        expect(result.current.items[0]).toMatchObject({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image_url: product.images[0],
+            quantity: 1
+        });
         expect(result.current.cartCount).toBe(1);
         expect(result.current.cartTotal).toBe(10);
         expect(result.current.isOpen).toBe(true);
@@ -51,7 +57,7 @@ describe('CartContext', () => {
 
     it('increments quantity when adding duplicate item', () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
@@ -68,7 +74,7 @@ describe('CartContext', () => {
 
     it('updates item quantity', () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
@@ -85,7 +91,7 @@ describe('CartContext', () => {
 
     it('removes item from cart', () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
@@ -101,7 +107,7 @@ describe('CartContext', () => {
 
     it('clears the cart', () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
@@ -117,7 +123,7 @@ describe('CartContext', () => {
 
     it('persists cart to localStorage', () => {
         const { result } = renderHook(() => useCart(), { wrapper: CartProvider });
-        const product = { id: 1, name: 'Test Product', price: 10, image_url: 'http://example.com/img.jpg' };
+        const product = { id: 1, name: 'Test Product', price: 10, images: ['http://example.com/img.jpg'] };
 
         act(() => {
             result.current.addToCart(product);
@@ -135,7 +141,7 @@ describe('CartContext', () => {
             price: 100,
             on_sale: true,
             sale_price: 80,
-            image_url: 'http://example.com/img.jpg'
+            images: ['http://example.com/img.jpg']
         };
 
         act(() => {
