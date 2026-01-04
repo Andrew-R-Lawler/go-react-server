@@ -38,8 +38,7 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
             if (product) {
                 if (product.images && product.images.length > 0) {
                     setImageUrls(product.images)
-                } else if (product.image_url) {
-                    setImageUrls([product.image_url])
+
                 } else {
                     setImageUrls([''])
                 }

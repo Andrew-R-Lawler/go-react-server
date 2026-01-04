@@ -39,7 +39,7 @@ function ManageProducts() {
             name: formData.get('name'),
             description: formData.get('description'),
             images: validImages,
-            image_url: validImages.length > 0 ? validImages[0] : '',
+
             price: Number(formData.get('price')),
             stock_quantity: Number(formData.get('stock-quantity')),
             featured: formData.get('featured') === 'on',
