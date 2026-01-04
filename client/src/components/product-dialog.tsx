@@ -114,12 +114,12 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="image-url">Image URL</Label>
+                            <Label htmlFor="image-url">Image URL or Path</Label>
                             <Input
                                 id="image-url"
                                 name="image-url"
-                                type="url"
-                                placeholder="https://example.com/image.jpg"
+                                type="text"
+                                placeholder="https://example.com/image.jpg or /assets/image.png"
                                 defaultValue={product?.image_url}
                                 required
                                 disabled={isLoading}

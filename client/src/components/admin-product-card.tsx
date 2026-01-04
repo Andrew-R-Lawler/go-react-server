@@ -39,7 +39,7 @@ interface AdminProductCardProps {
 
 export default function AdminProductCard({ product, handleDeleteProduct, handleSaveProduct, error }: AdminProductCardProps) {
     return (
-        <Card className="flex flex-col h-full bg-card border-border overflow-hidden group hover:border-accent transition-colors duration-200">
+        <Card className="flex flex-col h-full bg-card border-border overflow-hidden group hover:border-accent transition-colors duration-200 pt-0 gap-2">
             <div className="aspect-video w-full overflow-hidden bg-muted relative">
                 {product.image_url ? (
                     <img

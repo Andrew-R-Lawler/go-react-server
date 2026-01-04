@@ -69,7 +69,7 @@ function NewArrivals() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {products.map((product) => (
-                            <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group">
+                            <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0">
                                 <div className="aspect-square relative overflow-hidden bg-muted">
                                     {product.image_url ? (
                                         <img
