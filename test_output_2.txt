@@ -1,5 +1,0 @@
-=== RUN   TestGetAllOrders_Admin
-[GIN] 2026/01/03 - 16:17:53 | 200 |       515.4µs |                 | GET      "/api/admin/orders"
---- PASS: TestGetAllOrders_Admin (0.00s)
-PASS
-ok  	github.com/andrew-r-lawler/go-react-server	0.445s
