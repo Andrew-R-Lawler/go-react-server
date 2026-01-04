@@ -22,7 +22,7 @@ A modern, full-stack e-commerce application built with **Go** (Golang) and **Rea
 
 ## ✨ Features
 
-- **Storefront**: Browse products, view details, "New Arrivals", and "Featured" collections.
+- **Storefront**: Browse products, view details, "New Arrivals", "Featured" collections, and informational pages (FAQ, Shipping, Returns).
 - **Shopping Cart**: Add/remove items, adjust quantities.
 - **Checkout**: Integrated Stripe payment flow.
 - **User Accounts**:
@@ -131,6 +131,21 @@ Ensure you have the following installed:
 - `PUT /api/protected/editproduct/:id` - Edit Product (Admin)
 - `DELETE /api/protected/deleteproduct/:id` - Delete Product (Admin)
 - `GET /api/protected/orders` - View user orders
+
+## 🧪 Testing
+
+### Backend Tests
+Run the Go test suite (includes integration tests for handlers and API endpoints):
+```bash
+go test ./...
+```
+
+### Frontend Tests
+Run the Vitest suite for React components and utilities:
+```bash
+cd client
+npm run test
+```
 
 ## ☁️ Deployment
 

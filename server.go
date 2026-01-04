@@ -61,32 +61,53 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Migrate: Add featured column if not exists
+	// Create Users Table
 	_, err = db.Exec(`
-		ALTER TABLE products 
-		ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;
+		CREATE TABLE IF NOT EXISTS users (
+			id SERIAL PRIMARY KEY,
+			email TEXT UNIQUE NOT NULL,
+			password TEXT NOT NULL,
+			verified BOOLEAN DEFAULT FALSE,
+			admin BOOLEAN DEFAULT FALSE,
+			verification_token TEXT,
+			token_expiration TIMESTAMP
+		);
 	`)
 	if err != nil {
-		log.Println("Migration warning: failed to add featured column (might already exist):", err)
+		log.Fatal("Failed to create users table:", err)
 	}
 
-	// Migrate: Add sale columns if not exist
+	// Create Products Table
 	_, err = db.Exec(`
-		ALTER TABLE products
-		ADD COLUMN IF NOT EXISTS on_sale BOOLEAN DEFAULT FALSE,
-		ADD COLUMN IF NOT EXISTS sale_price DECIMAL(10, 2) DEFAULT 0.00;
+		CREATE TABLE IF NOT EXISTS products (
+			id SERIAL PRIMARY KEY,
+			name TEXT NOT NULL,
+			description TEXT,
+			image_url TEXT,
+			images TEXT[],
+			price DECIMAL(10, 2) NOT NULL,
+			stock_quantity INTEGER NOT NULL,
+			featured BOOLEAN DEFAULT FALSE,
+			on_sale BOOLEAN DEFAULT FALSE,
+			sale_price DECIMAL(10, 2) DEFAULT 0.00,
+			long_description TEXT DEFAULT ''
+		);
 	`)
 	if err != nil {
-		log.Println("Migration warning: failed to add sale columns:", err)
+		log.Fatal("Failed to create products table:", err)
 	}
 
-	// Migrate: Add long_description column if not exists
+	// Create Password Reset Table
 	_, err = db.Exec(`
-		ALTER TABLE products
-		ADD COLUMN IF NOT EXISTS long_description TEXT DEFAULT '';
+		CREATE TABLE IF NOT EXISTS password_reset (
+			user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			token TEXT NOT NULL,
+			expires_at TIMESTAMP NOT NULL,
+			used BOOLEAN DEFAULT FALSE
+		);
 	`)
 	if err != nil {
-		log.Println("Migration warning: failed to add long_description column:", err)
+		log.Fatal("Failed to create password_reset table:", err)
 	}
 
 	// Create Orders Table
@@ -99,44 +120,13 @@ func main() {
 			status TEXT NOT NULL,
 			items JSONB NOT NULL,
 			shipping_method TEXT,
-			receipt_email TEXT,
+			receipt_email TEXT NOT NULL,
 			tracking_number TEXT,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 	`)
 	if err != nil {
 		log.Fatal("Failed to create orders table:", err)
-	}
-
-	// Migrate: Add tracking_number column if not exists
-	_, err = db.Exec(`
-		ALTER TABLE orders
-		ADD COLUMN IF NOT EXISTS tracking_number TEXT;
-	`)
-	if err != nil {
-		log.Println("Migration warning: failed to add tracking_number column:", err)
-	}
-
-	// Migrate: Update product images to local assets (idempotent-ish check)
-	// We'll just run this update every time startup, it's fast enough for small DBs
-	_, err = db.Exec(`
-		UPDATE products SET image_url = '/assets/home_showcase.png' WHERE image_url LIKE 'http%' OR image_url NOT LIKE '/assets/%';
-	`)
-	if err != nil {
-		log.Println("Migration warning: failed to update product images:", err)
-	}
-
-	// Migrate: Add images column and backfill
-	_, err = db.Exec(`
-		ALTER TABLE products 
-		ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
-		
-		UPDATE products 
-		SET images = ARRAY[image_url] 
-		WHERE (images IS NULL OR array_length(images, 1) IS NULL) AND image_url IS NOT NULL AND image_url != '';
-	`)
-	if err != nil {
-		log.Println("Migration warning: failed to add/populate images column:", err)
 	}
 
 	r := gin.Default()
