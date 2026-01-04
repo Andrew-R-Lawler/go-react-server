@@ -2,7 +2,8 @@ import { useEffect, useState, useContext } from 'react';
 import { CookieConsentContext, CookieConsentProvider } from '@/context/cookie-consent-context';
 import { CookieConsent } from '@/components/CookieConsent';
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { Header } from './components/header'
 // import Todo from './components/todo'
 import Login from './components/login'
 import HomePage from './components/homepage'
@@ -28,21 +29,12 @@ import NewArrivals from './components/new-arrivals'
 import Careers from './components/careers'
 import OrderFulfillment from './components/order-fulfillment'
 import ProductDetails from './components/product-details'
-import logo from '@/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
-import { Button } from './components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { ThemeProvider } from "@/components/theme-provider"
-import { ModeToggle } from "@/components/mode-toggle"
-import { CartProvider, useCart } from "@/context/cart-context"
+import { CartProvider } from "@/context/cart-context"
 import { CartSheet } from "@/components/cart-sheet"
-import { ShoppingBag } from "lucide-react"
+
 
 function App() {
     return (
@@ -104,94 +96,15 @@ function AppContent() {
         getUser()
     }, [])
 
-    const CartTrigger = () => {
-        const { setIsOpen, cartCount } = useCart()
-        return (
-            <Button variant="ghost" size="icon" className="relative text-foreground" onClick={() => setIsOpen(true)}>
-                <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
-                {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                        {cartCount}
-                    </span>
-                )}
-                <span className="sr-only">Open cart</span>
-            </Button>
-        )
-    }
 
     return (
         <CartProvider>
             <Router>
                 <div className='min-h-screen bg-background text-foreground transition-colors duration-300'>
-                    <nav className='sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border-b border-border shadow-sm transition-colors duration-300'>
-                        <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
-                            <li className='mr-auto'>
-                                <Link to="/">
-                                    <img src={logo} width="30" height="30" alt="Logo" className="hover:opacity-80 transition-opacity invert dark:invert-0" />
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/shop" className='hover:text-muted-foreground transition-colors'>Shop</Link>
-                            </li>
-                            {user &&
-                                <>
-                                    <li>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost">
-                                                    Account
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="bg-card border-border">
-                                                {user.verified && (
-                                                    <DropdownMenuItem asChild>
-                                                        <Link to="/orders" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
-                                                            My Orders
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                )}
-                                                {user.admin && (
-                                                    <DropdownMenuItem asChild>
-                                                        <Link to="/manage-products" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
-                                                            Manage Products
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                )}
-                                                {user.admin && (
-                                                    <DropdownMenuItem asChild>
-                                                        <Link to="/order-fulfillment" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
-                                                            Order Fulfillment
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/10">
-                                                    Logout
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </li>
-                                </>
-                            }
-                            {!user &&
-                                <>
-                                    <li>
-                                        <Button variant="outline" className="bg-transparent border-input hover:bg-accent hover:text-accent-foreground transition-colors">
-                                            <Link to="/login">Login</Link>
-                                        </Button>
-                                    </li>
-                                </>
-                            }
-                            <li>
-                                <ModeToggle />
-                            </li>
-
-                            <li>
-                                <CartTrigger />
-                            </li>
-                        </ul>
-                    </nav>
+                    <Header user={user} signOut={signOut} />
                     <CartSheet />
                     <Routes>
+                        {/* ... existing routes */}
                         <Route path="/" element={<HomePage />} />
                         {/* <Route path="/todo" element={isAdmin() ? <Todo /> : <Forbidden />} /> */}
                         <Route path="/login" element={<Login />} />
