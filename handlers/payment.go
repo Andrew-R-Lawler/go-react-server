@@ -15,8 +15,9 @@ import (
 )
 
 type PaymentItem struct {
-	ID       int `json:"id"`
-	Quantity int `json:"quantity"`
+	ID       int    `json:"id"`
+	Quantity int    `json:"quantity"`
+	Name     string `json:"name,omitempty"`
 }
 
 type EmailItem struct {
