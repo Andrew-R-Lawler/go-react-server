@@ -14,18 +14,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export interface Product {
-    id: number
-    name: string
-    description: string
-    image_url: string
-    price: number
-    stock_quantity: number
-    featured: boolean
-    sale_price: number
-    on_sale: boolean
-    long_description?: string
-}
+import { Product } from "@/types"
 
 import { ProductDialog } from "./product-dialog"
 import { Star } from "lucide-react"
@@ -38,12 +27,14 @@ interface AdminProductCardProps {
 }
 
 export default function AdminProductCard({ product, handleDeleteProduct, handleSaveProduct, error }: AdminProductCardProps) {
+    const mainImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+
     return (
         <Card className="flex flex-col h-full bg-card border-border overflow-hidden group hover:border-accent transition-colors duration-200 pt-0 gap-2">
             <div className="aspect-video w-full overflow-hidden bg-muted relative">
-                {product.image_url ? (
+                {mainImage ? (
                     <img
-                        src={product.image_url}
+                        src={mainImage}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />

@@ -13,11 +13,11 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus, Minus, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { Product } from "./admin-product-card"
+import { Product } from "@/types"
 
 interface ProductDialogProps {
     handleSaveProduct: (event: React.FormEvent<HTMLFormElement>, product?: Product) => Promise<boolean>
@@ -30,6 +30,38 @@ interface ProductDialogProps {
 export function ProductDialog({ handleSaveProduct, isLoading = false, error, product, trigger }: ProductDialogProps) {
     const [open, setOpen] = useState(false)
     const [localError, setLocalError] = useState<string | null>(null)
+    const [imageUrls, setImageUrls] = useState<string[]>([''])
+
+    // Initialize images when product changes or dialog opens
+    useEffect(() => {
+        if (open) {
+            if (product) {
+                if (product.images && product.images.length > 0) {
+                    setImageUrls(product.images)
+                } else if (product.image_url) {
+                    setImageUrls([product.image_url])
+                } else {
+                    setImageUrls([''])
+                }
+            } else {
+                setImageUrls([''])
+            }
+        }
+    }, [product, open])
+
+    const addImageUrl = () => setImageUrls([...imageUrls, ''])
+
+    const removeImageUrl = (index: number) => {
+        const newUrls = [...imageUrls]
+        newUrls.splice(index, 1)
+        setImageUrls(newUrls)
+    }
+
+    const updateImageUrl = (index: number, value: string) => {
+        const newUrls = [...imageUrls]
+        newUrls[index] = value
+        setImageUrls(newUrls)
+    }
 
     // Sync external error to local state when it changes
     useEffect(() => {
@@ -114,16 +146,40 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="image-url">Image URL or Path</Label>
-                            <Input
-                                id="image-url"
-                                name="image-url"
-                                type="text"
-                                placeholder="https://example.com/image.jpg or /assets/image.png"
-                                defaultValue={product?.image_url}
-                                required
-                                disabled={isLoading}
-                            />
+                            <Label>Product Images</Label>
+                            <div className="space-y-2">
+                                {imageUrls.map((url, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <Input
+                                            name="images"
+                                            value={url}
+                                            onChange={(e) => updateImageUrl(index, e.target.value)}
+                                            placeholder={`Image URL ${index + 1}`}
+                                            disabled={isLoading}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => removeImageUrl(index)}
+                                            disabled={isLoading || imageUrls.length === 1}
+                                        >
+                                            <Minus className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={addImageUrl}
+                                    disabled={isLoading}
+                                    className="gap-2"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add Image
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

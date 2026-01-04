@@ -126,6 +126,19 @@ func main() {
 		log.Println("Migration warning: failed to update product images:", err)
 	}
 
+	// Migrate: Add images column and backfill
+	_, err = db.Exec(`
+		ALTER TABLE products 
+		ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+		
+		UPDATE products 
+		SET images = ARRAY[image_url] 
+		WHERE (images IS NULL OR array_length(images, 1) IS NULL) AND image_url IS NOT NULL AND image_url != '';
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add/populate images column:", err)
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 
