@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 interface OrderItem {
     id: number;
     quantity: number;
+    name?: string;
 }
 
 interface Order {
@@ -76,8 +77,8 @@ export default function Orders() {
                                         <TableCell>
                                             <div className="flex flex-col gap-1">
                                                 {order.items.map((item, index) => (
-                                                    <span key={index} className="text-xs text-muted-foreground">
-                                                        Item #{item.id} (x{item.quantity})
+                                                    <span key={index} className="text-sm">
+                                                        {item.name || `Item #${item.id}`} <span className="text-muted-foreground">(x{item.quantity})</span>
                                                     </span>
                                                 ))}
                                             </div>

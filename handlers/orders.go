@@ -58,6 +58,18 @@ func GetOrders(c *gin.Context, db *sql.DB) {
 			o.Items = []PaymentItem{} // Handle unmarshal error gracefully
 		}
 
+		// Hydrate product names
+		for i := range o.Items {
+			var name string
+			err := db.QueryRow("SELECT name FROM products WHERE id = $1", o.Items[i].ID).Scan(&name)
+			if err != nil {
+				// If product deleted or not found, fall back to "Product #ID"
+				o.Items[i].Name = fmt.Sprintf("Product #%d", o.Items[i].ID)
+			} else {
+				o.Items[i].Name = name
+			}
+		}
+
 		orders = append(orders, o)
 	}
 
