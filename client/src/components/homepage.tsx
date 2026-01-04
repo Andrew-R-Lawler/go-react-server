@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Product } from './admin-product-card'
+import { Product } from '@/types'
 import { Footer } from './footer'
 
 function HomePage() {
@@ -61,50 +61,53 @@ function HomePage() {
                     <div className="text-center py-12">Loading featured products...</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                        {featuredProducts.length > 0 ? featuredProducts.map((product) => (
-                            <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col pt-0">
-                                <Link to={`/product/${product.id}`} className="block cursor-pointer">
-                                    <div className="aspect-video w-full overflow-hidden bg-muted">
-                                        {product.image_url ? (
-                                            <img
-                                                src={product.image_url}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                                            />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
-                                        )}
-                                    </div>
-                                </Link>
-                                <CardHeader>
+                        {featuredProducts.length > 0 ? featuredProducts.map((product) => {
+                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+                            return (
+                                <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col pt-0">
                                     <Link to={`/product/${product.id}`} className="block cursor-pointer">
-                                        <CardTitle className="text-card-foreground text-xl line-clamp-1 hover:underline" title={product.name}>{product.name}</CardTitle>
+                                        <div className="aspect-video w-full overflow-hidden bg-muted">
+                                            {mainImage ? (
+                                                <img
+                                                    src={mainImage}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                                            )}
+                                        </div>
                                     </Link>
-                                    <CardDescription className="text-muted-foreground">
-                                        {product.on_sale ? (
-                                            <div className="flex gap-2 items-center">
-                                                <span className="text-green-500 font-bold">${product.sale_price.toFixed(2)}</span>
-                                                <span className="text-xs line-through text-muted-foreground">${product.price.toFixed(2)}</span>
-                                            </div>
-                                        ) : (
-                                            <span>${product.price.toFixed(2)}</span>
-                                        )}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <p className="text-muted-foreground text-sm line-clamp-3">
-                                        {product.description}
-                                    </p>
-                                </CardContent>
-                                <CardFooter>
-                                    <Link to={`/product/${product.id}`} className="w-full">
-                                        <Button variant="outline" className="w-full border-input bg-transparent text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                                            View Details
-                                        </Button>
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        )) : (
+                                    <CardHeader>
+                                        <Link to={`/product/${product.id}`} className="block cursor-pointer">
+                                            <CardTitle className="text-card-foreground text-xl line-clamp-1 hover:underline" title={product.name}>{product.name}</CardTitle>
+                                        </Link>
+                                        <CardDescription className="text-muted-foreground">
+                                            {product.on_sale ? (
+                                                <div className="flex gap-2 items-center">
+                                                    <span className="text-green-500 font-bold">${product.sale_price.toFixed(2)}</span>
+                                                    <span className="text-xs line-through text-muted-foreground">${product.price.toFixed(2)}</span>
+                                                </div>
+                                            ) : (
+                                                <span>${product.price.toFixed(2)}</span>
+                                            )}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="flex-grow">
+                                        <p className="text-muted-foreground text-sm line-clamp-3">
+                                            {product.description}
+                                        </p>
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Link to={`/product/${product.id}`} className="w-full">
+                                            <Button variant="outline" className="w-full border-input bg-transparent text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                                                View Details
+                                            </Button>
+                                        </Link>
+                                    </CardFooter>
+                                </Card>
+                            )
+                        }) : (
                             <div className="col-span-full text-center text-muted-foreground">
                                 No featured products currently available.
                             </div>

@@ -1,7 +1,8 @@
 import '../App.css'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import AdminProductCard, { Product } from './admin-product-card'
+import AdminProductCard from './admin-product-card'
+import { Product } from '@/types'
 import { ProductDialog } from './product-dialog'
 import { LayoutDashboard } from 'lucide-react'
 
@@ -30,10 +31,15 @@ function ManageProducts() {
         setIsLoading(true)
         setError('')
         const formData = new FormData(event.currentTarget)
+
+        const images = formData.getAll('images') as string[]
+        const validImages = images.filter(url => url.trim() !== '')
+
         const postData = {
             name: formData.get('name'),
-            image_url: formData.get('image-url'),
             description: formData.get('description'),
+            images: validImages,
+            image_url: validImages.length > 0 ? validImages[0] : '',
             price: Number(formData.get('price')),
             stock_quantity: Number(formData.get('stock-quantity')),
             featured: formData.get('featured') === 'on',

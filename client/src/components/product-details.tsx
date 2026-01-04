@@ -6,24 +6,24 @@ import { ShoppingCart, ArrowLeft } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 import { Separator } from "@/components/ui/separator"
 
-interface Product {
-    id: number
-    name: string
-    description: string
-    image_url: string
-    price: number
-    stock_quantity: number
-    on_sale: boolean
-    sale_price: number
-    long_description?: string
-}
+import { Product } from "@/types"
 
 export default function ProductDetails() {
     const { id } = useParams<{ id: string }>()
     const [product, setProduct] = useState<Product | null>(null)
+    const [selectedImage, setSelectedImage] = useState<string>('')
     const [loading, setLoading] = useState(true)
     const { addToCart } = useCart()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (product) {
+            const img = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+            setSelectedImage(img || '')
+        }
+    }, [product])
+
+    const displayImages = product ? (product.images && product.images.length > 0 ? product.images : (product.image_url ? [product.image_url] : [])) : [];
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -67,16 +67,33 @@ export default function ProductDetails() {
 
             <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
                 {/* Product Image */}
-                <div className="rounded-xl overflow-hidden bg-muted border border-border aspect-square relative shadow-lg">
-                    {product.image_url ? (
-                        <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-                            No Image
+                {/* Product Image Gallery */}
+                <div className="flex flex-col gap-4">
+                    <div className="rounded-xl overflow-hidden bg-muted border border-border aspect-square relative shadow-lg">
+                        {selectedImage ? (
+                            <img
+                                src={selectedImage}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                                No Image
+                            </div>
+                        )}
+                    </div>
+                    {/* Thumbnails */}
+                    {displayImages.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                            {displayImages.map((img, index) => (
+                                <button
+                                    key={index}
+                                    className={`relative rounded-md overflow-hidden w-20 h-20 flex-shrink-0 border-2 transition-all ${selectedImage === img ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}
+                                    onClick={() => setSelectedImage(img)}
+                                >
+                                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>

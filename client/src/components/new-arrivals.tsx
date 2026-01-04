@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 
-interface Product {
-    id: number
-    name: string
-    description: string
-    image_url: string
-    price: number
-    stock_quantity: number
-    on_sale: boolean
-    sale_price: number
-    long_description?: string
-}
+import { Product } from '@/types'
 
 function NewArrivals() {
     const [products, setProducts] = useState<Product[]>([])
@@ -68,50 +59,55 @@ function NewArrivals() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {products.map((product) => (
-                            <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0">
-                                <div className="aspect-square relative overflow-hidden bg-muted">
-                                    {product.image_url ? (
-                                        <img
-                                            src={product.image_url}
-                                            alt={product.name}
-                                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-                                            No Image
-                                        </div>
-                                    )}
-                                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full shadow-md">
-                                        NEW
-                                    </div>
-                                </div>
-                                <CardHeader>
-                                    <div className="flex justify-between items-start gap-2">
-                                        <CardTitle className="text-xl line-clamp-1">{product.name}</CardTitle>
-                                        <span className="font-bold text-lg shrink-0">
-                                            {product.on_sale ? (
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-green-500">${product.sale_price.toFixed(2)}</span>
-                                                    <span className="text-sm line-through text-muted-foreground">${product.price.toFixed(2)}</span>
-                                                </div>
+                        {products.map((product) => {
+                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+                            return (
+                                <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0">
+                                    <Link to={`/product/${product.id}`} className="block h-full">
+                                        <div className="aspect-square relative overflow-hidden bg-muted">
+                                            {mainImage ? (
+                                                <img
+                                                    src={mainImage}
+                                                    alt={product.name}
+                                                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                                                />
                                             ) : (
-                                                <span className="text-muted-foreground">${product.price.toFixed(2)}</span>
+                                                <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                                                    No Image
+                                                </div>
                                             )}
-                                        </span>
-                                    </div>
-                                    <CardDescription className="line-clamp-2 min-h-[2.5rem]">
-                                        {product.description}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardFooter className="mt-auto pt-4">
-                                    <Button className="w-full gap-2 group-hover:bg-primary/90" onClick={() => addToCart(product)}>
-                                        <ShoppingCart className="h-4 w-4" />
-                                        Add to Cart
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                                                NEW
+                                            </div>
+                                        </div>
+                                    </Link>
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start gap-2">
+                                            <CardTitle className="text-xl line-clamp-1">{product.name}</CardTitle>
+                                            <span className="font-bold text-lg shrink-0">
+                                                {product.on_sale ? (
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-green-500">${product.sale_price.toFixed(2)}</span>
+                                                        <span className="text-sm line-through text-muted-foreground">${product.price.toFixed(2)}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-muted-foreground">${product.price.toFixed(2)}</span>
+                                                )}
+                                            </span>
+                                        </div>
+                                        <CardDescription className="line-clamp-2 min-h-[2.5rem]">
+                                            {product.description}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardFooter className="mt-auto pt-4">
+                                        <Button className="w-full gap-2 group-hover:bg-primary/90" onClick={() => addToCart(product)}>
+                                            <ShoppingCart className="h-4 w-4" />
+                                            Add to Cart
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            )
+                        })}
                     </div>
                 )}
             </main>
