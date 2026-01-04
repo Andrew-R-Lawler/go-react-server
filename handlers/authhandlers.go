@@ -314,14 +314,15 @@ func Login(c *gin.Context, db *sql.DB) {
 	consent, err := c.Cookie("cookie_consent")
 	if err == nil && consent == "true" {
 		c.SetCookie(
-			"auth_token", // cookie name
-			token,        // value
-			3600*24,      // max age in seconds
-			"/",          // path
-			"localhost",  // domain
-			false,        // secure (true in production with HTTPS)
-			true,         // HttpOnly
+			"auth_token",                         // cookie name
+			token,                                // value
+			3600*24,                              // max age in seconds
+			"/",                                  // path
+			os.Getenv("COOKIE_DOMAIN"),           // domain
+			os.Getenv("COOKIE_SECURE") == "true", // secure (true in production with HTTPS)
+			true,                                 // HttpOnly
 		)
+		c.SetSameSite(http.SameSiteLaxMode)
 	} else {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cookie consent required"})
 		return
@@ -338,10 +339,11 @@ func Logout(c *gin.Context) {
 		"",
 		-1,
 		"/",
-		"localhost",
-		false,
+		os.Getenv("COOKIE_DOMAIN"),
+		os.Getenv("COOKIE_SECURE") == "true",
 		true,
 	)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
 
