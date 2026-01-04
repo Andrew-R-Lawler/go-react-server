@@ -129,6 +129,28 @@ func main() {
 		log.Fatal("Failed to create orders table:", err)
 	}
 
+	// Migrate: Update product images to local assets (idempotent-ish check)
+	// We'll just run this update every time startup, it's fast enough for small DBs
+	_, err = db.Exec(`
+		UPDATE products SET image_url = '/assets/home_showcase.png' WHERE image_url LIKE 'http%' OR image_url NOT LIKE '/assets/%';
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to update product images:", err)
+	}
+
+	// Migrate: Add images column and backfill
+	_, err = db.Exec(`
+		ALTER TABLE products 
+		ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+		
+		UPDATE products 
+		SET images = ARRAY[image_url] 
+		WHERE (images IS NULL OR array_length(images, 1) IS NULL) AND image_url IS NOT NULL AND image_url != '';
+	`)
+	if err != nil {
+		log.Println("Migration warning: failed to add/populate images column:", err)
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 
