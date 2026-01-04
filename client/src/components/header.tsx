@@ -9,6 +9,7 @@ import {
 import { ModeToggle } from "@/components/mode-toggle"
 import { useCart } from "@/context/cart-context"
 import { ShoppingBag } from "lucide-react"
+
 interface HeaderProps {
     user: {
         id: number;
@@ -27,7 +28,7 @@ export function Header({ user, signOut }: HeaderProps) {
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src="/assets/path6.svg" width="30" height="30" alt="Logo" className="hover:opacity-80 transition-opacity invert dark:invert-0" />
+                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity" />
                     </Link>
                 </li >
                 <li>
