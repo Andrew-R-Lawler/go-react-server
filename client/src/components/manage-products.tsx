@@ -38,7 +38,8 @@ function ManageProducts() {
             stock_quantity: Number(formData.get('stock-quantity')),
             featured: formData.get('featured') === 'on',
             on_sale: formData.get('on-sale') === 'on',
-            sale_price: Number(formData.get('sale-price'))
+            sale_price: Number(formData.get('sale-price')),
+            long_description: formData.get('long-description')
         }
 
         try {

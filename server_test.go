@@ -25,12 +25,12 @@ func TestGetProducts(t *testing.T) {
 	defer db.Close()
 
 	// Define expected rows
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price"}).
-		AddRow(1, "Product 1", "Description 1", "http://example.com/1.jpg", 10.0, 100, false, false, 0.0).
-		AddRow(2, "Product 2", "Description 2", "http://example.com/2.jpg", 20.0, 200, true, true, 15.0)
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description"}).
+		AddRow(1, "Product 1", "Description 1", "http://example.com/1.jpg", 10.0, 100, false, false, 0.0, "").
+		AddRow(2, "Product 2", "Description 2", "http://example.com/2.jpg", 20.0, 200, true, true, 15.0, "")
 
 	// Expect query
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price FROM "products"`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, '') FROM "products" ORDER BY id;`)).
 		WillReturnRows(rows)
 
 	// Setup Gin
@@ -56,6 +56,48 @@ func TestGetProducts(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "Product 2")
 
 	// Ensure all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+	// Ensure all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestGetProduct(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// Define expected rows
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description"}).
+		AddRow(1, "Product 1", "Description 1", "http://example.com/1.jpg", 10.0, 100, false, false, 0.0, "")
+
+	// Expect query
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, '') FROM "products" WHERE id = $1`)).
+		WithArgs("1").
+		WillReturnRows(rows)
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.GET("/api/products/:id", func(c *gin.Context) {
+		handlers.GetProduct(c, db)
+	})
+
+	req, err := http.NewRequest(http.MethodGet, "/api/products/1", nil)
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "Product 1")
+
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
@@ -120,10 +162,10 @@ func TestGetFeaturedProducts(t *testing.T) {
 	}
 	defer db.Close()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price"}).
-		AddRow(2, "Product 2", "Description 2", "http://example.com/2.jpg", 20.0, 200, true, true, 15.0)
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description"}).
+		AddRow(2, "Product 2", "Description 2", "http://example.com/2.jpg", 20.0, 200, true, true, 15.0, "")
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price FROM "products" WHERE featured = TRUE ORDER BY id;`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, '') FROM "products" WHERE featured = TRUE ORDER BY id;`)).
 		WillReturnRows(rows)
 
 	gin.SetMode(gin.TestMode)
@@ -150,10 +192,10 @@ func TestGetNewArrivals(t *testing.T) {
 	}
 	defer db.Close()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price"}).
-		AddRow(3, "Product 3", "Description 3", "http://example.com/3.jpg", 30.0, 300, false, false, 0.0)
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description"}).
+		AddRow(3, "Product 3", "Description 3", "http://example.com/3.jpg", 30.0, 300, false, false, 0.0, "")
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price FROM "products" ORDER BY id DESC LIMIT 3;`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, image_url, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, '') FROM "products" ORDER BY id DESC LIMIT 6;`)).
 		WillReturnRows(rows)
 
 	gin.SetMode(gin.TestMode)
@@ -180,8 +222,8 @@ func TestAddProduct_Admin(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)).
-		WithArgs("New Product", "Description", "http://image.com", 10.0, 50, false, false, 0.0).
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`)).
+		WithArgs("New Product", "Description", "http://image.com", 10.0, 50, false, false, 0.0, "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	gin.SetMode(gin.TestMode)
@@ -238,8 +280,8 @@ func TestEditProduct_Admin(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "products" SET name = $1, description = $2, image_url = $3, price = $4, stock_quantity = $5, featured = $6, on_sale = $7, sale_price = $8 WHERE id = $9`)).
-		WithArgs("Updated Product", "Desc", "img", 20.0, 10, true, true, 15.0, "1").
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "products" SET name = $1, description = $2, image_url = $3, price = $4, stock_quantity = $5, featured = $6, on_sale = $7, sale_price = $8, long_description = $9 WHERE id = $10`)).
+		WithArgs("Updated Product", "Desc", "img", 20.0, 10, true, true, 15.0, "", "1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 
 	gin.SetMode(gin.TestMode)
@@ -339,4 +381,33 @@ func TestUpdateOrderStatus_Admin(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAddProduct_LongDescription_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "image_url", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`)).
+		WithArgs("Long Desc Product", "Short", "http://image.com", 10.0, 50, false, false, 0.0, "This is a long description.").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.POST("/api/products", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.AddProduct(c, db)
+	})
+
+	payload := `{"name":"Long Desc Product", "description":"Short", "image_url":"http://image.com", "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0, "long_description":"This is a long description."}`
+	req, _ := http.NewRequest(http.MethodPost, "/api/products", strings.NewReader(payload))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
 }

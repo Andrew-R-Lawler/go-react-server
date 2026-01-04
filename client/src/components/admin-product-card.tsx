@@ -24,6 +24,7 @@ export interface Product {
     featured: boolean
     sale_price: number
     on_sale: boolean
+    long_description?: string
 }
 
 import { ProductDialog } from "./product-dialog"

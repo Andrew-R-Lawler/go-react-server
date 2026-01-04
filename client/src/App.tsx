@@ -27,6 +27,7 @@ import Returns from './components/returns'
 import NewArrivals from './components/new-arrivals'
 import Careers from './components/careers'
 import OrderFulfillment from './components/order-fulfillment'
+import ProductDetails from './components/product-details'
 import logo from '@/assets/path6.svg'
 import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
@@ -202,6 +203,7 @@ function AppContent() {
                         <Route path="/email-sent" element={<EmailSent />} />
                         <Route path='/registration-success' element={<RegisterSuccess />} />
                         <Route path='/shop' element={<Shop />} />
+                        <Route path='/product/:id' element={<ProductDetails />} />
                         <Route path='/about' element={<About />} />
                         <Route path="/contact" element={<Contact />} />
                         <Route path='/checkout' element={<Checkout />} />

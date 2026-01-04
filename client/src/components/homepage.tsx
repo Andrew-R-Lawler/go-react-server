@@ -62,7 +62,7 @@ function HomePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {featuredProducts.length > 0 ? featuredProducts.map((product) => (
                             <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col">
-                                <Link to="/shop" className="block cursor-pointer">
+                                <Link to={`/product/${product.id}`} className="block cursor-pointer">
                                     <div className="aspect-video w-full overflow-hidden bg-muted">
                                         {product.image_url ? (
                                             <img
@@ -76,7 +76,7 @@ function HomePage() {
                                     </div>
                                 </Link>
                                 <CardHeader>
-                                    <Link to="/shop" className="block cursor-pointer">
+                                    <Link to={`/product/${product.id}`} className="block cursor-pointer">
                                         <CardTitle className="text-card-foreground text-xl line-clamp-1 hover:underline" title={product.name}>{product.name}</CardTitle>
                                     </Link>
                                     <CardDescription className="text-muted-foreground">
@@ -96,9 +96,9 @@ function HomePage() {
                                     </p>
                                 </CardContent>
                                 <CardFooter>
-                                    <Link to={`/shop`} className="w-full">
+                                    <Link to={`/product/${product.id}`} className="w-full">
                                         <Button variant="outline" className="w-full border-input bg-transparent text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                                            View in Shop
+                                            View Details
                                         </Button>
                                     </Link>
                                 </CardFooter>
