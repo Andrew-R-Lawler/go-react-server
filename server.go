@@ -83,7 +83,6 @@ func main() {
 			id SERIAL PRIMARY KEY,
 			name TEXT NOT NULL,
 			description TEXT,
-			image_url TEXT,
 			images TEXT[],
 			price DECIMAL(10, 2) NOT NULL,
 			stock_quantity INTEGER NOT NULL,
@@ -129,26 +128,14 @@ func main() {
 		log.Fatal("Failed to create orders table:", err)
 	}
 
-	// Migrate: Update product images to local assets (idempotent-ish check)
-	// We'll just run this update every time startup, it's fast enough for small DBs
+	// Migrate: Drop image_url column (if exists) and clean up
+	// We ensure 'images' is populated before dropping (done in previous version)
 	_, err = db.Exec(`
-		UPDATE products SET image_url = '/assets/home_showcase.png' WHERE image_url LIKE 'http%' OR image_url NOT LIKE '/assets/%';
+		ALTER TABLE products DROP COLUMN IF EXISTS image_url;
+		ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
 	`)
 	if err != nil {
-		log.Println("Migration warning: failed to update product images:", err)
-	}
-
-	// Migrate: Add images column and backfill
-	_, err = db.Exec(`
-		ALTER TABLE products 
-		ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
-		
-		UPDATE products 
-		SET images = ARRAY[image_url] 
-		WHERE (images IS NULL OR array_length(images, 1) IS NULL) AND image_url IS NOT NULL AND image_url != '';
-	`)
-	if err != nil {
-		log.Println("Migration warning: failed to add/populate images column:", err)
+		log.Println("Migration warning: failed to drop image_url or ensure images col:", err)
 	}
 
 	r := gin.Default()

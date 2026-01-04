@@ -18,12 +18,12 @@ export default function ProductDetails() {
 
     useEffect(() => {
         if (product) {
-            const img = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+            const img = (product.images && product.images.length > 0) ? product.images[0] : '';
             setSelectedImage(img || '')
         }
     }, [product])
 
-    const displayImages = product ? (product.images && product.images.length > 0 ? product.images : (product.image_url ? [product.image_url] : [])) : [];
+    const displayImages = product ? (product.images && product.images.length > 0 ? product.images : []) : [];
 
     useEffect(() => {
         const fetchProduct = async () => {

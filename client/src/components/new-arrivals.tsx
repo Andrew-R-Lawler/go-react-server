@@ -60,7 +60,7 @@ function NewArrivals() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {products.map((product) => {
-                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : product.image_url;
+                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : null;
                             return (
                                 <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0">
                                     <Link to={`/product/${product.id}`} className="block h-full">
