@@ -16,6 +16,7 @@ import EmailSent from './components/email-sent'
 import RegisterSuccess from './components/register-success'
 import Forbidden from './components/forbidden'
 import ManageProducts from './components/manage-products'
+import AssetsManager from './components/assets-manager'
 import Shop from './components/shop'
 import Checkout from './components/checkout'
 import About from './components/about'
@@ -107,6 +108,8 @@ function AppContent() {
                         {/* ... existing routes */}
                         <Route path="/" element={<HomePage />} />
                         {/* <Route path="/todo" element={isAdmin() ? <Todo /> : <Forbidden />} /> */}
+                        {/* <Route path="/admin" element={isAdmin() ? <ManageProducts /> : <Forbidden />} /> */}
+                        <Route path="/manage-assets" element={isAdmin() ? <AssetsManager /> : <Forbidden />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<UserRegistration />} />
                         <Route path="/verify" element={<Verification />} />
