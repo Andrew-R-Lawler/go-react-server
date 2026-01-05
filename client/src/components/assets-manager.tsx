@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2, Trash2, Upload, Copy, Check, FileImage } from "lucide-react"
@@ -144,36 +144,38 @@ export default function AssetsManager() {
                         </div>
                     ) : (
                         assets.map((asset) => (
-                            <Card key={asset.name} className="overflow-hidden group hover:shadow-md transition-all">
-                                <div className="aspect-square relative bg-muted/30">
+                            <Card key={asset.name} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0 gap-2">
+                                <div className="aspect-square relative overflow-hidden bg-muted">
                                     <img
                                         src={`${asset.url}?t=${Date.now()}`} // Cache bust preview
                                         alt={asset.name}
-                                        className="w-full h-full object-contain p-2"
+                                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                         loading="lazy"
                                     />
                                 </div>
-                                <CardContent className="p-3">
-                                    <h3 className="font-medium text-sm truncate" title={asset.name}>{asset.name}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">{formatSize(asset.size)}</p>
-                                </CardContent>
-                                <CardFooter className="p-3 pt-0 flex justify-between gap-2">
+                                <CardHeader className="pb-2">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors" title={asset.name}>{asset.name}</CardTitle>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{formatSize(asset.size)}</p>
+                                </CardHeader>
+                                <CardFooter className="mt-auto pt-0 pb-4 flex gap-2">
                                     <Button
                                         variant="outline"
-                                        size="sm"
-                                        className="flex-1 h-8 text-xs"
+                                        size="sm" // Keeping small to fit two buttons
+                                        className="flex-1"
                                         onClick={() => handleCopy(asset.url, asset.name)}
                                     >
                                         {copiedId === asset.name ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
-                                        {copiedId === asset.name ? "Copied" : "Copy URL"}
+                                        {copiedId === asset.name ? "Copied" : "Copy"}
                                     </Button>
                                     <Button
                                         variant="destructive"
                                         size="icon"
-                                        className="h-8 w-8"
+                                        className="h-9 w-9 shrink-0"
                                         onClick={() => handleDelete(asset.name)}
                                     >
-                                        <Trash2 className="h-3.5 w-3.5" />
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </CardFooter>
                             </Card>
