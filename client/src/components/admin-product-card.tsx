@@ -27,7 +27,7 @@ interface AdminProductCardProps {
 }
 
 export default function AdminProductCard({ product, handleDeleteProduct, handleSaveProduct, error }: AdminProductCardProps) {
-    const mainImage = (product.images && product.images.length > 0) ? product.images[0] : null;
+    const mainImage = (product.images && product.images.length > 0) ? product.images[0] + `?t=${Date.now()}` : null;
 
     return (
         <Card className="flex flex-col h-full bg-card border-border overflow-hidden group hover:border-accent transition-colors duration-200 pt-0 gap-2">

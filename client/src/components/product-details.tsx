@@ -18,7 +18,7 @@ export default function ProductDetails() {
 
     useEffect(() => {
         if (product) {
-            const img = (product.images && product.images.length > 0) ? product.images[0] : '';
+            const img = (product.images && product.images.length > 0) ? product.images[0] + `?t=${Date.now()}` : '';
             setSelectedImage(img || '')
         }
     }, [product])
