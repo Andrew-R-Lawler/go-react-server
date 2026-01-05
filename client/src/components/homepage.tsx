@@ -62,7 +62,7 @@ function HomePage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {featuredProducts.length > 0 ? featuredProducts.map((product) => {
-                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : null;
+                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] + `?t=${Date.now()}` : null;
                             return (
                                 <Card key={product.id} className="bg-card border-border overflow-hidden hover:border-accent transition-colors duration-300 shadow-sm flex flex-col pt-0">
                                     <Link to={`/product/${product.id}`} className="block cursor-pointer">
