@@ -139,8 +139,8 @@ func main() {
 
 		log.Printf("DEBUG: Asset Request: URL=%s, Param=%s, LocalPath=%s\n", c.Request.URL.Path, param, localPath)
 
-		if _, err := os.Stat(localPath); err == nil {
-			log.Println("DEBUG: File found, serving...")
+		if info, err := os.Stat(localPath); err == nil {
+			log.Printf("DEBUG: File found, serving... Size: %d bytes\n", info.Size())
 			c.File(localPath)
 		} else {
 			log.Printf("DEBUG: File NOT found: %v\n", err)
