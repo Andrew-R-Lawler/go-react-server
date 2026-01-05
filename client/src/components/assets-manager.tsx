@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2, Trash2, Upload, Copy, Check, FileImage } from "lucide-react"
