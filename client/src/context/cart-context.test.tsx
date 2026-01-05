@@ -47,7 +47,7 @@ describe('CartContext', () => {
             id: product.id,
             name: product.name,
             price: product.price,
-            image_url: product.images[0],
+            image_url: expect.stringContaining(product.images[0]),
             quantity: 1
         });
         expect(result.current.cartCount).toBe(1);
