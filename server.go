@@ -180,7 +180,14 @@ func main() {
 	protectedGroup.GET("/user", func(c *gin.Context) { handlers.GetUser(c) })
 	protectedGroup.POST("/logout", func(c *gin.Context) { handlers.Logout(c) })
 	protectedGroup.POST("/products", func(c *gin.Context) { handlers.AddProduct(c, db) })
-	protectedGroup.DELETE("/deleteproduct/:id", func(c *gin.Context) { handlers.DeleteProduct(c, db) })
+	protectedGroup.DELETE("/products/:id", func(c *gin.Context) {
+		handlers.DeleteProduct(c, db)
+	})
+
+	// Asset Management Routes
+	protectedGroup.GET("/assets", handlers.ListAssets)
+	protectedGroup.POST("/assets/upload", handlers.UploadAsset)
+	protectedGroup.DELETE("/assets/:filename", handlers.DeleteAsset)
 	protectedGroup.PUT("/editproduct/:id", func(c *gin.Context) { handlers.EditProduct(c, db) })
 	protectedGroup.GET("/orders", func(c *gin.Context) { handlers.GetOrders(c, db) })
 	protectedGroup.GET("/admin/orders", func(c *gin.Context) { handlers.GetAllOrders(c, db) })

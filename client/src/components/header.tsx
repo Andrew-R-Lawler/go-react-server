@@ -61,6 +61,13 @@ export function Header({ user, signOut }: HeaderProps) {
                                     )}
                                     {user.admin && (
                                         <DropdownMenuItem asChild>
+                                            <Link to="/manage-assets" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                                Manage Assets
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    {user.admin && (
+                                        <DropdownMenuItem asChild>
                                             <Link to="/order-fulfillment" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
                                                 Order Fulfillment
                                             </Link>
