@@ -13,7 +13,7 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Minus, Loader2 } from "lucide-react"
+import { Plus, Minus, Loader2, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Product } from "@/types"
@@ -75,32 +75,31 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
             updateImageUrl(activeImageIndex, url)
         }
     }
-}
 
-// Sync external error to local state when it changes
-useEffect(() => {
-    if (error) {
-        setLocalError(error)
+    // Sync external error to local state when it changes
+    useEffect(() => {
+        if (error) {
+            setLocalError(error)
+        }
+    }, [error])
+
+    // Reset error when opening
+    useEffect(() => {
+        if (open) {
+            setLocalError(null)
+        }
+    }, [open])
+
+    const onSubmitWrapper = async (e: React.FormEvent<HTMLFormElement>) => {
+        const success = await handleSaveProduct(e, product) // Parent prevents default and handles API
+        if (success) {
+            setOpen(false)
+        }
     }
-}, [error])
 
-// Reset error when opening
-useEffect(() => {
-    if (open) {
-        setLocalError(null)
-    }
-}, [open])
+    const isEditMode = !!product
 
-const onSubmitWrapper = async (e: React.FormEvent<HTMLFormElement>) => {
-    const success = await handleSaveProduct(e, product) // Parent prevents default and handles API
-    if (success) {
-        setOpen(false)
-    }
-}
-
-const isEditMode = !!product
-
-return (
+    return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger ? trigger : (
@@ -298,13 +297,12 @@ return (
                         </Button>
                     </DialogFooter>
                 </form>
-                </form>
             </DialogContent>
-            
-            <AssetPicker 
-                open={pickerOpen} 
-                onOpenChange={setPickerOpen} 
-                onSelect={handleAssetSelect} 
+
+            <AssetPicker
+                open={pickerOpen}
+                onOpenChange={setPickerOpen}
+                onSelect={handleAssetSelect}
             />
         </Dialog >
     )

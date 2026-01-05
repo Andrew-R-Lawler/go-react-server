@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Loader2, Image as ImageIcon } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 interface Asset {
     name: string
