@@ -56,7 +56,7 @@ function Shop() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {products.map((product) => {
-                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] : null;
+                            const mainImage = (product.images && product.images.length > 0) ? product.images[0] + `?t=${Date.now()}` : null;
                             console.log(`DEBUG: Rendering product ${product.id} (${product.name}). Main Image:`, mainImage);
 
                             return (
