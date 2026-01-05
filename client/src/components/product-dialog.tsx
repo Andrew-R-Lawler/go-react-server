@@ -13,11 +13,12 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Minus, Loader2 } from "lucide-react"
+import { Plus, Minus, Loader2, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
 import { Product } from "@/types"
+import { AssetPicker } from "./asset-picker"
+import { Image as ImageIcon } from "lucide-react"
 
 interface ProductDialogProps {
     handleSaveProduct: (event: React.FormEvent<HTMLFormElement>, product?: Product) => Promise<boolean>
@@ -31,6 +32,8 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
     const [open, setOpen] = useState(false)
     const [localError, setLocalError] = useState<string | null>(null)
     const [imageUrls, setImageUrls] = useState<string[]>([''])
+    const [pickerOpen, setPickerOpen] = useState(false)
+    const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
 
     // Initialize images when product changes or dialog opens
     useEffect(() => {
@@ -60,6 +63,17 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
         const newUrls = [...imageUrls]
         newUrls[index] = value
         setImageUrls(newUrls)
+    }
+
+    const openPicker = (index: number) => {
+        setActiveImageIndex(index)
+        setPickerOpen(true)
+    }
+
+    const handleAssetSelect = (url: string) => {
+        if (activeImageIndex !== null) {
+            updateImageUrl(activeImageIndex, url)
+        }
     }
 
     // Sync external error to local state when it changes
@@ -148,14 +162,28 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                             <Label>Product Images</Label>
                             <div className="space-y-2">
                                 {imageUrls.map((url, index) => (
-                                    <div key={index} className="flex gap-2">
-                                        <Input
-                                            name="images"
-                                            value={url}
-                                            onChange={(e) => updateImageUrl(index, e.target.value)}
-                                            placeholder={`Image URL ${index + 1}`}
-                                            disabled={isLoading}
-                                        />
+                                    <div key={index} className="flex gap-2 items-center">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                name="images"
+                                                value={url}
+                                                onChange={(e) => updateImageUrl(index, e.target.value)}
+                                                placeholder={`Select an image...`}
+                                                disabled={isLoading}
+                                                className="pr-24" // Make room for select button
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                className="absolute right-1 top-1 h-7 text-xs"
+                                                onClick={() => openPicker(index)}
+                                                disabled={isLoading}
+                                            >
+                                                <ImageIcon className="h-3 w-3 mr-1" />
+                                                Select
+                                            </Button>
+                                        </div>
                                         <Button
                                             type="button"
                                             variant="outline"
@@ -270,6 +298,12 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                     </DialogFooter>
                 </form>
             </DialogContent>
-        </Dialog>
+
+            <AssetPicker
+                open={pickerOpen}
+                onOpenChange={setPickerOpen}
+                onSelect={handleAssetSelect}
+            />
+        </Dialog >
     )
 }
