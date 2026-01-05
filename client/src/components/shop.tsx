@@ -17,6 +17,7 @@ function Shop() {
         setIsLoading(true)
         try {
             const response = await axios.get('/api/shop/products')
+            console.log("DEBUG: Shop fetched products:", response.data)
             setProducts(response.data)
         } catch (error) {
             console.error('Error fetching products:', error)
@@ -56,6 +57,7 @@ function Shop() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {products.map((product) => {
                             const mainImage = (product.images && product.images.length > 0) ? product.images[0] : null;
+                            console.log(`DEBUG: Rendering product ${product.id} (${product.name}). Main Image:`, mainImage);
 
                             return (
                                 <Card key={product.id} className="flex flex-col h-full bg-card border-border overflow-hidden hover:border-accent transition-all duration-300 shadow-sm group pt-0 gap-2">
