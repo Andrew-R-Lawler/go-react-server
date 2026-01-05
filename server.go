@@ -138,6 +138,25 @@ func main() {
 		log.Println("Migration warning: failed to drop image_url or ensure images col:", err)
 	}
 
+	// Fix/Populate images for specific products if missing
+	_, err = db.Exec(`
+		UPDATE products 
+		SET images = ARRAY['/assets/conditioner_bars.png'] 
+		WHERE name ILIKE '%Conditioner%' 
+		AND (images IS NULL OR array_length(images, 1) IS NULL OR images = '{}');
+
+		UPDATE products 
+		SET images = ARRAY['/assets/shampoo_bars.jpeg'] 
+		WHERE name ILIKE '%Shampoo%' 
+		AND (images IS NULL OR array_length(images, 1) IS NULL OR images = '{}');
+		
+		UPDATE products 
+		SET images = ARRAY['/assets/soap.jpg'] 
+		WHERE (images IS NULL OR array_length(images, 1) IS NULL OR images = '{}')
+		AND name NOT ILIKE '%Conditioner%' 
+		AND name NOT ILIKE '%Shampoo%';
+	`)
+
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 
