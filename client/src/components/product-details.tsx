@@ -12,13 +12,14 @@ export default function ProductDetails() {
     const { id } = useParams<{ id: string }>()
     const [product, setProduct] = useState<Product | null>(null)
     const [selectedImage, setSelectedImage] = useState<string>('')
+    const [timestamp] = useState(Date.now())
     const [loading, setLoading] = useState(true)
     const { addToCart } = useCart()
     const navigate = useNavigate()
 
     useEffect(() => {
         if (product) {
-            const img = (product.images && product.images.length > 0) ? product.images[0] + `?t=${Date.now()}` : '';
+            const img = (product.images && product.images.length > 0) ? product.images[0] : '';
             setSelectedImage(img || '')
         }
     }, [product])
@@ -72,7 +73,7 @@ export default function ProductDetails() {
                     <div className="rounded-xl overflow-hidden bg-muted border border-border aspect-square relative shadow-lg">
                         {selectedImage ? (
                             <img
-                                src={selectedImage}
+                                src={`${selectedImage}?t=${timestamp}`}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                             />
@@ -91,7 +92,7 @@ export default function ProductDetails() {
                                     className={`relative rounded-md overflow-hidden w-20 h-20 flex-shrink-0 border-2 transition-all ${selectedImage === img ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}
                                     onClick={() => setSelectedImage(img)}
                                 >
-                                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                                    <img src={`${img}?t=${timestamp}`} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
