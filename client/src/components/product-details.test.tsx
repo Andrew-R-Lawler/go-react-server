@@ -94,7 +94,27 @@ describe('ProductDetails Component', () => {
         const addButton = screen.getByText('Add to Cart')
         fireEvent.click(addButton)
 
-        expect(mockAddToCart).toHaveBeenCalledWith(mockProduct)
+        expect(mockAddToCart).toHaveBeenCalledWith(mockProduct, null)
+    })
+
+    it('selects a variant and adds to cart', async () => {
+        const productWithSkus = {
+            ...mockProduct,
+            skus: [{ sku: 'SKU1', variant_name: 'Small', stock_quantity: 5 }]
+        }
+            ; (axios.get as any).mockResolvedValue({ data: productWithSkus })
+        renderComponent()
+
+        await waitFor(() => expect(screen.getByText('Detailed Product')).toBeInTheDocument())
+
+        // Select variant
+        const variantButton = screen.getByText('Small')
+        fireEvent.click(variantButton)
+
+        const addButton = screen.getByText('Add to Cart')
+        fireEvent.click(addButton)
+
+        expect(mockAddToCart).toHaveBeenCalledWith(productWithSkus, expect.objectContaining({ variant_name: 'Small' }))
     })
 
     it('navigates back when Back button is clicked', async () => {
