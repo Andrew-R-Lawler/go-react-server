@@ -6,12 +6,13 @@ import { ShoppingCart, ArrowLeft } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 import { Separator } from "@/components/ui/separator"
 
-import { Product } from "@/types"
+import { Product, ProductSKU } from "@/types"
 
 export default function ProductDetails() {
     const { id } = useParams<{ id: string }>()
     const [product, setProduct] = useState<Product | null>(null)
     const [selectedImage, setSelectedImage] = useState<string>('')
+    const [selectedSku, setSelectedSku] = useState<ProductSKU | null>(null)
     const [timestamp] = useState(Date.now())
     const [loading, setLoading] = useState(true)
     const { addToCart } = useCart()
@@ -21,6 +22,9 @@ export default function ProductDetails() {
         if (product) {
             const img = (product.images && product.images.length > 0) ? product.images[0] : '';
             setSelectedImage(img || '')
+            if (product.skus && product.skus.length > 0) {
+                setSelectedSku(product.skus[0])
+            }
         }
     }, [product])
 
@@ -123,14 +127,34 @@ export default function ProductDetails() {
                         </p>
                     </div>
 
-                    <div className="mt-auto">
-                        <Button size="lg" className="w-full md:w-auto gap-2 text-lg h-12 px-8" onClick={() => addToCart(product)}>
+                    <div className="mt-auto space-y-4">
+                        {/* Variant Selector */}
+                        {product.skus && product.skus.length > 0 && (
+                            <div className="space-y-2">
+                                <span className="text-sm font-medium">Variant</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.skus.map((sku) => (
+                                        <Button
+                                            key={sku.sku}
+                                            variant={selectedSku?.sku === sku.sku ? "default" : "outline"}
+                                            onClick={() => setSelectedSku(sku)}
+                                            className="min-w-[4rem]"
+                                        >
+                                            {sku.variant_name}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <Button size="lg" className="w-full md:w-auto gap-2 text-lg h-12 px-8" onClick={() => addToCart(product, selectedSku)}>
                             <ShoppingCart className="h-5 w-5" />
                             Add to Cart
                         </Button>
-                        {product.stock_quantity < 10 && (
+
+                        {(selectedSku ? selectedSku.stock_quantity : product.stock_quantity) < 10 && (
                             <p className="text-sm text-muted-foreground mt-2">
-                                Only {product.stock_quantity} left in stock!
+                                Only {selectedSku ? selectedSku.stock_quantity : product.stock_quantity} left in stock!
                             </p>
                         )}
                     </div>

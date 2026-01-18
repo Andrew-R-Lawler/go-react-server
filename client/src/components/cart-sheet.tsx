@@ -61,6 +61,9 @@ export function CartSheet() {
                                     <div className="flex flex-1 flex-col">
                                         <div className="flex justify-between text-base font-medium text-foreground">
                                             <h3 className="line-clamp-2">{item.name}</h3>
+                                            {item.variant_name && (
+                                                <p className="text-xs text-muted-foreground mt-1">Variant: {item.variant_name}</p>
+                                            )}
                                             <p className="ml-4 whitespace-nowrap">${(item.price * item.quantity).toFixed(2)}</p>
                                         </div>
 
@@ -68,7 +71,7 @@ export function CartSheet() {
                                             <div className="flex items-center gap-2 border border-border rounded-md p-1 bg-card">
                                                 <button
                                                     className="p-1 hover:bg-accent rounded-sm disabled:opacity-50 text-foreground"
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                    onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant_name)}
                                                     disabled={item.quantity <= 1}
                                                 >
                                                     <Minus className="w-3 h-3" />
@@ -76,7 +79,7 @@ export function CartSheet() {
                                                 <span className="w-6 text-center text-foreground font-medium">{item.quantity}</span>
                                                 <button
                                                     className="p-1 hover:bg-accent rounded-sm text-foreground"
-                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                    onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant_name)}
                                                 >
                                                     <Plus className="w-3 h-3" />
                                                 </button>
@@ -86,7 +89,7 @@ export function CartSheet() {
                                                 variant="ghost"
                                                 size="sm"
                                                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 px-2"
-                                                onClick={() => removeFromCart(item.id)}
+                                                onClick={() => removeFromCart(item.id, item.variant_name)}
                                             >
                                                 <Trash2 className="w-4 h-4 mr-1" />
                                                 Remove
