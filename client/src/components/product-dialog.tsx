@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Minus, Loader2, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Product } from "@/types"
+import { Product, ProductSKU } from "@/types"
 import { AssetPicker } from "./asset-picker"
 import { Image as ImageIcon } from "lucide-react"
 
@@ -34,6 +34,7 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
     const [imageUrls, setImageUrls] = useState<string[]>([''])
     const [pickerOpen, setPickerOpen] = useState(false)
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+    const [skus, setSkus] = useState<ProductSKU[]>([])
 
     // Initialize images when product changes or dialog opens
     useEffect(() => {
@@ -45,11 +46,35 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                 } else {
                     setImageUrls([''])
                 }
+                if (product.skus) {
+                    setSkus(product.skus)
+                } else {
+                    setSkus([])
+                }
             } else {
+                setSkus([])
                 setImageUrls([''])
             }
         }
     }, [product, open])
+
+    const totalStock = skus.reduce((acc, sku) => acc + (Number(sku.stock_quantity) || 0), 0)
+
+    const addSku = () => {
+        setSkus([...skus, { sku: '', variant_name: '', stock_quantity: 0 }])
+    }
+
+    const removeSku = (index: number) => {
+        const newSkus = [...skus]
+        newSkus.splice(index, 1)
+        setSkus(newSkus)
+    }
+
+    const updateSku = (index: number, field: keyof ProductSKU, value: string | number) => {
+        const newSkus = [...skus]
+        newSkus[index] = { ...newSkus[index], [field]: value }
+        setSkus(newSkus)
+    }
 
     const addImageUrl = () => setImageUrls([...imageUrls, ''])
 
@@ -111,6 +136,7 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] md:max-w-[600px] overflow-y-auto max-h-[90vh]">
                 <form onSubmit={onSubmitWrapper}>
+                    <input type="hidden" name="skus" value={JSON.stringify(skus)} />
                     <DialogHeader>
                         <DialogTitle>{isEditMode ? "Edit Product" : "Add New Product"}</DialogTitle>
                         <DialogDescription>
@@ -244,7 +270,8 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                                     placeholder="0"
                                     defaultValue={product?.stock_quantity}
                                     required
-                                    disabled={isLoading}
+                                    disabled={isLoading || skus.length > 0}
+                                    value={skus.length > 0 ? totalStock : undefined}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -289,6 +316,65 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                             </div>
                         </div>
                     </div>
+
+                    {/* SKU Management */}
+                    <div className="space-y-2 border p-4 rounded-md">
+                        <Label>Variants / SKUs</Label>
+                        {skus.map((sku, index) => (
+                            <div key={index} className="grid grid-cols-12 gap-2 items-end border-b pb-2 mb-2">
+                                <div className="col-span-4">
+                                    <Label className="text-xs">SKU Code</Label>
+                                    <Input
+                                        value={sku.sku}
+                                        onChange={(e) => updateSku(index, 'sku', e.target.value)}
+                                        placeholder="e.g. TSHIRT-S"
+                                        required
+                                    />
+                                </div>
+                                <div className="col-span-4">
+                                    <Label className="text-xs">Variant Name</Label>
+                                    <Input
+                                        value={sku.variant_name}
+                                        onChange={(e) => updateSku(index, 'variant_name', e.target.value)}
+                                        placeholder="e.g. Small"
+                                        required
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <Label className="text-xs">Stock</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={sku.stock_quantity}
+                                        onChange={(e) => updateSku(index, 'stock_quantity', Number(e.target.value))}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-span-1">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-destructive"
+                                        onClick={() => removeSku(index)}
+                                    >
+                                        <Minus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={addSku}
+                            className="gap-2 w-full"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add Variant
+                        </Button>
+                    </div>
+
 
                     <DialogFooter>
                         <Button type="submit" disabled={isLoading} className="w-full md:w-auto">

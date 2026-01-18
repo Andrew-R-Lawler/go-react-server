@@ -15,17 +15,26 @@ import (
 	"github.com/lib/pq"
 )
 
+type ProductSKU struct {
+	ID            int    `json:"id"`
+	ProductID     int    `json:"product_id"`
+	SKU           string `json:"sku"`
+	VariantName   string `json:"variant_name"`
+	StockQuantity int    `json:"stock_quantity"`
+}
+
 type Product struct {
-	ID              int      `json:"id"`
-	Name            string   `json:"name"`
-	Description     string   `json:"description"`
-	Images          []string `json:"images"`
-	Price           float32  `json:"price"`
-	StockQuantity   int      `json:"stock_quantity"`
-	Featured        bool     `json:"featured"`
-	OnSale          bool     `json:"on_sale"`
-	SalePrice       float32  `json:"sale_price"`
-	LongDescription string   `json:"long_description"`
+	ID              int          `json:"id"`
+	Name            string       `json:"name"`
+	Description     string       `json:"description"`
+	Images          []string     `json:"images"`
+	Price           float32      `json:"price"`
+	StockQuantity   int          `json:"stock_quantity"`
+	Featured        bool         `json:"featured"`
+	OnSale          bool         `json:"on_sale"`
+	SalePrice       float32      `json:"sale_price"`
+	LongDescription string       `json:"long_description"`
+	Skus            []ProductSKU `json:"skus"`
 }
 
 func GetProducts(c *gin.Context, db *sql.DB) {
@@ -42,6 +51,20 @@ func GetProducts(c *gin.Context, db *sql.DB) {
 		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
+		}
+		// Fetch SKUs
+		skuRows, err := db.Query(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`, product.ID)
+		if err == nil {
+			defer skuRows.Close()
+			for skuRows.Next() {
+				var sku ProductSKU
+				if err := skuRows.Scan(&sku.ID, &sku.ProductID, &sku.SKU, &sku.VariantName, &sku.StockQuantity); err == nil {
+					product.Skus = append(product.Skus, sku)
+				}
+			}
+		}
+		if product.Skus == nil {
+			product.Skus = []ProductSKU{}
 		}
 		products = append(products, product)
 	}
@@ -67,6 +90,20 @@ func GetFeaturedProducts(c *gin.Context, db *sql.DB) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
 		}
+		// Fetch SKUs
+		skuRows, err := db.Query(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`, product.ID)
+		if err == nil {
+			defer skuRows.Close()
+			for skuRows.Next() {
+				var sku ProductSKU
+				if err := skuRows.Scan(&sku.ID, &sku.ProductID, &sku.SKU, &sku.VariantName, &sku.StockQuantity); err == nil {
+					product.Skus = append(product.Skus, sku)
+				}
+			}
+		}
+		if product.Skus == nil {
+			product.Skus = []ProductSKU{}
+		}
 		products = append(products, product)
 	}
 	if products == nil {
@@ -90,6 +127,20 @@ func GetNewArrivals(c *gin.Context, db *sql.DB) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
 		}
+		// Fetch SKUs
+		skuRows, err := db.Query(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`, product.ID)
+		if err == nil {
+			defer skuRows.Close()
+			for skuRows.Next() {
+				var sku ProductSKU
+				if err := skuRows.Scan(&sku.ID, &sku.ProductID, &sku.SKU, &sku.VariantName, &sku.StockQuantity); err == nil {
+					product.Skus = append(product.Skus, sku)
+				}
+			}
+		}
+		if product.Skus == nil {
+			product.Skus = []ProductSKU{}
+		}
 		products = append(products, product)
 	}
 	if products == nil {
@@ -111,14 +162,27 @@ func AddProduct(c *gin.Context, db *sql.DB) {
 		return
 	}
 	query := `INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description")
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err = db.Exec(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
+	var productID int
+	err = db.QueryRow(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription).Scan(&productID)
 	if err != nil {
 		log.Printf("error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Added Product"})
+
+	// Insert SKUs
+	if len(product.Skus) > 0 {
+		skuQuery := `INSERT INTO product_skus (product_id, sku, variant_name, stock_quantity) VALUES ($1, $2, $3, $4)`
+		for _, sku := range product.Skus {
+			_, err := db.Exec(skuQuery, productID, sku.SKU, sku.VariantName, sku.StockQuantity)
+			if err != nil {
+				log.Printf("error inserting sku: %v", err)
+				// Continue or fail? defaulting to log
+			}
+		}
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Added Product", "id": productID})
 }
 
 func DeleteProduct(c *gin.Context, db *sql.DB) {
@@ -167,6 +231,23 @@ func EditProduct(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update product"})
 		return
 	}
+
+	// Update SKUs: Delete existing and re-insert
+	_, err = db.Exec(`DELETE FROM product_skus WHERE product_id = $1`, productId)
+	if err != nil {
+		log.Printf("error deleting old skus: %v", err)
+	}
+
+	if len(product.Skus) > 0 {
+		skuQuery := `INSERT INTO product_skus (product_id, sku, variant_name, stock_quantity) VALUES ($1, $2, $3, $4)`
+		for _, sku := range product.Skus {
+			_, err := db.Exec(skuQuery, productId, sku.SKU, sku.VariantName, sku.StockQuantity)
+			if err != nil {
+				log.Printf("error inserting update sku: %v", err)
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "product updated successfully",
 		"result":  result,
@@ -186,6 +267,21 @@ func GetProduct(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
+	// Fetch SKUs
+	skuRows, err := db.Query(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`, product.ID)
+	if err == nil {
+		defer skuRows.Close()
+		for skuRows.Next() {
+			var sku ProductSKU
+			if err := skuRows.Scan(&sku.ID, &sku.ProductID, &sku.SKU, &sku.VariantName, &sku.StockQuantity); err == nil {
+				product.Skus = append(product.Skus, sku)
+			}
+		}
+	}
+	if product.Skus == nil {
+		product.Skus = []ProductSKU{}
+	}
+
 	c.JSON(http.StatusOK, product)
 }
 

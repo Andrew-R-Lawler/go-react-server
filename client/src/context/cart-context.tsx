@@ -6,13 +6,15 @@ export interface CartItem {
     price: number;
     image_url: string;
     quantity: number;
+    sku?: string;
+    variant_name?: string;
 }
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: any) => void;
-    removeFromCart: (id: number) => void;
-    updateQuantity: (id: number, quantity: number) => void;
+    addToCart: (product: any, variant?: any) => void;
+    removeFromCart: (id: number, variant_name?: string) => void;
+    updateQuantity: (id: number, quantity: number, variant_name?: string) => void;
     clearCart: () => void;
     cartCount: number;
     cartTotal: number;
@@ -43,12 +45,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('cart', JSON.stringify(items));
     }, [items]);
 
-    const addToCart = (product: any) => {
+    const addToCart = (product: any, variant?: any) => {
         setItems(prev => {
-            const existing = prev.find(item => item.id === product.id);
+            const existing = prev.find(item => item.id === product.id && item.variant_name === (variant?.variant_name || undefined));
             if (existing) {
                 return prev.map(item =>
-                    item.id === product.id
+                    item.id === product.id && item.variant_name === (variant?.variant_name || undefined)
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
@@ -58,23 +60,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 name: product.name,
                 price: product.on_sale ? product.sale_price : product.price,
                 image_url: product.images && product.images.length > 0 ? product.images[0] + `?t=${Date.now()}` : '',
-                quantity: 1
+                quantity: 1,
+                sku: variant?.sku,
+                variant_name: variant?.variant_name
             }];
         });
         setIsOpen(true); // Open cart when adding item
     };
 
-    const removeFromCart = (id: number) => {
-        setItems(prev => prev.filter(item => item.id !== id));
+    const removeFromCart = (id: number, variant_name?: string) => {
+        setItems(prev => prev.filter(item => !(item.id === id && item.variant_name === variant_name)));
     };
 
-    const updateQuantity = (id: number, quantity: number) => {
+    const updateQuantity = (id: number, quantity: number, variant_name?: string) => {
         if (quantity < 1) {
-            removeFromCart(id);
+            removeFromCart(id, variant_name);
             return;
         }
         setItems(prev => prev.map(item =>
-            item.id === id ? { ...item, quantity } : item
+            item.id === id && item.variant_name === variant_name ? { ...item, quantity } : item
         ));
     };
 

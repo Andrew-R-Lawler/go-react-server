@@ -1,3 +1,11 @@
+export interface ProductSKU {
+    id?: number
+    product_id?: number
+    sku: string
+    variant_name: string
+    stock_quantity: number
+}
+
 export interface Product {
     id: number
     name: string
@@ -9,4 +17,5 @@ export interface Product {
     sale_price: number
     long_description?: string
     featured: boolean
+    skus?: ProductSKU[]
 }

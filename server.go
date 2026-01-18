@@ -96,6 +96,20 @@ func main() {
 		log.Fatal("Failed to create products table:", err)
 	}
 
+	// Create Product SKUs Table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS product_skus (
+			id SERIAL PRIMARY KEY,
+			product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+			sku TEXT NOT NULL,
+			variant_name TEXT,
+			stock_quantity INTEGER NOT NULL
+		);
+	`)
+	if err != nil {
+		log.Fatal("Failed to create product_skus table:", err)
+	}
+
 	// Create Password Reset Table
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS password_reset (
