@@ -44,6 +44,15 @@ func GetJwtSecret() []byte {
 func SendVerificationEmail(token string, email string) error {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
+	smtpHost := os.Getenv("SMTP_HOST")
+
+	if smtpHost == "" {
+		smtpHost = "smtp.gmail.com"
+	}
+
+	if smtpUser == "" || smtpPass == "" {
+		return fmt.Errorf("SMTP config missing. User: '%s', Pass set: %v", smtpUser, smtpPass != "")
+	}
 
 	if smtpUser == "" || smtpPass == "" {
 		return fmt.Errorf("SMTP config missing. User: '%s', Pass set: %v", smtpUser, smtpPass != "")
@@ -84,7 +93,7 @@ func SendVerificationEmail(token string, email string) error {
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
-	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
+	client, err := mail.NewClient(smtpHost, mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
@@ -98,6 +107,11 @@ func SendVerificationEmail(token string, email string) error {
 func SendResetEmail(token string, email string) error {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
+	smtpHost := os.Getenv("SMTP_HOST")
+
+	if smtpHost == "" {
+		smtpHost = "smtp.gmail.com"
+	}
 
 	if smtpUser == "" || smtpPass == "" {
 		return fmt.Errorf("SMTP config missing. User: '%s', Pass set: %v", smtpUser, smtpPass != "")
@@ -139,7 +153,7 @@ func SendResetEmail(token string, email string) error {
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
-	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
+	client, err := mail.NewClient(smtpHost, mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
@@ -153,6 +167,11 @@ func SendResetEmail(token string, email string) error {
 func SendShippingEmail(email string, orderID int, trackingNumber string) error {
 	smtpUser := os.Getenv("SMTP_USER")
 	smtpPass := os.Getenv("SMTP_PASS")
+	smtpHost := os.Getenv("SMTP_HOST")
+
+	if smtpHost == "" {
+		smtpHost = "smtp.gmail.com"
+	}
 
 	if smtpUser == "" || smtpPass == "" {
 		return fmt.Errorf("SMTP config missing")
@@ -201,7 +220,7 @@ func SendShippingEmail(email string, orderID int, trackingNumber string) error {
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
-	client, err := mail.NewClient("smtp.gmail.com", mail.WithTLSPortPolicy(mail.TLSMandatory),
+	client, err := mail.NewClient(smtpHost, mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(smtpUser), mail.WithPassword(smtpPass), mail.WithPort(587))
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
