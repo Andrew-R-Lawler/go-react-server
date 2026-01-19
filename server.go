@@ -184,7 +184,10 @@ func main() {
 	userGroup.POST("/login", func(c *gin.Context) { handlers.Login(c, db) })
 	userGroup.GET("/verify/:token", func(c *gin.Context) { handlers.Verify(c, db) })
 	userGroup.POST("/forgotpassword", func(c *gin.Context) { handlers.ForgotPassword(c, db) })
+
 	userGroup.POST("/resetpassword", func(c *gin.Context) { handlers.ResetPassword(c, db) })
+
+	r.POST("/api/contact", handlers.SubmitContactForm)
 
 	shopGroup.GET("/products", func(c *gin.Context) { handlers.GetProducts(c, db) })
 	shopGroup.GET("/featured", func(c *gin.Context) { handlers.GetFeaturedProducts(c, db) })

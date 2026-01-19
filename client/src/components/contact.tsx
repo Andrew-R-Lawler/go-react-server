@@ -1,3 +1,7 @@
+import { useState } from "react"
+import axios from "axios"
+import { Loader2 } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,6 +9,34 @@ import { Label } from "@/components/ui/label"
 import { Mail, MapPin, Phone } from "lucide-react"
 
 export default function Contact() {
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const form = e.currentTarget
+        setIsLoading(true)
+
+        const formData = new FormData(form)
+        const data = {
+            first_name: formData.get('first-name'),
+            last_name: formData.get('last-name'),
+            email: formData.get('email'),
+            subject: formData.get('subject'),
+            message: formData.get('message'),
+        }
+
+        try {
+            await axios.post('/api/contact', data)
+            form.reset()
+            alert("Message Sent! We've received your message and will get back to you soon.")
+        } catch (error) {
+            console.error(error)
+            alert("Error: Failed to send message. Please try again later.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-12 px-4 md:px-8">
             <div className="max-w-7xl mx-auto space-y-12">
@@ -72,38 +104,42 @@ export default function Contact() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="first-name">First Name</Label>
-                                        <Input id="first-name" placeholder="John" />
+                                        <Input name="first-name" id="first-name" placeholder="John" required disabled={isLoading} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="last-name">Last Name</Label>
-                                        <Input id="last-name" placeholder="Doe" />
+                                        <Input name="last-name" id="last-name" placeholder="Doe" required disabled={isLoading} />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type="email" placeholder="john@example.com" />
+                                    <Input name="email" id="email" type="email" placeholder="john@example.com" required disabled={isLoading} />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="subject">Subject</Label>
-                                    <Input id="subject" placeholder="How can we help?" />
+                                    <Input name="subject" id="subject" placeholder="How can we help?" required disabled={isLoading} />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="message">Message</Label>
                                     <textarea
+                                        name="message"
                                         id="message"
                                         className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Tell us more about your inquiry..."
+                                        required
+                                        disabled={isLoading}
                                     />
                                 </div>
 
-                                <Button className="w-full text-lg h-12">
+                                <Button className="w-full text-lg h-12" disabled={isLoading}>
+                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Send Message
                                 </Button>
                             </form>
