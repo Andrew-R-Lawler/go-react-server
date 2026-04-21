@@ -28,7 +28,8 @@ A modern, full-stack e-commerce application built with **Go** (Golang) and **Rea
 - **Advanced Shopping Cart**: Add/remove items with a sleek sliding sidebar cart and quantity management.
 - **Checkout Processing**: Robust Stripe payment flow.
 - **User Accounts & Security**:
-  - Secure Registration & Login
+  - Secure Registration & Local Email/Password Login
+  - OAuth 2.0 Integration (Google & Facebook)
   - Database-backed Email Verification
   - Secure Password Reset flow (Forgot Password)
   - Detailed Order History
@@ -78,11 +79,18 @@ CONTACT_SMTP_HOST=smtp.gmail.com
 CONTACT_SMTP_USER=your_email@example.com
 CONTACT_SMTP_PASS=your_email_password
 
+# OAuth 2.0 Configuration (Google & Facebook)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+FACEBOOK_CLIENT_ID=your_facebook_client_id
+FACEBOOK_CLIENT_SECRET=your_facebook_client_secret
+
 # Deployment Domain & Security Config
 # NOTE: If deploying over a raw IP (e.g. Unraid network), leave COOKIE_DOMAIN entirely empty!
+# NOTE 2: APP_URL must be perfectly matched to your network domain/IP or Google OAuth redirects will be blocked.
 COOKIE_DOMAIN=
 COOKIE_SECURE=false
-APP_URL=http://your-server-ip:8080
+APP_URL=https://your-server-domain.com
 ```
 
 ### 2. Spinning up the Containers
