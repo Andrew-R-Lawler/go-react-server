@@ -80,12 +80,23 @@ func main() {
 		log.Fatal("Failed to create users table:", err)
 	}
 
-	// Safely alter existing table for OAuth migrations
+	// Safely alter existing table for OAuth migrations and Profile data
 	_, err = db.Exec(`
 		ALTER TABLE users ALTER COLUMN password DROP NOT NULL;
 		ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT 'local';
 		ALTER TABLE users ADD COLUMN IF NOT EXISTS oauth_id TEXT;
 		ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+		-- Profile & PII Fields (At-Rest Encryption targeted)
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line1 TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line2 TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS postal_code TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS country TEXT;
 	`)
 	if err != nil {
 		log.Printf("Warning: Failed to execute alter table on users: %v", err)
@@ -185,6 +196,11 @@ func main() {
 
 	protectedGroup.GET("/user", func(c *gin.Context) { handlers.GetUser(c) })
 	protectedGroup.POST("/logout", func(c *gin.Context) { handlers.Logout(c) })
+	
+	// User Profile
+	protectedGroup.GET("/profile", func(c *gin.Context) { handlers.GetProfile(c, db) })
+	protectedGroup.PUT("/profile", func(c *gin.Context) { handlers.UpdateProfile(c, db) })
+
 	protectedGroup.POST("/products", func(c *gin.Context) { handlers.AddProduct(c, db) })
 	protectedGroup.DELETE("/products/:id", func(c *gin.Context) {
 		handlers.DeleteProduct(c, db)

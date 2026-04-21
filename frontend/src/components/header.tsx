@@ -45,6 +45,11 @@ export function Header({ user, signOut }: HeaderProps) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-card border-border">
+                                    <DropdownMenuItem asChild>
+                                        <Link to="/profile" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                            My Profile
+                                        </Link>
+                                    </DropdownMenuItem>
                                     {user.verified && (
                                         <DropdownMenuItem asChild>
                                             <Link to="/orders" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
