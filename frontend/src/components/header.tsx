@@ -28,7 +28,7 @@ export function Header({ user, signOut }: HeaderProps) {
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity" />
+                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
                     </Link>
                 </li >
                 <li>
@@ -45,6 +45,11 @@ export function Header({ user, signOut }: HeaderProps) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-card border-border">
+                                    <DropdownMenuItem asChild>
+                                        <Link to="/profile" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">
+                                            My Profile
+                                        </Link>
+                                    </DropdownMenuItem>
                                     {user.verified && (
                                         <DropdownMenuItem asChild>
                                             <Link to="/orders" className="w-full cursor-pointer hover:bg-accent hover:text-accent-foreground">

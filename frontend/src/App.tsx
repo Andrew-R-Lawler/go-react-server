@@ -23,6 +23,7 @@ import About from './components/about'
 import Contact from './components/contact'
 import Completion from './components/completion'
 import Orders from './components/orders'
+import Profile from './components/profile'
 import FAQ from './components/faq'
 import Shipping from './components/shipping'
 import Returns from './components/returns'
@@ -126,6 +127,7 @@ function AppContent() {
                         <Route path='/manage-products' element={isAdmin() ? <ManageProducts /> : <Forbidden />} />
                         <Route path='/order-fulfillment' element={isAdmin() ? <OrderFulfillment /> : <Forbidden />} />
                         <Route path='/orders' element={<Orders />} />
+                        <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
                         <Route path="/faq" element={<FAQ />} />
                         <Route path="/shipping" element={<Shipping />} />
                         <Route path="/returns" element={<Returns />} />

@@ -11,7 +11,7 @@ import axios from "axios"
 import { User, Lock } from "lucide-react"
 
 // Revert to standard function to ensure render stability
-function CheckoutForm({ total, userEmail, isPaymentUpdating }: { total: number, userEmail?: string, isPaymentUpdating: boolean }) {
+function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile }: { total: number, userEmail?: string, isPaymentUpdating: boolean, userProfile?: any }) {
     console.log("Rendering CheckoutForm", { total, userEmail, isPaymentUpdating })
     const stripe = useStripe()
     const elements = useElements()
@@ -59,7 +59,21 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating }: { total: number, 
 
             <div className="space-y-4">
                 <h3 className="text-lg font-medium">Shipping Address</h3>
-                <AddressElement options={{ mode: 'shipping' }} />
+                <AddressElement options={{ 
+                    mode: 'shipping',
+                    defaultValues: userProfile ? {
+                        name: [userProfile.first_name, userProfile.last_name].filter(Boolean).join(" ") || undefined,
+                        phone: userProfile.phone || undefined,
+                        address: {
+                            line1: userProfile.address_line1 || undefined,
+                            line2: userProfile.address_line2 || undefined,
+                            city: userProfile.city || undefined,
+                            state: userProfile.state || undefined,
+                            postal_code: userProfile.postal_code || undefined,
+                            country: userProfile.country ? userProfile.country.toUpperCase() : undefined,
+                        }
+                    } : undefined
+                }} />
             </div>
 
             <div className="space-y-4">
@@ -104,6 +118,7 @@ function Checkout() {
     // Auth State
     const [isGuest, setIsGuest] = useState(false)
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
+    const [userProfile, setUserProfile] = useState<any>(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
@@ -149,6 +164,16 @@ function Checkout() {
                 if (res.status === 200) {
                     setIsLoggedIn(true)
                     setUserEmail(res.data.email)
+                    
+                    // Fetch profile for autofill
+                    try {
+                        const profileRes = await axios.get('/api/protected/profile', { withCredentials: true })
+                        if (profileRes.status === 200) {
+                            setUserProfile(profileRes.data)
+                        }
+                    } catch (e) {
+                         // ignore missing profile or fetch errors
+                    }
                 }
             } catch (err) {
                 // Not logged in (401), stay false
@@ -306,7 +331,7 @@ function Checkout() {
                                     }
                                 }} stripe={stripePromise}>
                                     <div className="min-h-[300px]">
-                                        <CheckoutForm total={total} userEmail={userEmail} isPaymentUpdating={isPaymentUpdating} />
+                                        <CheckoutForm total={total} userEmail={userEmail} isPaymentUpdating={isPaymentUpdating} userProfile={userProfile} />
                                     </div>
                                 </Elements>
                             ) : (
