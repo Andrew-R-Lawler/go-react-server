@@ -66,15 +66,29 @@ func main() {
 		CREATE TABLE IF NOT EXISTS users (
 			id SERIAL PRIMARY KEY,
 			email TEXT UNIQUE NOT NULL,
-			password TEXT NOT NULL,
+			password TEXT,
 			verified BOOLEAN DEFAULT FALSE,
 			admin BOOLEAN DEFAULT FALSE,
 			verification_token TEXT,
-			token_expiration TIMESTAMP
+			token_expiration TIMESTAMP,
+			auth_provider TEXT DEFAULT 'local',
+			oauth_id TEXT UNIQUE,
+			avatar_url TEXT
 		);
 	`)
 	if err != nil {
 		log.Fatal("Failed to create users table:", err)
+	}
+
+	// Safely alter existing table for OAuth migrations
+	_, err = db.Exec(`
+		ALTER TABLE users ALTER COLUMN password DROP NOT NULL;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT 'local';
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS oauth_id TEXT;
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+	`)
+	if err != nil {
+		log.Printf("Warning: Failed to execute alter table on users: %v", err)
 	}
 
 	// Create Products Table
@@ -142,21 +156,18 @@ func main() {
 		log.Fatal("Failed to create orders table:", err)
 	}
 
+	handlers.InitOAuth()
+
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
-
-
 
 	// todoGroup := r.Group("/api/todo", func(c *gin.Context) { authMiddleware(c) })
 	userGroup := r.Group("/api/user")
 	shopGroup := r.Group("/api/shop")
 	protectedGroup := r.Group("/api/protected", func(c *gin.Context) { authMiddleware(c) })
 
-	// todoGroup.GET("/", func(c *gin.Context) { handlers.GetTodos(c, db) })
-	// todoGroup.DELETE("/:id", func(c *gin.Context) { handlers.DeleteTodo(c, db) })
-	// todoGroup.POST("/", func(c *gin.Context) { handlers.PostTodo(c, db) })
-	// todoGroup.PUT("/:id", func(c *gin.Context) { handlers.UpdateTodo(c, db) })
-	// todoGroup.PUT("/completed/:id", func(c *gin.Context) { handlers.CompleteTodo(c, db) })
+	userGroup.GET("/auth/:provider", handlers.OAuthLogin)
+	userGroup.GET("/auth/:provider/callback", func(c *gin.Context) { handlers.OAuthCallback(c, db) })
 
 	userGroup.POST("/register", func(c *gin.Context) { handlers.Register(c, db) })
 	userGroup.POST("/login", func(c *gin.Context) { handlers.Login(c, db) })
