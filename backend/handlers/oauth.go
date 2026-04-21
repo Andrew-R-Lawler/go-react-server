@@ -125,10 +125,8 @@ func OAuthCallback(c *gin.Context, db *sql.DB) {
 	)
 	c.SetSameSite(http.SameSiteLaxMode)
 
-	// Redirect securely back to the frontend homepage
-	appURL := os.Getenv("APP_URL")
-	if appURL == "" {
-		appURL = "http://localhost:8080"
-	}
-	c.Redirect(http.StatusFound, appURL+"/")
+	// Redirect securely back to the frontend homepage using a relative root redirect.
+	// This ensures we always hit whatever IP/Port the user is accessing the proxy through,
+	// instead of forcefully redirecting to a potentially misconfigured APP_URL.
+	c.Redirect(http.StatusFound, "/")
 }
