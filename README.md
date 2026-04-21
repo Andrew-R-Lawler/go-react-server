@@ -1,165 +1,156 @@
-# Lorem Ipsum Store
+# go-react-server (Lorem Ipsum Store)
 
-A modern, full-stack e-commerce application built with **Go** (Golang) and **React**. This project demonstrates a complete online store with features like user authentication, product management, shopping cart, and Stripe payment integration.
+A modern, full-stack e-commerce application built with **Go** (Golang) and **React (Vite)**. The architecture has been completely decoupled and Dockerized to provide an enterprise-grade standalone backend and a blazing fast Nginx-proxied frontend. 
 
-![Project Banner](client/src/assets/home_showcase.png)
+![Project Banner](frontend/public/assets/home_showcase.png)
 
 ## 🚀 Tech Stack
 
 ### Backend
-- **Language:** [Go](https://go.dev/)
+- **Language:** [Go 1.20+](https://go.dev/)
 - **Framework:** [Gin Web Framework](https://gin-gonic.com/)
-- **Database:** PostgreSQL
-- **Authentication:** JWT (JSON Web Tokens)
-- **Payment Processing:** Stripe API
+- **Database:** PostgreSQL (Dockerized instances)
+- **Authentication:** JWT (JSON Web Tokens) with HttpOnly secure cookies
+- **Payment Processing:** Stripe API integration
 
 ### Frontend
-- **Framework:** [React](https://react.dev/) (Vite)
+- **Framework:** [React](https://react.dev/) + [Vite](https://vitejs.dev/)
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Shadcn/UI (Radix Primitives)
+- **Styling:** Tailwind CSS & Shadcn/UI
 - **State Management:** React Context API
+- **Web Server & Proxy:** Nginx (Serves React files and reverse-proxies all API traffic)
 
-## ✨ Features
+---
 
-- **Storefront**: Browse products, view details, "New Arrivals", "Featured" collections, and informational pages (FAQ, Shipping, Returns).
-- **Shopping Cart**: Add/remove items, adjust quantities.
-- **Checkout**: Integrated Stripe payment flow.
-- **User Accounts**:
+## ✨ Core Features
+
+- **Dynamic Storefront**: Browse products, view detailed pages, "New Arrivals", "Featured" collections, and core informational pages.
+- **Advanced Shopping Cart**: Add/remove items with a sleek sliding sidebar cart and quantity management.
+- **Checkout Processing**: Robust Stripe payment flow.
+- **User Accounts & Security**:
   - Secure Registration & Login
-  - Email Verification
-  - Password Reset (Forgot Password flow)
-  - Order History
+  - Database-backed Email Verification
+  - Secure Password Reset flow (Forgot Password)
+  - Detailed Order History
 - **Admin Dashboard**:
-  - Add, Edit, and Delete products
-  - Manage "On Sale" status and Sale Pricing
-  - Mark products as "Featured"
-- **Cookie Consent**: GDPR/CCPA compliant consent blocking with "Access Denied" fallback.
+  - Add, Edit, and Delete products securely
+  - Manage "On Sale" status and Sale Pricing overrides
+  - Mark products as "Featured" globally
+- **GDPR Cookie Consent**: Embedded consent controls with fallback mechanisms for blocked access.
 
-## �️ Getting Started
+---
+
+## 🛠️ Installation & Getting Started
 
 ### Prerequisites
 
-Ensure you have the following installed:
-- [Go](https://go.dev/dl/) (v1.20+)
-- [Node.js](https://nodejs.org/) & npm
-- [PostgreSQL](https://www.postgresql.org/)
+Ensure you have the following installed on your machine or server:
+- [Docker Engine](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-### Installation
+### 1. Environment variables
+Create a `.env` file in the root directory. Both the frontend and backend pull critical configuration from this single source of truth.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/lorem-ipsum-store.git
-    cd lorem-ipsum-store
-    ```
+```env
+# Backend Ports
+PORT=3000
 
-2.  **Database Setup:**
-    - Create a PostgreSQL database (e.g., `go_react_store`).
-    - The server will automatically migrate tables on startup.
+# PostgreSQL Configuration
+DB_HOST=db
+DB_USER=andrew
+DB_PASSWORD=YourPassword!
+DB_NAME=Ecotheory_DB
 
-3.  **Environment Variables:**
-    Create a `.env` file in the root directory:
-    ```env
-    PORT=3000
-    DB_HOST=localhost
-    DB_USER=your_db_user
-    DB_PASSWORD=your_db_password
-    DB_NAME=go_react_store
-    JWT_SECRET=your_jwt_secret_key
-    STRIPE_SECRET_KEY=your_stripe_secret_key
-    SMTP_USER=your_email@example.com
-    SMTP_PASS=your_email_password
-    VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-    ```
+# Security Keys
+JWT_SECRET_KEY=your_jwt_secret_key
 
-4.  **Backend Setup:**
-    ```bash
-    go mod download
-    ```
+# Stripe Processing Keys
+STRIPE_SECRET_KEY=your_stripe_secret_key
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 
-5.  **Frontend Setup:**
-    ```bash
-    cd client
-    npm install
-    npm run build
-    cd ..
-    ```
+# Core App Mailing Setup
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=your_email@example.com
+SMTP_PASS=your_email_password
 
-### Running the Application
+# Contact Page Mailing
+CONTACT_SMTP_HOST=smtp.gmail.com
+CONTACT_SMTP_USER=your_email@example.com
+CONTACT_SMTP_PASS=your_email_password
 
-1.  **Start the Go Server:**
-    The server hosts both the API and the React static files.
-    ```bash
-    go run server.go
-    ```
-    
-2.  **Access the App:**
-    Open your browser and navigate to `http://localhost:3000`.
-
-## 📂 Project Structure
-
+# Deployment Domain & Security Config
+# NOTE: If deploying over a raw IP (e.g. Unraid network), leave COOKIE_DOMAIN entirely empty!
+COOKIE_DOMAIN=
+COOKIE_SECURE=false
+APP_URL=http://your-server-ip:8080
 ```
-├── client/                 # React Frontend
+
+### 2. Spinning up the Containers
+To launch the application into a local development environment using the latest source code, use the standard `docker-compose.yml`:
+
+```bash
+docker compose up -d --build
+```
+This automatically boots a clean PostgreSQL instance, builds your Go backend binary, and bundles your React frontend before launching it behind an Nginx reverse proxy. 
+
+### 3. Accessing the Application
+Once the containers are successfully running, the full application is unified securely and accessible at:
+👉 **`http://localhost:8080`**
+
+*(Note: Never navigate to the raw port 3000 manually natively in the browser, Nginx proxies your API traffic instantly from 8080 automatically).*
+
+---
+
+## ☁️ Deployment (Unraid & Prebuilt Hosts)
+
+If you are deploying to a remote host (like Unraid), we've included a production-ready template that skips compiling code and strictly pulls the latest automated release images from Docker Hub.
+
+1. Create a persistent app data directory for your server.
+2. Provide your `.env` configuration file in the directory.
+3. Bring in the Unraid-specific compose template:
+   ```bash
+   docker compose -f docker-compose.unraid.yml up -d
+   ```
+*(Unraid users can also implement this template natively inside of the Unraid Docker Compose Manager UI plugin).*
+
+---
+
+## 📂 Project Architecture
+
+```text
+├── frontend/               # React Codebase
 │   ├── src/
-│   │   ├── components/     # UI Components & Pages
-│   │   ├── context/        # React Context (Auth, Cart, Cookies)
-│   │   └── assets/         # Images & Styles
-│   └── dist/               # Built static files (served by Go)
-├── handlers/               # Go Route Handlers
-│   ├── authhandlers.go     # Auth logic (Login, Register, etc.)
-│   ├── shophandlers.go     # Product & Shop logic
-│   ├── payment.go          # Stripe integration
-│   └── orders.go           # Order management
-├── server.go               # Main entry point & Route definitions
-├── go.mod                  # Go dependencies
-└── .env                    # Environment configuration
+│   │   ├── components/     # Primary UI Components & React Pages
+│   │   ├── context/        # React Context logic (Auth, Cart, Cookies)
+│   │   └── assets/         # Images, SVG data, and CSS
+│   ├── nginx.conf          # Nginx Reverse Proxy routing config
+│   └── Dockerfile          # Multi-stage Vite+Bun environment -> Nginx server
+│
+├── backend/                # Go Codebase
+│   ├── handlers/           # Route logic (Auth, Shop, Product, Payment)
+│   ├── server.go           # Gin Server Setup & Database Table Initialization
+│   └── Dockerfile          # Extremely lightweight Alpine Go deployment
+│
+├── docker-compose.yml      # Standard development compose stack
+├── docker-compose.unraid.yml # Pre-built registry image stack for deployments
+└── .env                    # Shared application configuration  (See template above)
 ```
-
-## � API Endpoints
-
-### Shop
-- `GET /api/shop/products` - List all products
-- `GET /api/shop/featured` - List featured products
-- `GET /api/shop/new-arrivals` - List 3 newest products
-
-### Auth
-- `POST /api/user/register` - Create account
-- `POST /api/user/login` - Login & receive HttpOnly cookie
-
-### Protected (Requires Auth)
-- `POST /api/protected/products` - Add Product (Admin)
-- `PUT /api/protected/editproduct/:id` - Edit Product (Admin)
-- `DELETE /api/protected/deleteproduct/:id` - Delete Product (Admin)
-- `GET /api/protected/orders` - View user orders
 
 ## 🧪 Testing
 
-### Backend Tests
-Run the Go test suite (includes integration tests for handlers and API endpoints):
+Both environments include robust testing suites.
+
+**Backend Tests:**
 ```bash
-go test ./...
+cd backend
+go test ./... -v
 ```
 
-### Frontend Tests
-Run the Vitest suite for React components and utilities:
+**Frontend Tests:**
 ```bash
-cd client
-npm run test
-```
-
-## ☁️ Deployment
-
-You can easily deploy this application on a Linux server (Ubuntu/Debian recommended) using the included deployment script. This script handles:
-- Environment variable configuration
-- Downloading the latest release
-- Setting up a `systemd` service for background execution
-
-Run the following command on your server:
-
-```bash
-curl -s https://raw.githubusercontent.com/Andrew-R-Lawler/go-react-server/refs/heads/main/scripts/deployment.sh | bash
+cd frontend
+bun run test
 ```
 
 ## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source and strictly available under the MIT License.
