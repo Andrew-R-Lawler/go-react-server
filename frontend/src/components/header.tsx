@@ -24,11 +24,11 @@ export function Header({ user, signOut }: HeaderProps) {
     const { setIsOpen, cartCount } = useCart()
 
     return (
-        <nav className='sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border-b border-border shadow-sm transition-colors duration-300'>
+        <nav className='sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-1 px-4 border-b border-border shadow-sm transition-colors duration-300'>
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
+                        <img src="/assets/image2vector.svg" width="65" height="65" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
                     </Link>
                 </li >
                 <li>
