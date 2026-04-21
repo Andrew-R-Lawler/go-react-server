@@ -14,7 +14,7 @@ function ManageProducts() {
 
     const fetchProducts = async () => {
         const response = await axios.get('/api/shop/products');
-        setProducts(response.data)
+        setProducts(response.data || [])
     }
 
     const handleDeleteProduct = async (product: Product) => {

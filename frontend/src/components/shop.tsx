@@ -18,7 +18,7 @@ function Shop() {
         try {
             const response = await axios.get('/api/shop/products')
             console.log("DEBUG: Shop fetched products:", response.data)
-            setProducts(response.data)
+            setProducts(response.data || [])
         } catch (error) {
             console.error('Error fetching products:', error)
         } finally {
