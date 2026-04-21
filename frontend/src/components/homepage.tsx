@@ -33,10 +33,10 @@ function HomePage() {
             <section className="relative py-20 px-6 md:px-12 lg:px-24 flex flex-col items-center text-center bg-muted/50 border-b border-border transition-colors duration-300">
                 <div className="max-w-3xl space-y-6">
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-4">
-                        Quality Products for <span className="text-muted-foreground">Lorem Ipsum</span>
+                        Quality Products for <span className="text-muted-foreground">Radiant Skin</span>
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+                        Discover our collection of handcrafted, eco-friendly soaps. Made with natural ingredients to nourish your skin and protect our planet.
                     </p>
                     <div className="pt-4">
                         <Link to="/shop">
@@ -123,13 +123,13 @@ function HomePage() {
                         <h2 className="text-3xl md:text-4xl font-bold text-foreground">Discover Our Philosophy</h2>
                         <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
                             <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                                At Eco Theory, we believe that true beauty begins with the earth. Our journey started with a simple mission: to craft luxurious, deeply nourishing soaps without compromising our commitment to the environment. Every bar is a testament to our dedication to organic farming, sustainable sourcing, and cruelty-free practices.
                             </p>
                             <p>
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+                                We carefully select the finest botanical extracts, essential oils, and mineral-rich clays to create blends that not only cleanse but rejuvenate your skin and spirit. By eliminating harsh chemicals and synthetic fragrances, we ensure that what washes down your drain is as gentle on the earth as it is on your body.
                             </p>
                             <p>
-                                Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+                                Join us in our movement towards a cleaner, more sustainable future. With packaging that is 100% biodegradable and processes designed to minimize our carbon footprint, Eco Theory is more than just skincare—it is a promise to preserve the natural harmony of our shared world.
                             </p>
                         </div>
                         <div className="pt-4">

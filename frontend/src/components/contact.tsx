@@ -45,7 +45,7 @@ export default function Contact() {
                 <div className="text-center space-y-4">
                     <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">Get in Touch</h1>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Do you have questions? We'd love to hear from you.
+                        Do you have questions about our ingredients or want to partner with us? We'd love to hear from you.
                     </p>
                 </div>
 
@@ -64,8 +64,8 @@ export default function Contact() {
                                     <div>
                                         <h3 className="font-medium">Headquarters</h3>
                                         <p className="text-muted-foreground">
-                                            123 Lorem Ipsum Avenue<br />
-                                            Sit Amet City, 90210<br />
+                                            123 Sustainable Way<br />
+                                            Portland, OR 97204<br />
                                             United States
                                         </p>
                                     </div>
@@ -81,7 +81,7 @@ export default function Contact() {
                                     <Mail className="h-6 w-6 text-primary" />
                                     <div>
                                         <h3 className="font-medium">Email</h3>
-                                        <p className="text-muted-foreground">support@loremipsum.com</p>
+                                        <p className="text-muted-foreground">hello@ecotheory.com</p>
                                     </div>
                                 </div>
                             </CardContent>

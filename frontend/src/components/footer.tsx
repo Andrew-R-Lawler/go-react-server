@@ -37,7 +37,7 @@ export function Footer() {
                     </ul>
                 </div>
             </div>
-            <p>&copy; {new Date().getFullYear()} Lorem Ipsum Store. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Eco Theory Soap Co. All rights reserved.</p>
         </footer>
     )
 }
