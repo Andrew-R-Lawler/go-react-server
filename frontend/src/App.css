@@ -4,26 +4,26 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-.kaushan-script-regular {
-  font-family: "Kaushan Script", cursive;
+.inter-regular {
+  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-style: normal;
 }
 
-.kaushan-script-medium {
-  font-family: "Kaushan Script", cursive;
+.inter-medium {
+  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-style: normal;
 }
 
-.kaushan-script-semibold {
-  font-family: "Kaushan Script", cursive;
+.inter-semibold {
+  font-family: "Inter", sans-serif;
   font-weight: 600;
   font-style: normal;
 }
 
-.kaushan-script-bold {
-  font-family: "Kaushan Script", cursive;
+.inter-bold {
+  font-family: "Inter", sans-serif;
   font-weight: 700;
   font-style: normal;
 }
@@ -123,6 +123,6 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Kaushan Script", cursive;
+    font-family: "Inter", sans-serif;
   }
 }
