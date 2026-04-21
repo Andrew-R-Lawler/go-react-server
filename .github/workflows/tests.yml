@@ -31,7 +31,9 @@ jobs:
         echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
 
     - name: Test Backend
-      run: go test -v
+      run: |
+        cd backend
+        go test -v
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -45,10 +47,10 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd client
+        cd frontend
         bun install
 
     - name: Test Frontend
       run: |
-        cd client
+        cd frontend
         bun run test -- --run

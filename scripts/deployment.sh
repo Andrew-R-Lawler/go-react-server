@@ -126,7 +126,7 @@ unzip -o -q gin-server.zip
 rm gin-server.zip
 print_success "Extraction complete."
 
-BINARY_PATH="./client/dist/binary/gin-server"
+BINARY_PATH="./backend/gin-server"
 if [ ! -f "$BINARY_PATH" ]; then
     print_error "Binary not found at $BINARY_PATH. Deployment failed."
     exit 1
