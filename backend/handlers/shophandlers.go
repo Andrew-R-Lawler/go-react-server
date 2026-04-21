@@ -72,6 +72,9 @@ func GetProducts(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while iterating products"})
 		return
 	}
+	if products == nil {
+		products = []Product{}
+	}
 	c.JSON(http.StatusOK, products)
 }
 
