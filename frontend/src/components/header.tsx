@@ -28,7 +28,7 @@ export function Header({ user, signOut }: HeaderProps) {
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity" />
+                        <img src="/assets/image2vector.svg" width="50" height="50" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
                     </Link>
                 </li >
                 <li>
