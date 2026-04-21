@@ -6,12 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
+
 
 	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"github.com/stripe/stripe-go/v74"
 
-	"github.com/gin-contrib/static"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -145,29 +145,7 @@ func main() {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1:3000"}) // change nil to a slice of strings containing trusted proxy IPs for production
 
-	// Serve static assets from dist folder (both images and build artifacts)
-	// Custom Asset Handler for Debugging
-	r.GET("/assets/*filepath", func(c *gin.Context) {
-		param := c.Param("filepath")
-		localPath := filepath.Join("./client/dist/assets", param)
 
-		log.Printf("DEBUG: Asset Request: URL=%s, Param=%s, LocalPath=%s\n", c.Request.URL.Path, param, localPath)
-
-		if info, err := os.Stat(localPath); err == nil {
-			log.Printf("DEBUG: File found, serving... Size: %d bytes\n", info.Size())
-			c.File(localPath)
-		} else {
-			log.Printf("DEBUG: File NOT found: %v\n", err)
-			c.Status(http.StatusNotFound)
-		}
-	})
-
-	// r.Static("/assets", "./client/dist/assets")
-
-	r.Use(static.Serve("/", static.LocalFile("./client/dist", true)))
-	r.NoRoute(func(c *gin.Context) {
-		c.File(filepath.Join("./client/dist", "index.html"))
-	})
 
 	// todoGroup := r.Group("/api/todo", func(c *gin.Context) { authMiddleware(c) })
 	userGroup := r.Group("/api/user")

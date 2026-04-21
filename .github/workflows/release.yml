@@ -21,22 +21,28 @@ jobs:
       with:
         bun-version: latest
 
-    - name: Build Client
+    - name: Build Frontend
       run: |
-        cd client
+        cd frontend
         bun install
         bun run build
 
-    - name: Prepare Binary Directory
-      run: mkdir ./client/dist/binary
-
-    - name: Build Binary
+    - name: Build Backend
       run: |
+        cd backend
         go build -o gin-server ./
-        mv ./gin-server ./client/dist/binary/
+
+    - name: Prepare Release Directory
+      run: |
+        mkdir -p release/frontend
+        mkdir -p release/backend
+        cp -r frontend/dist/* release/frontend/
+        cp backend/gin-server release/backend/
 
     - name: Create Release Archive
-      run: zip -r gin-server.zip ./client/dist/*
+      run: |
+        cd release
+        zip -r ../gin-server.zip ./*
       
 
     - name: Create Release
