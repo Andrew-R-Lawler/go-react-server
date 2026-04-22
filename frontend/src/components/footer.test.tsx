@@ -34,6 +34,6 @@ describe('Footer Component', () => {
             </MemoryRouter>
         )
         const year = new Date().getFullYear()
-        expect(screen.getByText(new RegExp(`${year} Lorem Ipsum Store`, 'i'))).toBeInTheDocument()
+        expect(screen.getByText(new RegExp(`${year} Eco Theory Soap Co.`, 'i'))).toBeInTheDocument()
     })
 })

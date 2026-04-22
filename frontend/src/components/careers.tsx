@@ -23,9 +23,8 @@ function Careers() {
                 <section className="text-center">
                     <h2 className="text-2xl font-bold mb-4">Why Work With Us?</h2>
                     <p className="text-muted-foreground leading-relaxed">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris.
-                        Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus
-                        rhoncus ut eleifend nibh porttitor. Ut in nulla enim.
+                        We are always looking for passionate individuals who share our vision for sustainable skincare.
+                        Join us in our mission to change the world, one bar of soap at a time.
                     </p>
                 </section>
 
@@ -99,7 +98,7 @@ function Careers() {
                     <p className="text-muted-foreground mb-6">
                         We are always interested in meeting great people. Send us your resume and we'll keep you in mind for future openings.
                     </p>
-                    <a href="mailto:careers@example.com">
+                    <a href="mailto:hello@ecotheory.com">
                         <Button>Contact Us</Button>
                     </a>
                 </section>

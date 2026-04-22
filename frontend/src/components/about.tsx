@@ -19,10 +19,10 @@ function AboutUs() {
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold border-l-4 border-primary pl-4">Our Mission</h2>
                         <p className="text-lg text-muted-foreground leading-relaxed">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            Welcome to Eco Theory, where our passion for natural living meets the art of artisanal soap making. Founded on the principle that self-care should not come at the expense of our planet, we strive to bring you the purest elements of nature in every bar.
                         </p>
                         <p className="text-lg text-muted-foreground leading-relaxed">
-                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            We believe that beauty routines shouldn't burden the earth. That's why we meticulously source natural, cruelty-free ingredients and package everything in biodegradable materials.
                         </p>
                     </div>
                     <div className="bg-muted aspect-video rounded-lg flex items-center justify-center text-muted-foreground bg-stone-100 dark:bg-stone-800">
@@ -57,7 +57,7 @@ function AboutUs() {
                 <section className="bg-muted/30 p-8 md:p-12 rounded-2xl border border-border">
                     <h2 className="text-3xl font-bold mb-6 text-center">Our Story</h2>
                     <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+                        Our ingredients are ethically harvested from sustainable sources, ensuring that we support local communities and protect biodiversity. From the organic shea butter that heals your skin to the wild-crafted lavender that soothes your mind, every aspect of our product is designed with intention and respect for the environment.
                     </p>
                 </section>
             </main>
