@@ -18,6 +18,8 @@ services:
     # Optional: Expose 3000 to host if you want to bypass Nginx
     ports:
       - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
     env_file:
       - .env
     environment:
@@ -30,9 +32,12 @@ services:
     image: kernelmustang/go-react-server-frontend:latest
     ports:
       - "8080:80"
+    volumes:
+      - uploads_data:/usr/share/nginx/html/uploads
     depends_on:
       - backend
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  uploads_data:
