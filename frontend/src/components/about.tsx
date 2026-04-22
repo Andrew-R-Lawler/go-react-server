@@ -8,7 +8,7 @@ function AboutUs() {
                 <div className="max-w-4xl mx-auto px-6 text-center">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">About Us</h1>
                     <p className="text-xl text-muted-foreground leading-relaxed">
-                        We are building the future of [Your Industry]. Driven by passion, innovation, and a commitment to excellence.
+                        We are crafting the future of natural skincare. Driven by a passion for the earth, botanical innovation, and a commitment to purity.
                     </p>
                 </div>
             </div>
@@ -37,8 +37,8 @@ function AboutUs() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
                             { title: "Sustainability", icon: "🌱", desc: "Dedicated to eco-friendly practices and reducing our environmental footprint" },
-                            { title: "Integrity", icon: "🤝", desc: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua" },
-                            { title: "Quality", icon: "✨", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco" }
+                            { title: "Integrity", icon: "🤝", desc: "Honest sourcing and transparent ingredients in everything we make" },
+                            { title: "Quality", icon: "✨", desc: "Handcrafted in small batches to ensure the highest standards of purity" }
                         ].map((value, index) => (
                             <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 bg-card border-border">
                                 <CardHeader>
