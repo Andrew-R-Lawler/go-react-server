@@ -296,6 +296,15 @@ type Asset struct {
 	ModTime time.Time `json:"mod_time"`
 }
 
+func getAssetsDir() string {
+	dir := os.Getenv("ASSETS_DIR")
+	if dir == "" {
+		dir = "./uploads"
+	}
+	os.MkdirAll(dir, 0755)
+	return dir
+}
+
 // ListAssets returns all files in the assets directory
 func ListAssets(c *gin.Context) {
 	// Verify admin
@@ -305,7 +314,7 @@ func ListAssets(c *gin.Context) {
 		return
 	}
 
-	assetsDir := "./client/dist/assets"
+	assetsDir := getAssetsDir()
 	entries, err := os.ReadDir(assetsDir)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read assets directory"})
@@ -327,7 +336,7 @@ func ListAssets(c *gin.Context) {
 			}
 			assets = append(assets, Asset{
 				Name:    entry.Name(),
-				URL:     "/assets/" + entry.Name(),
+				URL:     "/uploads/" + entry.Name(),
 				Size:    info.Size(),
 				ModTime: info.ModTime(),
 			})
@@ -370,7 +379,8 @@ func UploadAsset(c *gin.Context) {
 	filename := filepath.Base(header.Filename)
 	filename = strings.ReplaceAll(filename, " ", "_")
 
-	targetPath := filepath.Join("./client/dist/assets", filename)
+	assetsDir := getAssetsDir()
+	targetPath := filepath.Join(assetsDir, filename)
 
 	// Save file
 	dst, err := os.Create(targetPath)
@@ -385,21 +395,9 @@ func UploadAsset(c *gin.Context) {
 		return
 	}
 
-	// Helper: Also try to save to source directory if it exists, for persistence in dev environment
-	// This is "best effort" and won't fail the request if it fails
-	sourcePath := filepath.Join("./client/public/assets", filename)
-	if _, err := os.Stat("./client/public/assets"); err == nil {
-		// Re-open source file to copy again
-		file.Seek(0, 0)
-		if srcDst, err := os.Create(sourcePath); err == nil {
-			io.Copy(srcDst, file)
-			srcDst.Close()
-		}
-	}
-
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "File uploaded successfully",
-		"url":     "/assets/" + filename,
+		"url":     "/uploads/" + filename,
 		"name":    filename,
 	})
 }
@@ -421,7 +419,8 @@ func DeleteAsset(c *gin.Context) {
 		return
 	}
 
-	targetPath := filepath.Join("./client/dist/assets", filename)
+	assetsDir := getAssetsDir()
+	targetPath := filepath.Join(assetsDir, filename)
 
 	if err := os.Remove(targetPath); err != nil {
 		if os.IsNotExist(err) {
@@ -431,10 +430,6 @@ func DeleteAsset(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
 		return
 	}
-
-	// Also try to delete from source if exists
-	sourcePath := filepath.Join("./client/public/assets", filename)
-	os.Remove(sourcePath) // Ignore errors
 
 	c.JSON(http.StatusOK, gin.H{"message": "File deleted successfully"})
 }
