@@ -53,7 +53,7 @@ function HomePage() {
                 <div className="mb-12 text-center">
                     <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Collection</h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        Explore our latest creations, carefully blended for the season to bring you fresh, revitalizing botanical nourishment.
                     </p>
                 </div>
 
@@ -156,17 +156,17 @@ function HomePage() {
                     <div className="p-6">
                         <div className="h-12 w-12 bg-accent rounded-full mx-auto mb-4 flex items-center justify-center text-2xl">🚛</div>
                         <h3 className="text-xl font-bold mb-2 text-foreground">Fast Shipping</h3>
-                        <p className="text-muted-foreground">Duis aute irure dolor in reprehenderit.</p>
+                        <p className="text-muted-foreground">Eco-friendly, carbon-neutral shipping straight to your door.</p>
                     </div>
                     <div className="p-6">
                         <div className="h-12 w-12 bg-accent rounded-full mx-auto mb-4 flex items-center justify-center text-2xl">🛡️</div>
                         <h3 className="text-xl font-bold mb-2 text-foreground">Secure Payment</h3>
-                        <p className="text-muted-foreground">Excepteur sint occaecat cupidatat non proident.</p>
+                        <p className="text-muted-foreground">Complete peace of mind with our safe and encrypted checkout.</p>
                     </div>
                     <div className="p-6">
                         <div className="h-12 w-12 bg-accent rounded-full mx-auto mb-4 flex items-center justify-center text-2xl">✨</div>
                         <h3 className="text-xl font-bold mb-2 text-foreground">Top Quality</h3>
-                        <p className="text-muted-foreground">Sunt in culpa qui officia deserunt mollit.</p>
+                        <p className="text-muted-foreground">Every product is quality checked for purity and performance.</p>
                     </div>
                 </div>
             </section>

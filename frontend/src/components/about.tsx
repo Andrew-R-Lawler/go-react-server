@@ -22,7 +22,7 @@ function AboutUs() {
                             Welcome to Eco Theory, where our passion for natural living meets the art of artisanal soap making. Founded on the principle that self-care should not come at the expense of our planet, we strive to bring you the purest elements of nature in every bar.
                         </p>
                         <p className="text-lg text-muted-foreground leading-relaxed">
-                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            We believe that beauty routines shouldn't burden the earth. That's why we meticulously source natural, cruelty-free ingredients and package everything in biodegradable materials.
                         </p>
                     </div>
                     <div className="bg-muted aspect-video rounded-lg flex items-center justify-center text-muted-foreground bg-stone-100 dark:bg-stone-800">
