@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Separator } from "./ui/separator"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { Button } from "./ui/button"
+import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react"
 
 function FAQ() {
+    const navigate = useNavigate()
     const faqs = [
         {
             question: "What is your return policy?",
@@ -40,6 +43,12 @@ function FAQ() {
     return (
         <div className="min-h-screen bg-background text-foreground py-12 px-6 lg:px-24">
             <div className="max-w-3xl mx-auto space-y-8">
+                <div className="mb-6">
+                    <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </Button>
+                </div>
                 <div className="text-center space-y-4">
                     <h1 className="text-4xl font-bold tracking-tight text-primary">Frequently Asked Questions</h1>
                     <p className="text-muted-foreground text-lg">

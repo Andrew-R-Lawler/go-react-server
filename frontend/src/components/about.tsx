@@ -1,10 +1,20 @@
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 function AboutUs() {
+    const navigate = useNavigate()
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             {/* Hero Section */}
-            <div className="bg-muted py-16 md:py-24 animate-in fade-in duration-700">
+            <div className="bg-muted py-8 md:py-16 animate-in fade-in duration-700">
+                <div className="max-w-7xl mx-auto px-6 mb-8">
+                    <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </Button>
+                </div>
                 <div className="max-w-4xl mx-auto px-6 text-center">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">About Us</h1>
                     <p className="text-xl text-muted-foreground leading-relaxed">
