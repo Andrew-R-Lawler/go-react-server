@@ -5,6 +5,7 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, ArrowLeft } from "lucide-react"
 import { useCart } from "@/context/cart-context"
+import { SEO } from './seo'
 
 import { Product } from '@/types'
 
@@ -33,6 +34,10 @@ function Shop() {
 
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+            <SEO 
+                title="Shop All" 
+                description="Browse our complete collection of artisan soaps and natural skincare products. Sustainable beauty for every skin type."
+            />
             {/* Hero Header */}
             <div className="bg-muted py-8 mb-8 animate-in fade-in duration-700">
                 <div className="max-w-7xl mx-auto px-4 mb-4">

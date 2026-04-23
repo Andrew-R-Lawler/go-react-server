@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Product } from '@/types'
 import { Footer } from './footer'
+import { SEO } from './seo'
 
 function HomePage() {
     const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -29,6 +30,10 @@ function HomePage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+            <SEO 
+                title="Home" 
+                description="Welcome to Ecotheory Cosmetics. Discover our handcrafted, eco-friendly soaps and natural skincare collection."
+            />
             {/* Hero Section */}
             <section className="relative py-20 px-6 md:px-12 lg:px-24 flex flex-col items-center text-center bg-muted/50 border-b border-border transition-colors duration-300">
                 <div className="max-w-3xl space-y-6">
