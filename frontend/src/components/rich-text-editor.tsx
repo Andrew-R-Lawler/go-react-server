@@ -5,6 +5,7 @@ import Link from '@tiptap/extension-link'
 import BulletList from '@tiptap/extension-bullet-list'
 import OrderedList from '@tiptap/extension-ordered-list'
 import ListItem from '@tiptap/extension-list-item'
+import HardBreak from '@tiptap/extension-hard-break'
 import { Button } from './ui/button'
 import {
     Bold,
@@ -16,7 +17,8 @@ import {
     Heading2,
     Quote,
     Undo,
-    Redo
+    Redo,
+    WrapText
 } from 'lucide-react'
 import { useEffect } from 'react'
 
@@ -48,6 +50,9 @@ export function RichTextEditor({ value, onChange, disabled }: RichTextEditorProp
             ListItem,
             Link.configure({
                 openOnClick: false,
+            }),
+            HardBreak.configure({
+                keepMarks: false,
             }),
         ],
         content: value,
@@ -156,6 +161,16 @@ export function RichTextEditor({ value, onChange, disabled }: RichTextEditorProp
                     disabled={disabled}
                 >
                     <Quote className="h-4 w-4" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editor.chain().focus().setHardBreak().run()}
+                    disabled={disabled}
+                    title="Insert Line Break (Shift+Enter)"
+                >
+                    <WrapText className="h-4 w-4" />
                 </Button>
                 <div className="w-[1px] h-4 bg-border self-center mx-1" />
                 <Button
