@@ -16,8 +16,7 @@ import {
     Heading2,
     Quote,
     Undo,
-    Redo,
-    Link as LinkIcon
+    Redo
 } from 'lucide-react'
 import { useEffect } from 'react'
 
@@ -28,7 +27,7 @@ interface RichTextEditorProps {
     disabled?: boolean
 }
 
-export function RichTextEditor({ value, onChange, placeholder, disabled }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, disabled }: RichTextEditorProps) {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
