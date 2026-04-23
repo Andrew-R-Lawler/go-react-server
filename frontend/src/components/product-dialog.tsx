@@ -12,6 +12,7 @@ import {
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
+import { RichTextEditor } from "./rich-text-editor"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Minus, Loader2, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -35,6 +36,7 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
     const [pickerOpen, setPickerOpen] = useState(false)
     const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
     const [skus, setSkus] = useState<ProductSKU[]>([])
+    const [longDescription, setLongDescription] = useState("")
 
     // Initialize images when product changes or dialog opens
     useEffect(() => {
@@ -51,9 +53,11 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                 } else {
                     setSkus([])
                 }
+                setLongDescription(product.long_description || "")
             } else {
                 setSkus([])
                 setImageUrls([''])
+                setLongDescription("")
             }
         }
     }, [product, open])
@@ -137,6 +141,7 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
             <DialogContent className="sm:max-w-[425px] md:max-w-[600px] overflow-y-auto max-h-[90vh]">
                 <form onSubmit={onSubmitWrapper}>
                     <input type="hidden" name="skus" value={JSON.stringify(skus)} />
+                    <input type="hidden" name="long-description" value={longDescription} />
                     <DialogHeader>
                         <DialogTitle>{isEditMode ? "Edit Product" : "Add New Product"}</DialogTitle>
                         <DialogDescription>
@@ -249,12 +254,10 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
 
                         <div className="space-y-2">
                             <Label htmlFor="long-description">Long Description</Label>
-                            <Textarea
-                                id="long-description"
-                                name="long-description"
+                            <RichTextEditor
+                                value={longDescription}
+                                onChange={setLongDescription}
                                 placeholder="Detailed description for product page..."
-                                defaultValue={product?.long_description}
-                                className="min-h-[100px]"
                                 disabled={isLoading}
                             />
                         </div>

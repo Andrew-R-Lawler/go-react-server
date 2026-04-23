@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, ArrowLeft } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 
 import { Product } from '@/types'
 
 function NewArrivals() {
+    const navigate = useNavigate()
     const [products, setProducts] = useState<Product[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const { addToCart } = useCart()
@@ -37,7 +38,13 @@ function NewArrivals() {
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             {/* Hero Header */}
-            <div className="bg-muted py-12 mb-8">
+            <div className="bg-muted py-8 mb-8 animate-in fade-in duration-700">
+                <div className="max-w-7xl mx-auto px-4 mb-4">
+                    <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </Button>
+                </div>
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">New Arrivals</h1>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

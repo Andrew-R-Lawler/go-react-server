@@ -121,11 +121,10 @@ export default function ProductDetails() {
 
                     <Separator />
 
-                    <div className="prose prose-neutral dark:prose-invert max-w-none">
-                        <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                            {product.long_description || product.description || "No description available."}
-                        </p>
-                    </div>
+                    <div 
+                        className="prose prose-neutral dark:prose-invert max-w-none text-muted-foreground"
+                        dangerouslySetInnerHTML={{ __html: product.long_description || product.description || "No description available." }}
+                    />
 
                     <div className="mt-auto space-y-4">
                         {/* Variant Selector */}

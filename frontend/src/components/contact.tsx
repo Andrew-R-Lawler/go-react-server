@@ -1,6 +1,7 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import axios from "axios"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Mail, MapPin, Phone } from "lucide-react"
 
 export default function Contact() {
+    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -40,6 +42,12 @@ export default function Contact() {
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-12 px-4 md:px-8">
             <div className="max-w-7xl mx-auto space-y-12">
+                <div className="mb-6">
+                    <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </Button>
+                </div>
 
                 {/* Header */}
                 <div className="text-center space-y-4">
