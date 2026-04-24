@@ -4,12 +4,14 @@ interface CookieConsentContextProps {
     consentGiven: boolean | null;
     analyticsConsent: boolean | null;
     setConsent: (essential: boolean, analytics: boolean) => void;
+    resetConsent: () => void;
 }
 
 export const CookieConsentContext = createContext<CookieConsentContextProps>({
     consentGiven: null,
     analyticsConsent: null,
-    setConsent: () => { }
+    setConsent: () => { },
+    resetConsent: () => { }
 });
 
 interface ProviderProps {
@@ -58,8 +60,19 @@ export const CookieConsentProvider: React.FC<ProviderProps> = ({ children }) => 
         document.cookie = `cookie_consent=${cookieValue}; path=/; max-age=31536000`;
     };
 
+    const resetConsent = () => {
+        localStorage.removeItem('cookieConsent');
+        localStorage.removeItem('analyticsConsent');
+        document.cookie = 'cookie_consent=; path=/; max-age=0';
+        setConsentGiven(null);
+        setAnalyticsConsent(null);
+        if ((window as any)._paq) {
+            (window as any)._paq.push(['optUserOut']); // default to opt out when revoked
+        }
+    };
+
     return (
-        <CookieConsentContext.Provider value={{ consentGiven, analyticsConsent, setConsent }}>
+        <CookieConsentContext.Provider value={{ consentGiven, analyticsConsent, setConsent, resetConsent }}>
             {children}
         </CookieConsentContext.Provider>
     );
