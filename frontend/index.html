@@ -15,20 +15,22 @@
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
-    (function() {
-      var u="//matomo.lawl3r.net/";
-      _paq.push(['setTrackerUrl', u+'matomo.php']);
+    (function () {
+      var u = "//matomo.lawl3r.net/";
+      _paq.push(['setTrackerUrl', u + 'matomo.php']);
       _paq.push(['setSiteId', '1']);
-      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-      g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+      g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
     })();
   </script>
   <!-- End Matomo Code -->
-
+  <meta name="google-site-verification" content="rYHfyU421_K6XIk9-gyIkG7s8y2tPJJjDaeDBiyGSeo" />
 </head>
 
 <body>
-  <noscript><p><img src="//matomo.lawl3r.net/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+  <noscript>
+    <p><img src="//matomo.lawl3r.net/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p>
+  </noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
