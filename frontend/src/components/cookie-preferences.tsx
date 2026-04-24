@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { CookieConsentContext } from '@/context/cookie-consent-context'
 import { Button } from '@/components/ui/button'
 import { SEO } from './seo'
@@ -6,11 +6,18 @@ import { Switch } from '@/components/ui/switch'
 
 export default function CookiePreferences() {
     const { analyticsConsent, setConsent } = useContext(CookieConsentContext)
+    const [localAnalyticsConsent, setLocalAnalyticsConsent] = useState<boolean>(analyticsConsent === true)
+    const [savedMessage, setSavedMessage] = useState<string | null>(null)
 
-    // Local state to handle toggles before saving
-    // If they haven't set it yet, default to false (opt-out) for analytics in this view
+    // Sync local state if context changes
+    useEffect(() => {
+        setLocalAnalyticsConsent(analyticsConsent === true)
+    }, [analyticsConsent])
+
     const handleSave = (analytics: boolean) => {
         setConsent(true, analytics)
+        setSavedMessage("Preferences saved successfully!")
+        setTimeout(() => setSavedMessage(null), 3000)
     }
 
     return (
@@ -49,20 +56,25 @@ export default function CookiePreferences() {
                         </div>
                         <div className="pt-1">
                             <Switch 
-                                checked={analyticsConsent === true} 
-                                onCheckedChange={(checked) => handleSave(checked)}
+                                checked={localAnalyticsConsent} 
+                                onCheckedChange={(checked) => setLocalAnalyticsConsent(checked)}
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-4 pt-4">
-                    <Button onClick={() => handleSave(analyticsConsent === true)}>
+                <div className="flex items-center gap-4 pt-4">
+                    <Button onClick={() => handleSave(localAnalyticsConsent)}>
                         Save Preferences
                     </Button>
                     <Button variant="outline" onClick={() => handleSave(true)}>
                         Accept All Cookies
                     </Button>
+                    {savedMessage && (
+                        <span className="text-green-500 text-sm animate-in fade-in duration-300">
+                            {savedMessage}
+                        </span>
+                    )}
                 </div>
             </div>
         </div>
