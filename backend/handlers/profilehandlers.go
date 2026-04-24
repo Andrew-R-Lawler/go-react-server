@@ -107,3 +107,22 @@ func UpdateProfile(c *gin.Context, db *sql.DB) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully"})
 }
+
+func DeleteProfile(c *gin.Context, db *sql.DB) {
+	userID, exists := c.Get("id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := db.Exec(query, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete account"})
+		return
+	}
+
+	c.SetCookie("auth_token", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
+}

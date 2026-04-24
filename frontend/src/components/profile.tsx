@@ -159,6 +159,25 @@ export default function Profile() {
                         </Button>
                     </div>
                 </form>
+
+                <div className="mt-16 border-t border-border pt-8">
+                    <h2 className="text-xl font-bold text-destructive mb-2">Danger Zone</h2>
+                    <p className="text-muted-foreground mb-4">
+                        Permanently delete your account and all associated profile data. This action cannot be undone. For tax purposes, past order receipts are securely retained.
+                    </p>
+                    <Button variant="destructive" onClick={async () => {
+                        if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+                            try {
+                                await axios.delete("/api/protected/profile", { withCredentials: true })
+                                window.location.href = "/"
+                            } catch (err) {
+                                setMessage({ text: "Failed to delete account.", type: 'error' })
+                            }
+                        }
+                    }}>
+                        Delete Account
+                    </Button>
+                </div>
             </div>
         </div>
     )
