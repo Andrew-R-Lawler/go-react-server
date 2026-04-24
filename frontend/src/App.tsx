@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { CookieConsentContext, CookieConsentProvider } from '@/context/cookie-consent-context';
 import { CookieConsent } from '@/components/CookieConsent';
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Header } from './components/header'
 // import Todo from './components/todo'
 import Login from './components/login'
@@ -31,6 +31,7 @@ import NewArrivals from './components/new-arrivals'
 import Careers from './components/careers'
 import OrderFulfillment from './components/order-fulfillment'
 import ProductDetails from './components/product-details'
+import CookiePreferences from './components/cookie-preferences'
 import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
 import { ThemeProvider } from "@/components/theme-provider"
@@ -50,6 +51,19 @@ function App() {
     )
 }
 
+function CookieOverlay() {
+    const { consentGiven } = useContext(CookieConsentContext)
+    const location = useLocation()
+    
+    if (consentGiven === true || location.pathname === '/cookie-preferences') return null
+
+    return (
+        <div className="fixed inset-0 bg-background/80 flex flex-col items-center justify-center z-50">
+            <CookieConsent />
+        </div>
+    )
+}
+
 function AppContent() {
     interface User {
         id: number;
@@ -59,7 +73,6 @@ function AppContent() {
     }
 
     const [user, setUser] = useState<User | null>(null);
-    const { consentGiven } = useContext(CookieConsentContext);
 
     const getUser = async () => {
         try {
@@ -133,16 +146,13 @@ function AppContent() {
                         <Route path="/returns" element={<Returns />} />
                         <Route path="/new-arrivals" element={<NewArrivals />} />
                         <Route path="/careers" element={<Careers />} />
+                        <Route path="/cookie-preferences" element={<CookiePreferences />} />
                         <Route path='/completion' element={<Completion />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>
                 {/* Overlay blocking UI until cookie consent is given */}
-                {consentGiven !== true && (
-                    <div className="fixed inset-0 bg-background/80 flex flex-col items-center justify-center z-50">
-                        <CookieConsent />
-                    </div>
-                )}
+                <CookieOverlay />
             </Router>
         </CartProvider>
     )

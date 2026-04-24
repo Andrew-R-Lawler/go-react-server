@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Button } from '@/components/ui/button';
 import { CookieConsentContext } from '@/context/cookie-consent-context';
+import { Link } from 'react-router-dom';
 
 export const CookieConsent: React.FC = () => {
     const { consentGiven, setConsent } = useContext(CookieConsentContext);
@@ -18,9 +19,11 @@ export const CookieConsent: React.FC = () => {
                     <Button variant="default" onClick={() => setConsent(true, true)}>
                         Accept All
                     </Button>
-                    <Button variant="outline" onClick={() => setConsent(true, false)}>
-                        Essential Only
-                    </Button>
+                    <Link to="/cookie-preferences">
+                        <Button variant="outline">
+                            Customize Preferences
+                        </Button>
+                    </Link>
                 </div>
             </div>
         );
@@ -35,9 +38,11 @@ export const CookieConsent: React.FC = () => {
                 <Button variant="default" onClick={() => setConsent(true, true)}>
                     Accept All
                 </Button>
-                <Button variant="outline" onClick={() => setConsent(true, false)}>
-                    Essential Only
-                </Button>
+                <Link to="/cookie-preferences">
+                    <Button variant="outline">
+                        Customize
+                    </Button>
+                </Link>
             </div>
         </div>
     );
