@@ -140,7 +140,7 @@ function AppContent() {
                         <Route path='/manage-products' element={isAdmin() ? <ManageProducts /> : <Forbidden />} />
                         <Route path='/order-fulfillment' element={isAdmin() ? <OrderFulfillment /> : <Forbidden />} />
                         <Route path='/orders' element={<Orders />} />
-                        <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
+                        <Route path="/profile" element={user ? <Profile setUser={setUser} /> : <Navigate to="/login" replace />} />
                         <Route path="/faq" element={<FAQ />} />
                         <Route path="/shipping" element={<Shipping />} />
                         <Route path="/returns" element={<Returns />} />

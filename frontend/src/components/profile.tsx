@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
-export default function Profile() {
+export default function Profile({ setUser }: { setUser: any }) {
+    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
@@ -169,7 +171,8 @@ export default function Profile() {
                         if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
                             try {
                                 await axios.delete("/api/protected/profile", { withCredentials: true })
-                                window.location.href = "/"
+                                setUser(null)
+                                navigate("/")
                             } catch (err) {
                                 setMessage({ text: "Failed to delete account.", type: 'error' })
                             }

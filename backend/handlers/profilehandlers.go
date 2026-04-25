@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -122,7 +123,16 @@ func DeleteProfile(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	c.SetCookie("auth_token", "", -1, "/", "", false, true)
+	c.SetCookie(
+		"auth_token",
+		"",
+		-1,
+		"/",
+		os.Getenv("COOKIE_DOMAIN"),
+		os.Getenv("COOKIE_SECURE") == "true",
+		true,
+	)
+	c.SetSameSite(http.SameSiteLaxMode)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
 }
