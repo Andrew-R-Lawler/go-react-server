@@ -102,6 +102,21 @@ export default function Profile({ setUser }: { setUser: any }) {
         }
     }
 
+    const handleExportData = async () => {
+        try {
+            const res = await axios.get("/api/protected/export", { withCredentials: true, responseType: 'blob' })
+            const url = window.URL.createObjectURL(new Blob([res.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', 'user_data_export.json')
+            document.body.appendChild(link)
+            link.click()
+            link.parentNode?.removeChild(link)
+        } catch (err) {
+            setMessage({ text: "Failed to export data.", type: 'error' })
+        }
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
@@ -230,7 +245,15 @@ export default function Profile({ setUser }: { setUser: any }) {
                 </form>
 
                 <div className="mt-16 border-t border-border pt-8">
-                    <h2 className="text-xl font-bold text-destructive mb-2">Danger Zone</h2>
+                    <h2 className="text-xl font-bold mb-2">Data Export</h2>
+                    <p className="text-muted-foreground mb-4">
+                        Download a copy of your profile and order history in JSON format.
+                    </p>
+                    <Button variant="outline" onClick={handleExportData} className="mb-8">
+                        Export My Data
+                    </Button>
+
+                    <h2 className="text-xl font-bold text-destructive mb-2 border-t border-border pt-8">Danger Zone</h2>
                     <p className="text-muted-foreground mb-4">
                         Permanently delete your account and all associated profile data. This action cannot be undone. For tax purposes, past order receipts are securely retained.
                     </p>

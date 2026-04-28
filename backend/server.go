@@ -202,6 +202,7 @@ func main() {
 	protectedGroup.PUT("/profile", func(c *gin.Context) { handlers.UpdateProfile(c, db) })
 	protectedGroup.DELETE("/profile", func(c *gin.Context) { handlers.DeleteProfile(c, db) })
 	protectedGroup.POST("/changepassword", func(c *gin.Context) { handlers.ChangePassword(c, db) })
+	protectedGroup.GET("/export", func(c *gin.Context) { handlers.ExportData(c, db) })
 
 	protectedGroup.POST("/products", func(c *gin.Context) { handlers.AddProduct(c, db) })
 	protectedGroup.DELETE("/products/:id", func(c *gin.Context) {
