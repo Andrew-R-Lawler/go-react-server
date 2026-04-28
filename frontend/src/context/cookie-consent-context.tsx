@@ -40,13 +40,29 @@ export const CookieConsentProvider: React.FC<ProviderProps> = ({ children }) => 
     });
 
     useEffect(() => {
-        // Apply Matomo consent status if window._paq is available
-        if ((window as any)._paq) {
-            if (analyticsConsent === false) {
-                (window as any)._paq.push(['optUserOut']);
-            } else if (analyticsConsent === true) {
+        if (analyticsConsent === true) {
+            if (!document.getElementById('matomo-script')) {
+                const _paq = (window as any)._paq = (window as any)._paq || [];
+                _paq.push(['disableCookies']);
+                _paq.push(['trackPageView']);
+                _paq.push(['enableLinkTracking']);
+
+                const u = "//matomo.lawl3r.net/";
+                _paq.push(['setTrackerUrl', u + 'matomo.php']);
+                _paq.push(['setSiteId', '1']);
+
+                const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+                g.async = true; g.src = u + 'matomo.js'; g.id = 'matomo-script';
+                if (s && s.parentNode) {
+                    s.parentNode.insertBefore(g, s);
+                } else {
+                    document.head.appendChild(g);
+                }
+            } else if ((window as any)._paq) {
                 (window as any)._paq.push(['forgetUserOptOut']);
             }
+        } else if (analyticsConsent === false && (window as any)._paq) {
+            (window as any)._paq.push(['optUserOut']);
         }
     }, [analyticsConsent]);
 

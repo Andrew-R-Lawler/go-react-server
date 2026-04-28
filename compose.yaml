@@ -25,6 +25,11 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     image: kernelmustang/go-react-server-frontend:latest
@@ -35,6 +40,11 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
