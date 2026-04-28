@@ -24,6 +24,14 @@ export default function Profile({ setUser }: { setUser: any }) {
         country: ""
     })
 
+    const [passwords, setPasswords] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    })
+    const [isChangingPassword, setIsChangingPassword] = useState(false)
+    const [passwordMessage, setPasswordMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -65,6 +73,32 @@ export default function Profile({ setUser }: { setUser: any }) {
             setMessage({ text: "Failed to update profile.", type: 'error' })
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswords({ ...passwords, [e.target.name]: e.target.value })
+    }
+
+    const handlePasswordSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (passwords.newPassword !== passwords.confirmPassword) {
+            setPasswordMessage({ text: "New passwords do not match.", type: 'error' })
+            return
+        }
+        setIsChangingPassword(true)
+        setPasswordMessage(null)
+        try {
+            const res = await axios.post("/api/protected/changepassword", {
+                currentPassword: passwords.currentPassword,
+                newPassword: passwords.newPassword
+            }, { withCredentials: true })
+            setPasswordMessage({ text: res.data.message || "Password changed successfully!", type: 'success' })
+            setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        } catch (err: any) {
+            setPasswordMessage({ text: err.response?.data?.error || "Failed to change password.", type: 'error' })
+        } finally {
+            setIsChangingPassword(false)
         }
     }
 
@@ -160,6 +194,39 @@ export default function Profile({ setUser }: { setUser: any }) {
                             {isSaving ? "Saving..." : "Save Profile"}
                         </Button>
                     </div>
+                </form>
+
+                <form onSubmit={handlePasswordSubmit}>
+                    <Card className="border-border mt-8">
+                        <CardHeader>
+                            <CardTitle>Change Password</CardTitle>
+                            <CardDescription>Update your account password. Must contain at least 8 characters, an uppercase letter, a number, and a special character.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="currentPassword">Current Password</Label>
+                                <Input id="currentPassword" name="currentPassword" type="password" value={passwords.currentPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="newPassword">New Password</Label>
+                                <Input id="newPassword" name="newPassword" type="password" value={passwords.newPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                <Input id="confirmPassword" name="confirmPassword" type="password" value={passwords.confirmPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="pt-2 flex items-center justify-between">
+                                {passwordMessage ? (
+                                    <p className={`text-sm font-medium ${passwordMessage.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                                        {passwordMessage.text}
+                                    </p>
+                                ) : <div></div>}
+                                <Button type="submit" disabled={isChangingPassword}>
+                                    {isChangingPassword ? "Changing..." : "Change Password"}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </form>
 
                 <div className="mt-16 border-t border-border pt-8">

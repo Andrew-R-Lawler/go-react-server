@@ -538,3 +538,59 @@ func ResetPassword(c *gin.Context, db *sql.DB) {
 		return
 	}
 }
+
+func ChangePassword(c *gin.Context, db *sql.DB) {
+	userID, exists := c.Get("id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var request struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+		return
+	}
+
+	if !validatePassword(request.NewPassword) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet the requirements."})
+		return
+	}
+
+	var storedPassword sql.NullString
+	query := "SELECT password FROM users WHERE id = $1"
+	err := db.QueryRow(query, userID).Scan(&storedPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	if !storedPassword.Valid || storedPassword.String == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Account does not use a password (e.g., logged in via OAuth)."})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(storedPassword.String), []byte(request.CurrentPassword))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect current password"})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing new password"})
+		return
+	}
+
+	updateQuery := `UPDATE users SET password = $1 WHERE id = $2`
+	_, err = db.Exec(updateQuery, hashedPassword, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully!"})
+}
