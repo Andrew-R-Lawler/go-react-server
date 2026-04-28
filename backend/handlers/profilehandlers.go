@@ -132,6 +132,9 @@ func DeleteProfile(c *gin.Context, db *sql.DB) {
 
 	// Async wipe Matomo data
 	go anonymizeMatomoUser(email, userID.(int))
+	
+	// Async wipe Stripe PaymentIntents PII
+	go anonymizeStripeData(email, db)
 
 	c.SetCookie(
 		"auth_token",
@@ -195,6 +198,37 @@ func anonymizeMatomoUser(email string, userID int) {
 	_, err = http.PostForm(deleteURL, data)
 	if err != nil {
 		log.Println("Matomo deleteDataSubjects error:", err)
+	}
+}
+
+func anonymizeStripeData(email string, db *sql.DB) {
+	if stripe.Key == "" {
+		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	}
+
+	rows, err := db.Query("SELECT payment_intent_id FROM orders WHERE receipt_email = $1", email)
+	if err != nil {
+		log.Println("Database error fetching orders for Stripe cleanup:", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var piID string
+		if err := rows.Scan(&piID); err == nil {
+			params := &stripe.PaymentIntentParams{
+				ReceiptEmail: stripe.String(""), // Clear email
+			}
+			// Clear custom PII from metadata
+			params.AddMetadata("items_json", "deleted")
+			params.AddMetadata("shipping_id", "deleted")
+			params.AddMetadata("customer_deleted", "true")
+
+			_, err := paymentintent.Update(piID, params)
+			if err != nil {
+				log.Printf("Note: Failed to completely anonymize Stripe PI %s (may be locked): %v", piID, err)
+			}
+		}
 	}
 }
 
