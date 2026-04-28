@@ -10,6 +10,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/paymentintent"
 )
 
 type UserProfile struct {
