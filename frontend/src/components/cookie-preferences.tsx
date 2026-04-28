@@ -26,8 +26,8 @@ export default function CookiePreferences() {
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             <SEO 
-                title="Cookie Preferences" 
-                description="Manage your cookie preferences and opt-out of analytics."
+                title="Privacy & Tracking Preferences" 
+                description="Manage your privacy preferences and opt-out of analytics."
             />
             {/* Hero Section */}
             <div className="bg-muted py-8 md:py-16 animate-in fade-in duration-700">
@@ -38,9 +38,9 @@ export default function CookiePreferences() {
                     </Button>
                 </div>
                 <div className="max-w-4xl mx-auto px-6 text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">Cookie Preferences</h1>
+                    <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">Privacy & Tracking Preferences</h1>
                     <p className="text-xl text-muted-foreground leading-relaxed">
-                        We use cookies to ensure our website functions correctly and to analyze our traffic. You can manage your preferences below.
+                        We use essential cookies to ensure our website functions correctly. We also use cookieless tracking to analyze our traffic. You can manage your preferences below.
                     </p>
                 </div>
             </div>
@@ -62,9 +62,9 @@ export default function CookiePreferences() {
 
                     <div className="p-6 bg-card border border-border rounded-lg shadow-sm flex items-start justify-between gap-4">
                         <div>
-                            <h3 className="text-lg font-semibold mb-1">Analytics Cookies (Matomo)</h3>
+                            <h3 className="text-lg font-semibold mb-1">Analytics Tracking (Matomo)</h3>
                             <p className="text-sm text-muted-foreground">
-                                These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site.
+                                We use cookieless tracking to count visits and traffic sources so we can measure and improve the performance of our site. It helps us to know which pages are the most and least popular without storing personal cookies on your device.
                             </p>
                         </div>
                         <div className="pt-1">
@@ -81,7 +81,7 @@ export default function CookiePreferences() {
                         Save Preferences
                     </Button>
                     <Button variant="outline" onClick={() => handleSave(true)}>
-                        Accept All Cookies
+                        Accept All Tracking
                     </Button>
                     {savedMessage && (
                         <span className="text-green-500 text-sm animate-in fade-in duration-300">
