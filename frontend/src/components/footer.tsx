@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-
 export function Footer() {
+
     return (
         <footer className="py-10 bg-muted text-muted-foreground text-center text-sm border-t border-border transition-colors duration-300">
             <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-left">
@@ -25,6 +25,7 @@ export function Footer() {
                     <ul className="space-y-2">
                         <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
                         <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+                        <li><Link to="/cookie-preferences" className="hover:text-primary transition-colors">Cookie Preferences</Link></li>
                     </ul>
                 </div>
                 <div>

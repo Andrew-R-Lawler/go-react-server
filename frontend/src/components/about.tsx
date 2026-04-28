@@ -2,11 +2,16 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SEO } from './seo'
 
 function AboutUs() {
     const navigate = useNavigate()
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+            <SEO 
+                title="About Us" 
+                description="Learn about Eco Theory's mission to craft luxurious, deeply nourishing soaps without compromising our commitment to the environment."
+            />
             {/* Hero Section */}
             <div className="bg-muted py-8 md:py-16 animate-in fade-in duration-700">
                 <div className="max-w-7xl mx-auto px-6 mb-8">

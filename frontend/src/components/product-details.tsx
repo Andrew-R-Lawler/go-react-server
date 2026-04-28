@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { ShoppingCart, ArrowLeft } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 import { Separator } from "@/components/ui/separator"
+import { SEO } from './seo'
+import { Helmet } from 'react-helmet-async'
 
 import { Product, ProductSKU } from "@/types"
 
@@ -61,8 +63,37 @@ export default function ProductDetails() {
         )
     }
 
+    const productSchema = product ? {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.name,
+        "image": product.images || [],
+        "description": product.description,
+        "sku": product.id,
+        "offers": {
+            "@type": "Offer",
+            "url": window.location.href,
+            "priceCurrency": "USD",
+            "price": product.on_sale ? product.sale_price : product.price,
+            "availability": (product.stock_quantity > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+        }
+    } : null;
+
     return (
         <div className="container mx-auto py-10 px-4 min-h-screen">
+            <SEO 
+                title={product.name} 
+                description={product.description} 
+                ogImage={product.images && product.images.length > 0 ? product.images[0] : undefined}
+                ogType="product"
+            />
+            {productSchema && (
+                <Helmet>
+                    <script type="application/ld+json">
+                        {JSON.stringify(productSchema)}
+                    </script>
+                </Helmet>
+            )}
             <div className="mb-6">
                 <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
                     <ArrowLeft className="h-4 w-4" />

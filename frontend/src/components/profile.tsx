@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
-export default function Profile() {
+export default function Profile({ setUser }: { setUser: any }) {
+    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
@@ -21,6 +23,14 @@ export default function Profile() {
         postal_code: "",
         country: ""
     })
+
+    const [passwords, setPasswords] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    })
+    const [isChangingPassword, setIsChangingPassword] = useState(false)
+    const [passwordMessage, setPasswordMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -63,6 +73,32 @@ export default function Profile() {
             setMessage({ text: "Failed to update profile.", type: 'error' })
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswords({ ...passwords, [e.target.name]: e.target.value })
+    }
+
+    const handlePasswordSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (passwords.newPassword !== passwords.confirmPassword) {
+            setPasswordMessage({ text: "New passwords do not match.", type: 'error' })
+            return
+        }
+        setIsChangingPassword(true)
+        setPasswordMessage(null)
+        try {
+            const res = await axios.post("/api/protected/changepassword", {
+                currentPassword: passwords.currentPassword,
+                newPassword: passwords.newPassword
+            }, { withCredentials: true })
+            setPasswordMessage({ text: res.data.message || "Password changed successfully!", type: 'success' })
+            setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        } catch (err: any) {
+            setPasswordMessage({ text: err.response?.data?.error || "Failed to change password.", type: 'error' })
+        } finally {
+            setIsChangingPassword(false)
         }
     }
 
@@ -159,6 +195,59 @@ export default function Profile() {
                         </Button>
                     </div>
                 </form>
+
+                <form onSubmit={handlePasswordSubmit}>
+                    <Card className="border-border mt-8">
+                        <CardHeader>
+                            <CardTitle>Change Password</CardTitle>
+                            <CardDescription>Update your account password. Must contain at least 8 characters, an uppercase letter, a number, and a special character.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="currentPassword">Current Password</Label>
+                                <Input id="currentPassword" name="currentPassword" type="password" value={passwords.currentPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="newPassword">New Password</Label>
+                                <Input id="newPassword" name="newPassword" type="password" value={passwords.newPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                <Input id="confirmPassword" name="confirmPassword" type="password" value={passwords.confirmPassword} onChange={handlePasswordChange} required />
+                            </div>
+                            <div className="pt-2 flex items-center justify-between">
+                                {passwordMessage ? (
+                                    <p className={`text-sm font-medium ${passwordMessage.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                                        {passwordMessage.text}
+                                    </p>
+                                ) : <div></div>}
+                                <Button type="submit" disabled={isChangingPassword}>
+                                    {isChangingPassword ? "Changing..." : "Change Password"}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </form>
+
+                <div className="mt-16 border-t border-border pt-8">
+                    <h2 className="text-xl font-bold text-destructive mb-2">Danger Zone</h2>
+                    <p className="text-muted-foreground mb-4">
+                        Permanently delete your account and all associated profile data. This action cannot be undone. For tax purposes, past order receipts are securely retained.
+                    </p>
+                    <Button variant="destructive" onClick={async () => {
+                        if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+                            try {
+                                await axios.delete("/api/protected/profile", { withCredentials: true })
+                                setUser(null)
+                                navigate("/")
+                            } catch (err) {
+                                setMessage({ text: "Failed to delete account.", type: 'error' })
+                            }
+                        }
+                    }}>
+                        Delete Account
+                    </Button>
+                </div>
             </div>
         </div>
     )
