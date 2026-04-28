@@ -3,13 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 
-
 	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"github.com/stripe/stripe-go/v74"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 
 	"github.com/gin-gonic/gin"
@@ -44,6 +45,17 @@ func authMiddleware(c *gin.Context) {
 }
 
 func main() {
+	// Setup Lumberjack Log Rotation
+	logWriter := &lumberjack.Logger{
+		Filename:   "logs/server.log",
+		MaxSize:    10, // megabytes
+		MaxBackups: 3,
+		MaxAge:     30,   // days
+		Compress:   true, // compress disabled by default
+	}
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, logWriter)
+	log.SetOutput(io.MultiWriter(os.Stdout, logWriter))
+
 	dbuser := os.Getenv("DB_USER")
 	dbpassword := os.Getenv("DB_PASSWORD")
 	dbhost := os.Getenv("DB_HOST")
