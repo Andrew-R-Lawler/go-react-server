@@ -74,10 +74,25 @@ export default function Privacy() {
                         </ul>
                     </CardContent>
                 </Card>
+
+                <Card className="border-border">
+                    <CardHeader>
+                        <CardTitle>6. US State Privacy Rights (CCPA/CPRA)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-muted-foreground">
+                        <p>If you reside in California or other applicable US states, you have specific rights regarding your personal data:</p>
+                        <ul className="list-disc pl-6 space-y-2">
+                            <li><strong>Right to Know & Access:</strong> Request details on data we collect and how we use it.</li>
+                            <li><strong>Right to Delete:</strong> Request deletion of your data via Account Settings.</li>
+                            <li><strong>Right to Opt-Out ("Do Not Sell or Share My Personal Information"):</strong> We do not sell data for money. Analytics cookies may count as "sharing." Opt-out via Cookie Preferences.</li>
+                            <li><strong>Non-Discrimination:</strong> We will not treat you differently for using these rights.</li>
+                        </ul>
+                    </CardContent>
+                </Card>
                 
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle>6. Contact Us</CardTitle>
+                        <CardTitle>7. Contact Us</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-muted-foreground">
                         <p>If you have any questions about this privacy policy or our privacy practices, please contact us via our Contact page.</p>

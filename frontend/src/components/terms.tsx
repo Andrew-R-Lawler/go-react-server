@@ -78,7 +78,7 @@ export default function Terms() {
                         <CardTitle>8. Governing Law</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-muted-foreground">
-                        <p>These Terms of Service and any separate agreements whereby we provide you services shall be governed by and construed in accordance with the laws of the United States.</p>
+                        <p>These Terms of Service and any separate agreements whereby we provide you services shall be governed by and construed in accordance with the laws of the State of Minnesota, United States.</p>
                     </CardContent>
                 </Card>
             </div>
