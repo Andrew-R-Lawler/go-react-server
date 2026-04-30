@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import ProductDetails from './product-details'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import * as CartContext from '@/context/cart-context'
 import axios from 'axios'
 
@@ -50,11 +51,13 @@ describe('ProductDetails Component', () => {
 
     const renderComponent = (id = '1') => {
         render(
-            <MemoryRouter initialEntries={[`/product/${id}`]}>
-                <Routes>
-                    <Route path="/product/:id" element={<ProductDetails />} />
-                </Routes>
-            </MemoryRouter>
+            <HelmetProvider>
+                <MemoryRouter initialEntries={[`/product/${id}`]}>
+                    <Routes>
+                        <Route path="/product/:id" element={<ProductDetails />} />
+                    </Routes>
+                </MemoryRouter>
+            </HelmetProvider>
         )
     }
 
