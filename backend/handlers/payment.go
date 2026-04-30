@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
+	"github.com/stripe/stripe-go/v74/tax/calculation"
 	"github.com/wneessen/go-mail"
 )
 
@@ -27,9 +28,77 @@ type EmailItem struct {
 	Total    float64
 }
 
+type Address struct {
+	Line1      string `json:"line1"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	PostalCode string `json:"postal_code"`
+	Country    string `json:"country"`
+}
+
 type PaymentRequest struct {
 	Items      []PaymentItem `json:"items"`
 	ShippingID string        `json:"shipping_id"`
+	Address    *Address      `json:"address,omitempty"`
+}
+
+type TaxRequest struct {
+	Items      []PaymentItem `json:"items"`
+	ShippingID string        `json:"shipping_id"`
+	Address    Address       `json:"address"`
+}
+
+func calculateTaxAmount(items []PaymentItem, shippingID string, address Address, db *sql.DB) int64 {
+	var lineItems []*stripe.TaxCalculationLineItemParams
+	for _, item := range items {
+		var price float64
+		if err := db.QueryRow("SELECT price FROM products WHERE id = $1", item.ID).Scan(&price); err == nil {
+			lineItems = append(lineItems, &stripe.TaxCalculationLineItemParams{
+				Amount:    stripe.Int64(int64(price * float64(item.Quantity) * 100)),
+				Reference: stripe.String(fmt.Sprintf("item_%d", item.ID)),
+			})
+		}
+	}
+
+	shippingCost := int64(500)
+	if shippingID == "express" {
+		shippingCost = 1000
+	}
+	lineItems = append(lineItems, &stripe.TaxCalculationLineItemParams{
+		Amount:    stripe.Int64(shippingCost),
+		Reference: stripe.String("shipping"),
+	})
+
+	calcParams := &stripe.TaxCalculationParams{
+		Currency: stripe.String("usd"),
+		CustomerDetails: &stripe.TaxCalculationCustomerDetailsParams{
+			Address: &stripe.AddressParams{
+				Line1:      stripe.String(address.Line1),
+				City:       stripe.String(address.City),
+				State:      stripe.String(address.State),
+				PostalCode: stripe.String(address.PostalCode),
+				Country:    stripe.String(address.Country),
+			},
+			AddressSource: stripe.String("shipping"),
+		},
+		LineItems: lineItems,
+	}
+
+	calc, err := calculation.New(calcParams)
+	if err != nil {
+		return 0
+	}
+	return calc.TaxAmountExclusive
+}
+
+func CalculateTax(c *gin.Context, db *sql.DB) {
+	var req TaxRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	tax := calculateTaxAmount(req.Items, req.ShippingID, req.Address, db)
+	c.JSON(http.StatusOK, gin.H{"taxAmount": tax})
 }
 
 func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
@@ -39,8 +108,15 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// Calculate total amount on the server
+	// Calculate base total
 	total := calculateOrderAmount(req.Items, req.ShippingID, db)
+
+	// Calculate tax if address provided
+	var tax int64 = 0
+	if req.Address != nil && req.Address.Country != "" {
+		tax = calculateTaxAmount(req.Items, req.ShippingID, *req.Address, db)
+		total += tax
+	}
 
 	// Serialize items to JSON
 	itemsJSON, err := json.Marshal(req.Items)
@@ -49,14 +125,12 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// Create a PaymentIntent with the order amount and currency
 	params := &stripe.PaymentIntentParams{
 		Amount:   stripe.Int64(total),
 		Currency: stripe.String(string(stripe.CurrencyUSD)),
 		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 			Enabled: stripe.Bool(true),
 		},
-		// PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 	}
 	params.AddMetadata("shipping_id", req.ShippingID)
 	params.AddMetadata("items_json", string(itemsJSON))
@@ -69,6 +143,7 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"clientSecret": pi.ClientSecret,
+		"taxAmount":    tax,
 	})
 }
 

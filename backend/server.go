@@ -233,6 +233,7 @@ func main() {
 	// Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	r.POST("/api/create-payment-intent", func(c *gin.Context) { handlers.CreatePaymentIntent(c, db) })
+	r.POST("/api/calculate-tax", func(c *gin.Context) { handlers.CalculateTax(c, db) })
 	r.POST("/api/confirm-order", func(c *gin.Context) { handlers.ConfirmOrder(c, db) })
 
 	// Public Config
