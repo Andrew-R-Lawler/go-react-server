@@ -38,7 +38,7 @@ function HomePage() {
             <section className="relative py-20 px-6 md:px-12 lg:px-24 flex flex-col items-center text-center bg-muted/50 border-b border-border transition-colors duration-300">
                 <div className="max-w-3xl space-y-6">
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-4">
-                        Quality Test Products for <span className="text-muted-foreground">Radiant Skin</span>
+                        Quality Products for <span className="text-muted-foreground">Radiant Skin</span>
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground">
                         Discover our collection of handcrafted, eco-friendly soaps. Made with natural ingredients to nourish your skin and protect our planet.

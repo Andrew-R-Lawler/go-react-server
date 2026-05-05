@@ -92,7 +92,16 @@ export default function Privacy() {
                 
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle>7. Contact Us</CardTitle>
+                        <CardTitle>7. Children's Privacy (COPPA)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-muted-foreground">
+                        <p>Our website is not intended for children under 13 years of age. We do not knowingly collect personal data from children under 13. If you are under 13, do not use or provide any information on this website. If we learn we have collected personal data from a child under 13 without verification of parental consent, we will delete that information.</p>
+                    </CardContent>
+                </Card>
+                
+                <Card className="border-border">
+                    <CardHeader>
+                        <CardTitle>8. Contact Us</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-muted-foreground">
                         <p>If you have any questions about this privacy policy or our privacy practices, please contact us via our Contact page.</p>

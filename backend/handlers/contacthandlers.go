@@ -59,7 +59,11 @@ func SubmitContactForm(c *gin.Context) {
 		return
 	}
 	// Send FROM the support email (to avoid spoofing checks)
-	if err := m.From(smtpUser); err != nil {
+	fromAddress := os.Getenv("CONTACT_SMTP_FROM")
+	if fromAddress == "" {
+		fromAddress = smtpUser
+	}
+	if err := m.From(fromAddress); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set From address"})
 		return
 	}

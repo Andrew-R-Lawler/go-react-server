@@ -11,10 +11,11 @@ export default function Terms() {
 
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle>1. Introduction</CardTitle>
+                        <CardTitle>1. Introduction and Age Requirements</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-muted-foreground">
                         <p>Welcome to Eco Theory Soap Co. ("we," "our," or "us"). By accessing or using our website and purchasing our products, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+                        <p>Our services are not intended for use by children. You must be at least 18 years old, or the age of majority in your jurisdiction, to create an account or make a purchase. By using this site, you represent that you meet these age requirements. If you are under 18, you may use our website only with the involvement of a parent or guardian.</p>
                     </CardContent>
                 </Card>
 
