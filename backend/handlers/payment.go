@@ -365,8 +365,15 @@ func SendOrderConfirmationEmail(email string, orderID string, items []EmailItem,
 	if fromAddress == "" {
 		fromAddress = smtpUser
 	}
-	if err := m.From(fromAddress); err != nil {
-		return err
+	fromName := os.Getenv("SMTP_FROM_NAME")
+	if fromName != "" {
+		if err := m.FromFormat(fromName, fromAddress); err != nil {
+			return err
+		}
+	} else {
+		if err := m.From(fromAddress); err != nil {
+			return err
+		}
 	}
 	if err := m.To(email); err != nil {
 		return err
