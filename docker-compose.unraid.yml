@@ -1,6 +1,8 @@
+name: go-react-server
 
 services:
   db:
+    container_name: go-react-server-db
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: ${DB_USER:-andrew}
@@ -13,6 +15,7 @@ services:
     restart: unless-stopped
 
   backend:
+    container_name: go-react-server-backend
     image: kernelmustang/go-react-server-backend:latest
     # Optional: Expose 3000 to host if you want to bypass Nginx
     ports:
@@ -33,6 +36,7 @@ services:
         max-file: "3"
 
   frontend:
+    container_name: go-react-server-frontend
     image: kernelmustang/go-react-server-frontend:latest
     ports:
       - "8080:80"
