@@ -16,6 +16,7 @@ export interface Product {
     on_sale: boolean
     sale_price: number
     long_description?: string
+    ingredients?: string
     featured: boolean
     skus?: ProductSKU[]
 }

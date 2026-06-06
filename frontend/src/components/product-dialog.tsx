@@ -253,6 +253,17 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="ingredients">Ingredients List</Label>
+                            <Textarea
+                                id="ingredients"
+                                name="ingredients"
+                                placeholder="List of ingredients..."
+                                defaultValue={product?.ingredients}
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="long-description">Long Description</Label>
                             <RichTextEditor
                                 value={longDescription}

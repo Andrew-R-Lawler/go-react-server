@@ -46,6 +46,7 @@ function ManageProducts() {
             on_sale: formData.get('on-sale') === 'on',
             sale_price: Number(formData.get('sale-price')),
             long_description: formData.get('long-description'),
+            ingredients: formData.get('ingredients'),
             skus: JSON.parse(formData.get('skus') as string || '[]')
         }
 
