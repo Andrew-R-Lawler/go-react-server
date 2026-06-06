@@ -38,6 +38,28 @@ export const INCI_DICTIONARY: InciEntry[] = [
   { commonName: "Salt", inciName: "Sodium Chloride" },
   { commonName: "Sea Salt", inciName: "Maris Sal" },
 
+  // Syndet Surfactants & Co-Emulsifiers / Hardener Inputs
+  { commonName: "Sodium Cocoyl Isethionate", inciName: "Sodium Cocoyl Isethionate" },
+  { commonName: "SCI", inciName: "Sodium Cocoyl Isethionate" },
+  { commonName: "Sodium Coco-Sulfate", inciName: "Sodium Coco-Sulfate" },
+  { commonName: "SCS", inciName: "Sodium Coco-Sulfate" },
+  { commonName: "Sodium Lauryl Sulfoacetate", inciName: "Sodium Lauryl Sulfoacetate" },
+  { commonName: "SLSa", inciName: "Sodium Lauryl Sulfoacetate" },
+  { commonName: "Cocamidopropyl Betaine", inciName: "Cocamidopropyl Betaine" },
+  { commonName: "CAPB", inciName: "Cocamidopropyl Betaine" },
+  { commonName: "Coco Glucoside", inciName: "Coco-Glucoside" },
+  { commonName: "Decyl Glucoside", inciName: "Decyl Glucoside" },
+  { commonName: "Lauryl Glucoside", inciName: "Lauryl Glucoside" },
+  { commonName: "Stearic Acid", inciName: "Stearic Acid" },
+  { commonName: "Cetyl Alcohol", inciName: "Cetyl Alcohol" },
+  { commonName: "Cetearyl Alcohol", inciName: "Cetearyl Alcohol" },
+  { commonName: "BTMS-50", inciName: "Behentrimonium Methosulfate (and) Cetyl Alcohol (and) Butylene Glycol" },
+  { commonName: "Behentrimonium Methosulfate", inciName: "Behentrimonium Methosulfate (and) Cetearyl Alcohol" },
+  { commonName: "BTMS-25", inciName: "Behentrimonium Methosulfate (and) Cetearyl Alcohol" },
+  { commonName: "Polyquaternium-7", inciName: "Polyquaternium-7" },
+  { commonName: "Disodium Laureth Sulfosuccinate", inciName: "Disodium Laureth Sulfosuccinate" },
+  { commonName: "Sodium C14-16 Olefin Sulfonate", inciName: "Sodium C14-16 Olefin Sulfonate" },
+
   // Essential Oils (with EU/FDA declarable fragrance allergens)
   {
     commonName: "Lavender Essential Oil",
