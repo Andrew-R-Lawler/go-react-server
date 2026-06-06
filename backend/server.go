@@ -127,7 +127,8 @@ func main() {
 			on_sale BOOLEAN DEFAULT FALSE,
 			sale_price DECIMAL(10, 2) DEFAULT 0.00,
 			long_description TEXT DEFAULT '',
-			ingredients TEXT DEFAULT ''
+			ingredients TEXT DEFAULT '',
+			raw_ingredients_json TEXT DEFAULT '[]'
 		);
 	`)
 	if err != nil {
@@ -137,6 +138,7 @@ func main() {
 	// Safely alter existing table for products
 	_, err = db.Exec(`
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS ingredients TEXT DEFAULT '';
+		ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_ingredients_json TEXT DEFAULT '[]';
 	`)
 	if err != nil {
 		log.Printf("Warning: Failed to execute alter table on products: %v", err)

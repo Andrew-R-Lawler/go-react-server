@@ -35,11 +35,12 @@ type Product struct {
 	SalePrice       float32      `json:"sale_price"`
 	LongDescription string       `json:"long_description"`
 	Ingredients     string       `json:"ingredients"`
+	RawIngredientsJSON string    `json:"raw_ingredients_json"`
 	Skus            []ProductSKU `json:"skus"`
 }
 
 func GetProducts(c *gin.Context, db *sql.DB) {
-	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" ORDER BY id;`)
+	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" ORDER BY id;`)
 	if err != nil {
 		log.Printf("error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -49,7 +50,7 @@ func GetProducts(c *gin.Context, db *sql.DB) {
 	var products []Product
 	for rows.Next() {
 		var product Product
-		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients); err != nil {
+		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients, &product.RawIngredientsJSON); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
 		}
@@ -80,7 +81,7 @@ func GetProducts(c *gin.Context, db *sql.DB) {
 }
 
 func GetFeaturedProducts(c *gin.Context, db *sql.DB) {
-	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" WHERE featured = TRUE ORDER BY id;`)
+	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" WHERE featured = TRUE ORDER BY id;`)
 	if err != nil {
 		log.Printf("error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -90,7 +91,7 @@ func GetFeaturedProducts(c *gin.Context, db *sql.DB) {
 	var products []Product
 	for rows.Next() {
 		var product Product
-		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients); err != nil {
+		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients, &product.RawIngredientsJSON); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
 		}
@@ -117,7 +118,7 @@ func GetFeaturedProducts(c *gin.Context, db *sql.DB) {
 }
 
 func GetNewArrivals(c *gin.Context, db *sql.DB) {
-	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" ORDER BY id DESC LIMIT 6;`)
+	rows, err := db.Query(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" ORDER BY id DESC LIMIT 6;`)
 	if err != nil {
 		log.Printf("error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -127,7 +128,7 @@ func GetNewArrivals(c *gin.Context, db *sql.DB) {
 	var products []Product
 	for rows.Next() {
 		var product Product
-		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients); err != nil {
+		if err := rows.Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients, &product.RawIngredientsJSON); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read product"})
 			return
 		}
@@ -165,10 +166,10 @@ func AddProduct(c *gin.Context, db *sql.DB) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	query := `INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients")
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
+	query := `INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json")
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`
 	var productID int
-	err = db.QueryRow(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription, product.Ingredients).Scan(&productID)
+	err = db.QueryRow(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription, product.Ingredients, product.RawIngredientsJSON).Scan(&productID)
 	if err != nil {
 		log.Printf("error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -228,10 +229,11 @@ func EditProduct(c *gin.Context, db *sql.DB) {
 		on_sale = $7,
 		sale_price = $8,
 		long_description = $9,
-		ingredients = $10
-	WHERE id = $11
+		ingredients = $10,
+		raw_ingredients_json = $11
+	WHERE id = $12
 	`
-	result, err := db.Exec(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription, product.Ingredients, productId)
+	result, err := db.Exec(query, product.Name, product.Description, pq.Array(product.Images), product.Price, product.StockQuantity, product.Featured, product.OnSale, product.SalePrice, product.LongDescription, product.Ingredients, product.RawIngredientsJSON, productId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update product"})
 		return
@@ -262,8 +264,8 @@ func EditProduct(c *gin.Context, db *sql.DB) {
 func GetProduct(c *gin.Context, db *sql.DB) {
 	id := c.Param("id")
 	var product Product
-	query := `SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" WHERE id = $1`
-	err := db.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients)
+	query := `SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.Description, pq.Array(&product.Images), &product.Price, &product.StockQuantity, &product.Featured, &product.OnSale, &product.SalePrice, &product.LongDescription, &product.Ingredients, &product.RawIngredientsJSON)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})

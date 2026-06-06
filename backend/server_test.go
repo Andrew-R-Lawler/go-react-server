@@ -24,12 +24,12 @@ func TestGetProducts(t *testing.T) {
 	defer db.Close()
 
 	// Define expected rows
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients"}).
-		AddRow(1, "Product 1", "Description 1", "{http://example.com/1.jpg}", 10.0, 100, false, false, 0.0, "", "").
-		AddRow(2, "Product 2", "Description 2", "{http://example.com/2.jpg}", 20.0, 200, true, true, 15.0, "", "")
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json"}).
+		AddRow(1, "Product 1", "Description 1", "{http://example.com/1.jpg}", 10.0, 100, false, false, 0.0, "", "", "[]").
+		AddRow(2, "Product 2", "Description 2", "{http://example.com/2.jpg}", 20.0, 200, true, true, 15.0, "", "", "[]")
 
 	// Expect query
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" ORDER BY id;`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" ORDER BY id;`)).
 		WillReturnRows(rows)
 
 	// Expect SKU queries for each product
@@ -81,11 +81,11 @@ func TestGetProduct(t *testing.T) {
 	defer db.Close()
 
 	// Define expected rows
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients"}).
-		AddRow(1, "Product 1", "Description 1", "{http://example.com/1.jpg}", 10.0, 100, false, false, 0.0, "", "")
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json"}).
+		AddRow(1, "Product 1", "Description 1", "{http://example.com/1.jpg}", 10.0, 100, false, false, 0.0, "", "", "[]")
 
 	// Expect query
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" WHERE id = $1`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" WHERE id = $1`)).
 		WithArgs("1").
 		WillReturnRows(rows)
 
@@ -175,10 +175,10 @@ func TestGetFeaturedProducts(t *testing.T) {
 	}
 	defer db.Close()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients"}).
-		AddRow(2, "Product 2", "Description 2", "{http://example.com/2.jpg}", 20.0, 200, true, true, 15.0, "", "")
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json"}).
+		AddRow(2, "Product 2", "Description 2", "{http://example.com/2.jpg}", 20.0, 200, true, true, 15.0, "", "", "[]")
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" WHERE featured = TRUE ORDER BY id;`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" WHERE featured = TRUE ORDER BY id;`)).
 		WillReturnRows(rows)
 
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`)).
@@ -209,10 +209,10 @@ func TestGetNewArrivals(t *testing.T) {
 	}
 	defer db.Close()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients"}).
-		AddRow(3, "Product 3", "Description 3", "{http://example.com/3.jpg}", 30.0, 300, false, false, 0.0, "", "")
+	rows := sqlmock.NewRows([]string{"id", "name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json"}).
+		AddRow(3, "Product 3", "Description 3", "{http://example.com/3.jpg}", 30.0, 300, false, false, 0.0, "", "", "[]")
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, '') FROM "products" ORDER BY id DESC LIMIT 6;`)).
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, name, description, images, price, stock_quantity, featured, on_sale, sale_price, COALESCE(long_description, ''), COALESCE(ingredients, ''), COALESCE(raw_ingredients_json, '[]') FROM "products" ORDER BY id DESC LIMIT 6;`)).
 		WillReturnRows(rows)
 
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, product_id, sku, variant_name, stock_quantity FROM product_skus WHERE product_id = $1`)).
@@ -243,8 +243,8 @@ func TestAddProduct_Admin(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`)).
-		WithArgs("New Product", "Description", sqlmock.AnyArg(), 10.0, 50, false, false, 0.0, "", "").
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`)).
+		WithArgs("New Product", "Description", sqlmock.AnyArg(), 10.0, 50, false, false, 0.0, "", "", "[]").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	gin.SetMode(gin.TestMode)
@@ -255,7 +255,7 @@ func TestAddProduct_Admin(t *testing.T) {
 		handlers.AddProduct(c, db)
 	})
 
-	payload := `{"name":"New Product", "description":"Description", "images":["http://image.com/1.jpg"], "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0}`
+	payload := `{"name":"New Product", "description":"Description", "images":["http://image.com/1.jpg"], "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0, "raw_ingredients_json":"[]"}`
 	req, _ := http.NewRequest(http.MethodPost, "/api/products", strings.NewReader(payload))
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -301,8 +301,8 @@ func TestEditProduct_Admin(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "products" SET name = $1, description = $2, images = $3, price = $4, stock_quantity = $5, featured = $6, on_sale = $7, sale_price = $8, long_description = $9, ingredients = $10 WHERE id = $11`)).
-		WithArgs("Updated Product", "Desc", sqlmock.AnyArg(), 20.0, 10, true, true, 15.0, "", "", "1").
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "products" SET name = $1, description = $2, images = $3, price = $4, stock_quantity = $5, featured = $6, on_sale = $7, sale_price = $8, long_description = $9, ingredients = $10, raw_ingredients_json = $11 WHERE id = $12`)).
+		WithArgs("Updated Product", "Desc", sqlmock.AnyArg(), 20.0, 10, true, true, 15.0, "", "", "[]", "1").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 
 	// Expect delete old SKUs
@@ -317,7 +317,7 @@ func TestEditProduct_Admin(t *testing.T) {
 		handlers.EditProduct(c, db)
 	})
 
-	payload := `{"name":"Updated Product", "description":"Desc", "images":["img"], "price":20.0, "stock_quantity":10, "featured":true, "on_sale":true, "sale_price":15.0}`
+	payload := `{"name":"Updated Product", "description":"Desc", "images":["img"], "price":20.0, "stock_quantity":10, "featured":true, "on_sale":true, "sale_price":15.0, "raw_ingredients_json":"[]"}`
 	req, _ := http.NewRequest(http.MethodPut, "/api/products/1", strings.NewReader(payload))
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -416,8 +416,8 @@ func TestAddProduct_LongDescription_Admin(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`)).
-		WithArgs("Long Desc Product", "Short", sqlmock.AnyArg(), 10.0, 50, false, false, 0.0, "This is a long description.", "").
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO products ("name", "description", "images", "price", "stock_quantity", "featured", "on_sale", "sale_price", "long_description", "ingredients", "raw_ingredients_json") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`)).
+		WithArgs("Long Desc Product", "Short", sqlmock.AnyArg(), 10.0, 50, false, false, 0.0, "This is a long description.", "", "[]").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	gin.SetMode(gin.TestMode)
@@ -427,7 +427,7 @@ func TestAddProduct_LongDescription_Admin(t *testing.T) {
 		handlers.AddProduct(c, db)
 	})
 
-	payload := `{"name":"Long Desc Product", "description":"Short", "images":["http://image.com"], "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0, "long_description":"This is a long description."}`
+	payload := `{"name":"Long Desc Product", "description":"Short", "images":["http://image.com"], "price":10.0, "stock_quantity":50, "featured":false, "on_sale":false, "sale_price":0.0, "long_description":"This is a long description.", "raw_ingredients_json":"[]"}`
 	req, _ := http.NewRequest(http.MethodPost, "/api/products", strings.NewReader(payload))
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
