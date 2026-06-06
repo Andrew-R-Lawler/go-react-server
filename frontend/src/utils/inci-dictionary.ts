@@ -20,6 +20,9 @@ export const INCI_DICTIONARY: InciEntry[] = [
 
   // Liquids
   { commonName: "Water", inciName: "Aqua" },
+  { commonName: "Distilled Water", inciName: "Aqua" },
+  { commonName: "Distilled Water (or Oat Water)", inciName: "Aqua" },
+  { commonName: "Oat Water", inciName: "Avena Sativa Kernel Extract" },
   { commonName: "Goat Milk", inciName: "Caprae Lac" },
   { commonName: "Coconut Milk", inciName: "Cocos Nucifera Fruit Extract" },
   { commonName: "Sodium Hydroxide", inciName: "Sodium Hydroxide" },
@@ -27,8 +30,10 @@ export const INCI_DICTIONARY: InciEntry[] = [
 
   // Additives & Colorants & Botanicals
   { commonName: "Glycerin", inciName: "Glycerin" },
+  { commonName: "Clycerin", inciName: "Glycerin" }, // Typo fallback
   { commonName: "Oatmeal", inciName: "Avena Sativa Kernel Flour" },
   { commonName: "Oats", inciName: "Avena Sativa Kernel Flour" },
+  { commonName: "Colloidal Oatmeal", inciName: "Avena Sativa Kernel Flour" },
   { commonName: "Honey", inciName: "Mel" },
   { commonName: "Titanium Dioxide", inciName: "Titanium Dioxide (CI 77891)" },
   { commonName: "Sodium Lactate", inciName: "Sodium Lactate" },
@@ -37,6 +42,20 @@ export const INCI_DICTIONARY: InciEntry[] = [
   { commonName: "Charcoal", inciName: "Charcoal Powder" },
   { commonName: "Salt", inciName: "Sodium Chloride" },
   { commonName: "Sea Salt", inciName: "Maris Sal" },
+  { commonName: "Panthenol (B5)", inciName: "Panthenol" },
+  { commonName: "Panthenol", inciName: "Panthenol" },
+  { commonName: "Allantoin", inciName: "Allantoin" },
+  { commonName: "Squalane", inciName: "Squalane" },
+  { commonName: "Hyaluronic Acid", inciName: "Sodium Hyaluronate" },
+  { commonName: "Zinc PCA", inciName: "Zinc PCA" },
+  { commonName: "Salicylic Acid", inciName: "Salicylic Acid" },
+  { commonName: "Niacinamide", inciName: "Niacinamide" },
+  { commonName: "Aloe Vera Powder (200x)", inciName: "Aloe Barbadensis Leaf Juice Powder" },
+  { commonName: "Aloe Vera Powder", inciName: "Aloe Barbadensis Leaf Juice Powder" },
+  { commonName: "Essential Oils", inciName: "Parfum" },
+  { commonName: "Phenoxyethanol & Ethylhexylglyceri", inciName: "Phenoxyethanol (and) Ethylhexylglycerin" },
+  { commonName: "Phenoxyethanol & Ethylhexylglyc", inciName: "Phenoxyethanol (and) Ethylhexylglycerin" },
+  { commonName: "Phenoxyethanol & Ethylhexylglycerin", inciName: "Phenoxyethanol (and) Ethylhexylglycerin" },
 
   // Syndet Surfactants & Co-Emulsifiers / Hardener Inputs
   { commonName: "Sodium Cocoyl Isethionate", inciName: "Sodium Cocoyl Isethionate" },
