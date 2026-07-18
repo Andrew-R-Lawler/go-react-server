@@ -9,7 +9,7 @@ import {
 import { ModeToggle } from "@/components/mode-toggle"
 import { useCart } from "@/context/cart-context"
 import { ShoppingBag } from "lucide-react"
-import logo from "@/assets/image2vector.svg"
+import logo from "@/assets/ecotheory-logo.svg"
 
 interface HeaderProps {
     user: {
