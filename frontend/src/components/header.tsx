@@ -29,7 +29,7 @@ export function Header({ user, signOut }: HeaderProps) {
             <ul className='flex justify-end items-center gap-6 max-w-7xl mx-auto'>
                 <li className='mr-auto'>
                     <Link to="/">
-                        <img src={logo} width="65" height="65" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
+                        <img src={logo} width="110" height="80" alt="Logo" className="hover:opacity-80 transition-opacity dark:invert" />
                     </Link>
                 </li >
                 <li>
