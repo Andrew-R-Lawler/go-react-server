@@ -3,12 +3,9 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -75,21 +72,17 @@ func calculateShippingCost(items []PaymentItem, shippingID string, address *Addr
 		totalOunces += weight * float64(item.Quantity)
 	}
 
-	// Map shippingID to USPS service
-	var uspsService string
+	// Map shippingID to fallback rates
 	var fallbackBase float64
 	var fallbackMultiplier float64
 	switch shippingID {
 	case "usps_ground_advantage":
-		uspsService = "GROUND ADVANTAGE"
 		fallbackBase = 4.50
 		fallbackMultiplier = 0.50
 	case "usps_priority_mail":
-		uspsService = "PRIORITY"
 		fallbackBase = 8.50
 		fallbackMultiplier = 1.00
 	case "usps_priority_mail_express":
-		uspsService = "PRIORITY EXPRESS"
 		fallbackBase = 25.50
 		fallbackMultiplier = 2.50
 	default:
@@ -154,52 +147,6 @@ func calculateShippingCost(items []PaymentItem, shippingID string, address *Addr
 		}
 	}
 
-	// Try querying USPS API if credentials are set
-	userID := os.Getenv("USPS_USER_ID")
-	originZip := os.Getenv("USPS_ORIGIN_ZIP")
-	if originZip == "" {
-		originZip = "90210"
-	}
-
-	if userID != "" && address != nil && address.PostalCode != "" && address.Country == "US" {
-		pounds := int(totalOunces / 16)
-		remOunces := totalOunces - float64(pounds*16)
-		xmlReq := fmt.Sprintf(`<RateV4Request USERID="%s">
-			<Revision>2</Revision>
-			<Package ID="0">
-				<Service>%s</Service>
-				<ZipOrigination>%s</ZipOrigination>
-				<ZipDestination>%s</ZipDestination>
-				<Pounds>%d</Pounds>
-				<Ounces>%.1f</Ounces>
-				<Container>VARIABLE</Container>
-				<Size>REGULAR</Size>
-			</Package>
-		</RateV4Request>`, userID, uspsService, originZip, address.PostalCode, pounds, remOunces)
-
-		apiURL := fmt.Sprintf("https://production.shippingapis.com/ShippingAPI.dll?API=RateV4&XML=%s", url.QueryEscape(xmlReq))
-		resp, err := http.Get(apiURL)
-		if err == nil {
-			defer resp.Body.Close()
-			body, readErr := io.ReadAll(resp.Body)
-			if readErr == nil {
-				var rateResp struct {
-					XMLName xml.Name `xml:"RateV4Response"`
-					Package struct {
-						Postage struct {
-							Rate float64 `xml:"Rate"`
-						} `xml:"Postage"`
-						Error struct {
-							Description string `xml:"Description"`
-						} `xml:"Error"`
-					} `xml:"Package"`
-				}
-				if xml.Unmarshal(body, &rateResp) == nil && rateResp.Package.Error.Description == "" && rateResp.Package.Postage.Rate > 0 {
-					return int64(rateResp.Package.Postage.Rate * 100)
-				}
-			}
-		}
-	}
 
 	// Fallback/Mock USPS Rates Calculation
 	totalLbs := totalOunces / 16.0
