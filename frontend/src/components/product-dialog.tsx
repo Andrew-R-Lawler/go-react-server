@@ -283,6 +283,19 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                             </div>
                         </div>
 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="gtin">GTIN (Barcode)</Label>
+                                <Input
+                                    id="gtin"
+                                    name="gtin"
+                                    placeholder="e.g. 0123456789012"
+                                    defaultValue={product?.gtin}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <Label>Product Images</Label>
                             <div className="space-y-2">

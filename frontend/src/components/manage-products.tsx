@@ -48,6 +48,7 @@ function ManageProducts() {
             long_description: formData.get('long-description'),
             ingredients: formData.get('ingredients'),
             raw_ingredients_json: formData.get('raw-ingredients-json') || '[]',
+            gtin: formData.get('gtin'),
             skus: JSON.parse(formData.get('skus') as string || '[]')
         }
 

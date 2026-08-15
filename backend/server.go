@@ -129,7 +129,8 @@ func main() {
 			long_description TEXT DEFAULT '',
 			ingredients TEXT DEFAULT '',
 			raw_ingredients_json TEXT DEFAULT '[]',
-			weight DECIMAL(10, 2) DEFAULT 0.00
+			weight DECIMAL(10, 2) DEFAULT 0.00,
+			gtin TEXT DEFAULT ''
 		);
 	`)
 	if err != nil {
@@ -141,6 +142,7 @@ func main() {
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS ingredients TEXT DEFAULT '';
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_ingredients_json TEXT DEFAULT '[]';
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS weight DECIMAL(10, 2) DEFAULT 0.00;
+		ALTER TABLE products ADD COLUMN IF NOT EXISTS gtin TEXT DEFAULT '';
 	`)
 	if err != nil {
 		log.Printf("Warning: Failed to execute alter table on products: %v", err)
