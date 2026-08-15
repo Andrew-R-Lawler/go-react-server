@@ -128,7 +128,8 @@ func main() {
 			sale_price DECIMAL(10, 2) DEFAULT 0.00,
 			long_description TEXT DEFAULT '',
 			ingredients TEXT DEFAULT '',
-			raw_ingredients_json TEXT DEFAULT '[]'
+			raw_ingredients_json TEXT DEFAULT '[]',
+			weight DECIMAL(10, 2) DEFAULT 0.00
 		);
 	`)
 	if err != nil {
@@ -139,6 +140,7 @@ func main() {
 	_, err = db.Exec(`
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS ingredients TEXT DEFAULT '';
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_ingredients_json TEXT DEFAULT '[]';
+		ALTER TABLE products ADD COLUMN IF NOT EXISTS weight DECIMAL(10, 2) DEFAULT 0.00;
 	`)
 	if err != nil {
 		log.Printf("Warning: Failed to execute alter table on products: %v", err)
@@ -191,6 +193,11 @@ func main() {
 		log.Fatal("Failed to create orders table:", err)
 	}
 
+	_, err = db.Exec("ALTER TABLE orders ADD COLUMN IF NOT EXISTS label_url TEXT;")
+	if err != nil {
+		log.Fatal("Failed to migrate orders table (label_url):", err)
+	}
+
 	handlers.InitOAuth()
 
 	r := gin.Default()
@@ -241,12 +248,14 @@ func main() {
 	protectedGroup.GET("/orders", func(c *gin.Context) { handlers.GetOrders(c, db) })
 	protectedGroup.GET("/admin/orders", func(c *gin.Context) { handlers.GetAllOrders(c, db) })
 	protectedGroup.PUT("/admin/orders/:id/status", func(c *gin.Context) { handlers.UpdateOrderStatus(c, db) })
+	protectedGroup.POST("/admin/orders/:id/shippo-label", func(c *gin.Context) { handlers.GenerateShippoLabel(c, db) })
 
 	// Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	r.POST("/api/create-payment-intent", func(c *gin.Context) { handlers.CreatePaymentIntent(c, db) })
 	r.POST("/api/calculate-tax", func(c *gin.Context) { handlers.CalculateTax(c, db) })
 	r.POST("/api/confirm-order", func(c *gin.Context) { handlers.ConfirmOrder(c, db) })
+	r.POST("/api/shipping-rates", func(c *gin.Context) { handlers.GetShippingRates(c, db) })
 
 	// Public Config
 	r.GET("/api/config", func(c *gin.Context) {

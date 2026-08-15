@@ -119,36 +119,83 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile, addres
 function Checkout() {
     const { items, cartTotal } = useCart()
     // Shipping State
-    const [selectedShipping, setSelectedShipping] = useState("standard")
+    const [selectedShipping, setSelectedShipping] = useState("usps_ground_advantage")
+    const [shippingOptions, setShippingOptions] = useState<Record<string, { id: string; label: string; price: number }>>({
+        usps_ground_advantage: { id: "usps_ground_advantage", label: "USPS Ground Advantage (2-5 business days)", price: 5.00 },
+        usps_priority_mail: { id: "usps_priority_mail", label: "USPS Priority Mail (1-3 business days)", price: 10.00 },
+        usps_priority_mail_express: { id: "usps_priority_mail_express", label: "USPS Priority Mail Express (Next-Day)", price: 25.00 }
+    })
 
-    const shippingOptions = {
-        standard: { id: "standard", label: "Standard Shipping", price: 5.00 },
-        express: { id: "express", label: "Express Shipping", price: 10.00 }
-    }
-
-    const shippingCost = shippingOptions[selectedShipping as keyof typeof shippingOptions].price
+    const shippingCost = shippingOptions[selectedShipping]?.price || 0
     const [taxAmount, setTaxAmount] = useState(0)
     const total = cartTotal + shippingCost + taxAmount
 
     const [address, setAddress] = useState<any>(null)
     const [isPaymentUpdating, setIsPaymentUpdating] = useState(false)
 
+    const fetchRatesAndTax = (addr: any, currentShippingId: string) => {
+        setIsPaymentUpdating(true)
+        axios.post("/api/shipping-rates", {
+            items,
+            address: addr
+        }).then(ratesRes => {
+            const newOptions: Record<string, { id: string; label: string; price: number }> = {}
+            ratesRes.data.forEach((opt: any) => {
+                newOptions[opt.id] = { id: opt.id, label: opt.label, price: opt.price }
+            })
+            setShippingOptions(newOptions)
+
+            let activeShippingId = currentShippingId
+            if (!newOptions[currentShippingId]) {
+                const keys = Object.keys(newOptions)
+                if (keys.length > 0) {
+                    activeShippingId = keys[0]
+                    setSelectedShipping(activeShippingId)
+                }
+            }
+
+            return axios.post("/api/calculate-tax", {
+                items,
+                shipping_id: activeShippingId,
+                address: addr
+            })
+        }).then(taxRes => {
+            if (taxRes) {
+                setTaxAmount(taxRes.data.taxAmount / 100)
+            }
+        }).catch((err) => {
+            console.error("Failed to fetch shipping/tax:", err)
+            setTaxAmount(0)
+        }).finally(() => {
+            setIsPaymentUpdating(false)
+        })
+    }
+
     const handleAddressComplete = (addr: any) => {
         setAddress(addr)
         if (addr) {
-            setIsPaymentUpdating(true)
-            axios.post("/api/calculate-tax", {
-                items,
-                shipping_id: selectedShipping,
-                address: addr
-            }).then(res => {
-                setTaxAmount(res.data.taxAmount / 100)
-            }).catch(() => setTaxAmount(0))
-              .finally(() => setIsPaymentUpdating(false))
+            fetchRatesAndTax(addr, selectedShipping)
         } else {
             setTaxAmount(0)
         }
     }
+
+    useEffect(() => {
+        if (address) {
+            setIsPaymentUpdating(true)
+            axios.post("/api/calculate-tax", {
+                items,
+                shipping_id: selectedShipping,
+                address: address
+            }).then(res => {
+                setTaxAmount(res.data.taxAmount / 100)
+            }).catch(() => {
+                setTaxAmount(0)
+            }).finally(() => {
+                setIsPaymentUpdating(false)
+            })
+        }
+    }, [selectedShipping])
 
     // Auth State
     const [isGuest, setIsGuest] = useState(false)
@@ -318,7 +365,10 @@ function Checkout() {
                                                     <div className="text-sm">
                                                         <p className="font-medium text-foreground">{option.label}</p>
                                                         <p className="text-muted-foreground">
-                                                            {option.id === 'standard' ? '3-5 Business Days' : '1-2 Business Days'}
+                                                            {option.id === 'usps_ground_advantage' ? '2-5 Business Days' :
+                                                             option.id === 'usps_priority_mail' ? '1-3 Business Days' :
+                                                             option.id === 'usps_priority_mail_express' ? 'Next-Day Delivery' :
+                                                             'Standard Shipping'}
                                                         </p>
                                                     </div>
                                                 </div>

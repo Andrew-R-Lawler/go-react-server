@@ -43,6 +43,7 @@ interface Order {
     created_at: string;
     receipt_email: string;
     tracking_number: string;
+    label_url?: string;
 }
 
 export default function OrderFulfillment() {
@@ -54,6 +55,7 @@ export default function OrderFulfillment() {
     const [shippingDialogOpen, setShippingDialogOpen] = useState(false)
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
     const [trackingNumber, setTrackingNumber] = useState("")
+    const [buyingLabel, setBuyingLabel] = useState(false)
 
     const fetchOrders = async () => {
         try {
@@ -77,6 +79,30 @@ export default function OrderFulfillment() {
             setShippingDialogOpen(true)
         } else {
             handleStatusUpdate(orderId, newStatus)
+        }
+    }
+
+    const buyShippoLabel = async () => {
+        if (!selectedOrderId) return
+        setBuyingLabel(true)
+        try {
+            const response = await axios.post(`/api/protected/admin/orders/${selectedOrderId}/shippo-label`, {}, { withCredentials: true })
+            const { label_url, tracking_number } = response.data
+            
+            setOrders(orders.map(o => o.id === selectedOrderId ? { 
+                ...o, 
+                status: 'shipped', 
+                tracking_number: tracking_number, 
+                label_url: label_url 
+            } : o))
+            
+            setShippingDialogOpen(false)
+            setSelectedOrderId(null)
+        } catch (error) {
+            console.error("Failed to buy Shippo label:", error)
+            alert("Error buying label: " + (axios.isAxiosError(error) ? error.response?.data?.error : "Unknown error"))
+        } finally {
+            setBuyingLabel(false)
         }
     }
 
@@ -144,7 +170,23 @@ export default function OrderFulfillment() {
                                             {order.receipt_email}
                                         </TableCell>
                                         <TableCell className="capitalize">{order.shipping_method || 'Standard'}</TableCell>
-                                        <TableCell className="font-mono text-xs">{order.tracking_number || '-'}</TableCell>
+                                        <TableCell className="font-mono text-xs">
+                                            {order.tracking_number ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <span>{order.tracking_number}</span>
+                                                    {order.label_url && (
+                                                        <a 
+                                                            href={order.label_url} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="text-emerald-500 hover:underline text-xs flex items-center gap-1 font-semibold"
+                                                        >
+                                                            Print Label
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ) : '-'}
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             ${(order.amount / 100).toFixed(2)}
                                         </TableCell>
@@ -182,7 +224,7 @@ export default function OrderFulfillment() {
                     <DialogHeader>
                         <DialogTitle>Mark Order as Shipped</DialogTitle>
                         <DialogDescription>
-                            Enter the tracking number for this order. An email will be sent to the customer.
+                            Enter the tracking number for this order, or buy a Shippo label.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -196,12 +238,23 @@ export default function OrderFulfillment() {
                                 onChange={(e) => setTrackingNumber(e.target.value)}
                                 className="col-span-3"
                                 placeholder="USPS Tracking Number"
+                                disabled={buyingLabel}
                             />
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShippingDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={confirmShipping}>Confirm Shipment</Button>
+                    <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
+                        <Button 
+                            variant="secondary" 
+                            onClick={buyShippoLabel} 
+                            disabled={buyingLabel}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+                        >
+                            {buyingLabel ? "Buying..." : "Buy Shippo Label"}
+                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => setShippingDialogOpen(false)} disabled={buyingLabel}>Cancel</Button>
+                            <Button onClick={confirmShipping} disabled={buyingLabel}>Confirm Shipment</Button>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
