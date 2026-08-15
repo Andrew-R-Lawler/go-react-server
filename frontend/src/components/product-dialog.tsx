@@ -294,6 +294,19 @@ export function ProductDialog({ handleSaveProduct, isLoading = false, error, pro
                                     disabled={isLoading}
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="weight">Shipping Weight (oz)</Label>
+                                <Input
+                                    id="weight"
+                                    name="weight"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    defaultValue={product?.weight}
+                                    disabled={isLoading}
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">

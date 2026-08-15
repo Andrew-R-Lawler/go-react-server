@@ -20,5 +20,6 @@ export interface Product {
     raw_ingredients_json?: string
     featured: boolean
     gtin?: string
+    weight?: number
     skus?: ProductSKU[]
 }
