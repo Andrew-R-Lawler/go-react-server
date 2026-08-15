@@ -185,6 +185,12 @@ func GenerateShippoLabel(c *gin.Context, db *sql.DB) {
 
 	idStr := c.Param("id")
 
+	// Parse optional body parameter for rate ID
+	var requestBody struct {
+		RateID string `json:"rate_id"`
+	}
+	_ = c.ShouldBindJSON(&requestBody)
+
 	// 1. Fetch order details from database
 	var paymentIntentID string
 	var shippingMethod string
@@ -196,106 +202,112 @@ func GenerateShippoLabel(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// 2. Retrieve PaymentIntent from Stripe to get shipping address
-	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-	pi, err := paymentintent.Get(paymentIntentID, nil)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve payment intent from Stripe: " + err.Error()})
-		return
-	}
+	var matchedRateID string = requestBody.RateID
 
-	if pi.Shipping == nil || pi.Shipping.Address == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Order has no shipping details in Stripe"})
-		return
-	}
-
-	// 3. Parse items and calculate total weight in ounces
-	var items []PaymentItem
-	if err := json.Unmarshal(itemsJSON, &items); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse order items"})
-		return
-	}
-
-	var totalOunces float64
-	for _, item := range items {
-		var weight float64
-		err := db.QueryRow("SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1", item.ID).Scan(&weight)
+	if matchedRateID == "" {
+		// 2. Retrieve PaymentIntent from Stripe to get shipping address
+		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+		pi, err := paymentintent.Get(paymentIntentID, nil)
 		if err != nil {
-			weight = 4.0
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve payment intent from Stripe: " + err.Error()})
+			return
 		}
-		if weight <= 0 {
-			weight = 4.0
+
+		if pi.Shipping == nil || pi.Shipping.Address == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Order has no shipping details in Stripe"})
+			return
 		}
-		totalOunces += weight * float64(item.Quantity)
-	}
 
-	// 4. Create toAddress for Shippo
-	toAddr := ShippoAddress{
-		Name:    pi.Shipping.Name,
-		Street1: pi.Shipping.Address.Line1,
-		Street2: pi.Shipping.Address.Line2,
-		City:    pi.Shipping.Address.City,
-		State:   pi.Shipping.Address.State,
-		Zip:     pi.Shipping.Address.PostalCode,
-		Country: pi.Shipping.Address.Country,
-		Phone:   pi.Shipping.Phone,
-		Email:   receiptEmail,
-	}
+		// 3. Parse items and calculate total weight in ounces
+		var items []PaymentItem
+		if err := json.Unmarshal(itemsJSON, &items); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse order items"})
+			return
+		}
 
-	// 5. Create Shippo shipment and fetch rates
-	shipment, err := CreateShippoShipment(toAddr, totalOunces)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Shippo shipment: " + err.Error()})
-		return
-	}
+		var totalOunces float64
+		for _, item := range items {
+			var weight float64
+			err := db.QueryRow("SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1", item.ID).Scan(&weight)
+			if err != nil {
+				weight = 4.0
+			}
+			if weight <= 0 {
+				weight = 4.0
+			}
+			totalOunces += weight * float64(item.Quantity)
+		}
 
-	if len(shipment.Rates) == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No shipping rates returned by Shippo"})
-		return
-	}
+		// 4. Create toAddress for Shippo
+		toAddr := ShippoAddress{
+			Name:    pi.Shipping.Name,
+			Street1: pi.Shipping.Address.Line1,
+			Street2: pi.Shipping.Address.Line2,
+			City:    pi.Shipping.Address.City,
+			State:   pi.Shipping.Address.State,
+			Zip:     pi.Shipping.Address.PostalCode,
+			Country: pi.Shipping.Address.Country,
+			Phone:   pi.Shipping.Phone,
+			Email:   receiptEmail,
+		}
 
-	// 6. Find matching rate for selected shipping method
-	var targetToken string
-	switch shippingMethod {
-	case "usps_ground_advantage":
-		targetToken = "usps_ground_advantage"
-	case "usps_priority_mail":
-		targetToken = "usps_priority"
-	case "usps_priority_mail_express":
-		targetToken = "usps_priority_express"
-	default:
-		if shippingMethod == "express" {
-			targetToken = "usps_priority"
-		} else {
+		// 5. Create Shippo shipment and fetch rates
+		shipment, err := CreateShippoShipment(toAddr, totalOunces)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Shippo shipment: " + err.Error()})
+			return
+		}
+
+		if len(shipment.Rates) == 0 {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "No shipping rates returned by Shippo"})
+			return
+		}
+
+		// 6. Find matching rate for selected shipping method
+		var targetToken string
+		switch shippingMethod {
+		case "usps_ground_advantage":
 			targetToken = "usps_ground_advantage"
+		case "usps_priority_mail":
+			targetToken = "usps_priority"
+		case "usps_priority_mail_express":
+			targetToken = "usps_priority_express"
+		default:
+			if shippingMethod == "express" {
+				targetToken = "usps_priority"
+			} else {
+				targetToken = "usps_ground_advantage"
+			}
 		}
-	}
 
-	var matchedRate *ShippoRate
-	for _, r := range shipment.Rates {
-		if r.ServiceLevel.Token == targetToken {
-			matchedRate = &r
-			break
-		}
-	}
-
-	// Fallback to any USPS rate if exact token doesn't match
-	if matchedRate == nil {
+		var matchedRate *ShippoRate
 		for _, r := range shipment.Rates {
-			if r.Provider == "USPS" {
+			if r.ServiceLevel.Token == targetToken {
 				matchedRate = &r
 				break
 			}
 		}
-	}
 
-	// Double fallback to first rate if no USPS rate found
-	if matchedRate == nil {
-		matchedRate = &shipment.Rates[0]
+		// Fallback to any USPS rate if exact token doesn't match
+		if matchedRate == nil {
+			for _, r := range shipment.Rates {
+				if r.Provider == "USPS" {
+					matchedRate = &r
+					break
+				}
+			}
+		}
+
+		// Double fallback to first rate if no USPS rate found
+		if matchedRate == nil {
+			matchedRate = &shipment.Rates[0]
+		}
+
+		matchedRateID = matchedRate.ObjectID
 	}
 
 	// 7. Purchase Shippo label
-	txResp, err := PurchaseShippoLabel(matchedRate.ObjectID)
+	txResp, err := PurchaseShippoLabel(matchedRateID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to purchase Shippo label: " + err.Error()})
 		return
@@ -318,4 +330,113 @@ func GenerateShippoLabel(c *gin.Context, db *sql.DB) {
 		"label_url":       txResp.LabelURL,
 		"tracking_number": txResp.TrackingNumber,
 	})
+}
+
+func GetShippoRatesForOrder(c *gin.Context, db *sql.DB) {
+	// Verify admin status
+	isAdmin, exists := c.Get("admin")
+	if !exists || !isAdmin.(bool) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		return
+	}
+
+	idStr := c.Param("id")
+
+	// Parse optional body parameters for custom dimensions/weight
+	var reqBody struct {
+		Length       string  `json:"length"`
+		Width        string  `json:"width"`
+		Height       string  `json:"height"`
+		DistanceUnit string  `json:"distance_unit"`
+		Weight       float64 `json:"weight"` // weight in oz
+		MassUnit     string  `json:"mass_unit"`
+	}
+	_ = c.ShouldBindJSON(&reqBody)
+
+	// Fetch order details
+	var paymentIntentID string
+	var itemsJSON []byte
+	var receiptEmail string
+	err := db.QueryRow("SELECT payment_intent_id, items, receipt_email FROM orders WHERE id = $1", idStr).Scan(&paymentIntentID, &itemsJSON, &receiptEmail)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	// Retrieve PaymentIntent from Stripe
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	pi, err := paymentintent.Get(paymentIntentID, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve payment intent from Stripe: " + err.Error()})
+		return
+	}
+
+	if pi.Shipping == nil || pi.Shipping.Address == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Order has no shipping details in Stripe"})
+		return
+	}
+
+	// Determine parcel parameters
+	var parcel ShippoParcel
+	if reqBody.Length != "" && reqBody.Width != "" && reqBody.Height != "" {
+		parcel.Length = reqBody.Length
+		parcel.Width = reqBody.Width
+		parcel.Height = reqBody.Height
+		parcel.DistanceUnit = reqBody.DistanceUnit
+		if parcel.DistanceUnit == "" {
+			parcel.DistanceUnit = "in"
+		}
+		parcel.Weight = fmt.Sprintf("%.2f", reqBody.Weight)
+		parcel.MassUnit = reqBody.MassUnit
+		if parcel.MassUnit == "" {
+			parcel.MassUnit = "oz"
+		}
+	} else {
+		// Calculate default weight from items
+		var items []PaymentItem
+		if err := json.Unmarshal(itemsJSON, &items); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse order items"})
+			return
+		}
+		var totalOunces float64
+		for _, item := range items {
+			var weight float64
+			err := db.QueryRow("SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1", item.ID).Scan(&weight)
+			if err != nil {
+				weight = 4.0
+			}
+			if weight <= 0 {
+				weight = 4.0
+			}
+			totalOunces += weight * float64(item.Quantity)
+		}
+		parcel = ShippoParcel{
+			Length:       "5",
+			Width:        "5",
+			Height:       "5",
+			DistanceUnit: "in",
+			Weight:       fmt.Sprintf("%.2f", totalOunces),
+			MassUnit:     "oz",
+		}
+	}
+
+	toAddr := ShippoAddress{
+		Name:    pi.Shipping.Name,
+		Street1: pi.Shipping.Address.Line1,
+		Street2: pi.Shipping.Address.Line2,
+		City:    pi.Shipping.Address.City,
+		State:   pi.Shipping.Address.State,
+		Zip:     pi.Shipping.Address.PostalCode,
+		Country: pi.Shipping.Address.Country,
+		Phone:   pi.Shipping.Phone,
+		Email:   receiptEmail,
+	}
+
+	shipment, err := CreateShippoShipmentWithOptions(toAddr, parcel)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create Shippo shipment: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, shipment)
 }

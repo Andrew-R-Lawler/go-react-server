@@ -251,6 +251,7 @@ func main() {
 	protectedGroup.GET("/admin/orders", func(c *gin.Context) { handlers.GetAllOrders(c, db) })
 	protectedGroup.PUT("/admin/orders/:id/status", func(c *gin.Context) { handlers.UpdateOrderStatus(c, db) })
 	protectedGroup.POST("/admin/orders/:id/shippo-label", func(c *gin.Context) { handlers.GenerateShippoLabel(c, db) })
+	protectedGroup.POST("/admin/orders/:id/shippo-rates", func(c *gin.Context) { handlers.GetShippoRatesForOrder(c, db) })
 
 	// Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")

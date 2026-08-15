@@ -57,6 +57,16 @@ export default function OrderFulfillment() {
     const [trackingNumber, setTrackingNumber] = useState("")
     const [buyingLabel, setBuyingLabel] = useState(false)
 
+    // Live Rate Shopping States
+    const [showRateShopping, setShowRateShopping] = useState(false)
+    const [length, setLength] = useState("5")
+    const [width, setWidth] = useState("5")
+    const [height, setHeight] = useState("5")
+    const [weight, setWeight] = useState("16")
+    const [rates, setRates] = useState<any[]>([])
+    const [loadingRates, setLoadingRates] = useState(false)
+    const [fetchingRatesError, setFetchingRatesError] = useState("")
+
     const fetchOrders = async () => {
         try {
             const response = await axios.get('/api/protected/admin/orders', { withCredentials: true })
@@ -76,9 +86,67 @@ export default function OrderFulfillment() {
         if (newStatus === 'shipped') {
             setSelectedOrderId(orderId)
             setTrackingNumber("")
+            setShowRateShopping(false)
+            setLength("5")
+            setWidth("5")
+            setHeight("5")
+            setWeight("16")
+            setRates([])
+            setFetchingRatesError("")
             setShippingDialogOpen(true)
         } else {
             handleStatusUpdate(orderId, newStatus)
+        }
+    }
+
+    const fetchRates = async () => {
+        if (!selectedOrderId) return
+        setLoadingRates(true)
+        setRates([])
+        setFetchingRatesError("")
+        try {
+            const response = await axios.post(`/api/protected/admin/orders/${selectedOrderId}/shippo-rates`, {
+                length: length,
+                width: width,
+                height: height,
+                weight: Number(weight),
+                distance_unit: "in",
+                mass_unit: "oz"
+            }, { withCredentials: true })
+            setRates(response.data.rates || [])
+        } catch (error) {
+            console.error("Failed to fetch rates:", error)
+            setFetchingRatesError(axios.isAxiosError(error) ? error.response?.data?.error || "Error fetching rates" : "Unknown error")
+        } finally {
+            setLoadingRates(false)
+        }
+    }
+
+    const buySpecificRate = async (rateId: string) => {
+        if (!selectedOrderId) return
+        setBuyingLabel(true)
+        try {
+            const response = await axios.post(`/api/protected/admin/orders/${selectedOrderId}/shippo-label`, {
+                rate_id: rateId
+            }, { withCredentials: true })
+            const { label_url, tracking_number } = response.data
+            
+            setOrders(orders.map(o => o.id === selectedOrderId ? { 
+                ...o, 
+                status: 'shipped', 
+                tracking_number: tracking_number, 
+                label_url: label_url 
+            } : o))
+            
+            setShippingDialogOpen(false)
+            setSelectedOrderId(null)
+            setRates([])
+            setShowRateShopping(false)
+        } catch (error) {
+            console.error("Failed to buy specific label:", error)
+            alert("Error buying label: " + (axios.isAxiosError(error) ? error.response?.data?.error : "Unknown error"))
+        } finally {
+            setBuyingLabel(false)
         }
     }
 
@@ -220,7 +288,7 @@ export default function OrderFulfillment() {
             </Card>
 
             <Dialog open={shippingDialogOpen} onOpenChange={setShippingDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px] md:max-w-[650px] overflow-y-auto max-h-[90vh]">
                     <DialogHeader>
                         <DialogTitle>Mark Order as Shipped</DialogTitle>
                         <DialogDescription>
@@ -241,6 +309,93 @@ export default function OrderFulfillment() {
                                 disabled={buyingLabel}
                             />
                         </div>
+
+                        <div className="border-t border-border pt-4">
+                            <button
+                                type="button"
+                                onClick={() => setShowRateShopping(!showRateShopping)}
+                                className="text-sm text-primary hover:underline font-semibold flex items-center gap-1"
+                            >
+                                {showRateShopping ? "[-] Hide Rate Shopping" : "[+] Advanced: Live Rate Shopping"}
+                            </button>
+                        </div>
+
+                        {showRateShopping && (
+                            <div className="space-y-4 bg-muted/20 p-4 rounded-md border border-border">
+                                <div className="grid grid-cols-4 gap-2 items-center">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">Length (in)</Label>
+                                        <Input value={length} onChange={e => setLength(e.target.value)} placeholder="5" disabled={buyingLabel} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">Width (in)</Label>
+                                        <Input value={width} onChange={e => setWidth(e.target.value)} placeholder="5" disabled={buyingLabel} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">Height (in)</Label>
+                                        <Input value={height} onChange={e => setHeight(e.target.value)} placeholder="5" disabled={buyingLabel} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">Weight (oz)</Label>
+                                        <Input value={weight} onChange={e => setWeight(e.target.value)} placeholder="16" disabled={buyingLabel} />
+                                    </div>
+                                </div>
+
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={fetchRates} 
+                                    disabled={loadingRates || buyingLabel}
+                                    className="w-full text-xs font-semibold"
+                                >
+                                    {loadingRates ? "Fetching Rates..." : "Get Live Quotes"}
+                                </Button>
+
+                                {fetchingRatesError && (
+                                    <p className="text-xs text-destructive">{fetchingRatesError}</p>
+                                )}
+
+                                {rates.length > 0 && (
+                                    <div className="max-h-[220px] overflow-y-auto border border-border rounded-md bg-background">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="border-b bg-muted/50 font-semibold">
+                                                    <th className="p-2">Carrier / Service</th>
+                                                    <th className="p-2">Days</th>
+                                                    <th className="p-2">Cost</th>
+                                                    <th className="p-2 text-right">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {rates.map((rate: any) => (
+                                                    <tr key={rate.object_id} className="border-b hover:bg-muted/30">
+                                                        <td className="p-2 font-medium">
+                                                            {rate.provider} - {rate.servicelevel.name}
+                                                        </td>
+                                                        <td className="p-2">
+                                                            {rate.estimated_days ? `${rate.estimated_days} days` : "-"}
+                                                        </td>
+                                                        <td className="p-2 font-semibold">
+                                                            ${Number(rate.amount).toFixed(2)}
+                                                        </td>
+                                                        <td className="p-2 text-right">
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => buySpecificRate(rate.object_id)}
+                                                                disabled={buyingLabel}
+                                                                className="h-7 text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+                                                            >
+                                                                Buy
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
                         <Button 
@@ -249,7 +404,7 @@ export default function OrderFulfillment() {
                             disabled={buyingLabel}
                             className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
                         >
-                            {buyingLabel ? "Buying..." : "Buy Shippo Label"}
+                            {buyingLabel ? "Buying..." : "Buy Shippo Label (Auto)"}
                         </Button>
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={() => setShippingDialogOpen(false)} disabled={buyingLabel}>Cancel</Button>

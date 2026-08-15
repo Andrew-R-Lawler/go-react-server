@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -13,6 +16,8 @@ import (
 	"github.com/andrew-r-lawler/go-react-server/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/form"
 )
 
 func TestGetProducts(t *testing.T) {
@@ -436,4 +441,147 @@ func TestAddProduct_LongDescription_Admin(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
+}
+
+type mockStripeBackend struct {
+	responseJSON string
+}
+
+func (m *mockStripeBackend) Call(method, path, key string, params stripe.ParamsContainer, v stripe.LastResponseSetter) error {
+	return json.Unmarshal([]byte(m.responseJSON), v)
+}
+
+func (m *mockStripeBackend) CallRaw(method, path, key string, body *form.Values, params *stripe.Params, v stripe.LastResponseSetter) error {
+	return nil
+}
+
+func (m *mockStripeBackend) CallMultipart(method, path, key string, boundary string, body *bytes.Buffer, params *stripe.Params, v stripe.LastResponseSetter) error {
+	return nil
+}
+
+func (m *mockStripeBackend) CallStreaming(method, path, key string, params stripe.ParamsContainer, v stripe.StreamingLastResponseSetter) error {
+	return nil
+}
+
+func (m *mockStripeBackend) SetMaxNetworkRetries(maxNetworkRetries int64) {}
+
+func TestGetShippoRatesForOrder_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// Mock order DB query
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT payment_intent_id, items, receipt_email FROM orders WHERE id = $1`)).
+		WithArgs("1").
+		WillReturnRows(sqlmock.NewRows([]string{"payment_intent_id", "items", "receipt_email"}).
+			AddRow("pi_123", []byte(`[{"id": 1, "quantity": 1}]`), "test@example.com"))
+
+	// Mock product weight query
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1`)).
+		WithArgs(1).
+		WillReturnRows(sqlmock.NewRows([]string{"weight"}).AddRow(12.5))
+
+	// Mock Stripe PaymentIntent response
+	piJSON := `{"id":"pi_123","shipping":{"name":"John Doe","address":{"line1":"123 Main St","city":"San Francisco","state":"CA","postal_code":"94105","country":"US"}}}`
+	stripe.SetBackend(stripe.APIBackend, &mockStripeBackend{responseJSON: piJSON})
+
+	// Mock Shippo API response
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{
+			"object_id": "shipment_123",
+			"rates": [
+				{
+					"object_id": "rate_123",
+					"provider": "USPS",
+					"amount": "5.50",
+					"estimated_days": 3,
+					"servicelevel": {
+						"name": "Ground Advantage",
+						"token": "usps_ground_advantage"
+					}
+				}
+			]
+		}`))
+	}))
+	defer server.Close()
+
+	// Point Shippo to our mock server
+	oldShippoAPIBase := handlers.ShippoAPIBase
+	handlers.ShippoAPIBase = server.URL
+	defer func() { handlers.ShippoAPIBase = oldShippoAPIBase }()
+
+	os.Setenv("SHIPPO_API_KEY", "test_key")
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.POST("/api/admin/orders/:id/shippo-rates", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.GetShippoRatesForOrder(c, db)
+	})
+
+	req, _ := http.NewRequest(http.MethodPost, "/api/admin/orders/1/shippo-rates", strings.NewReader(`{}`))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "shipment_123")
+	assert.Contains(t, w.Body.String(), "rate_123")
+}
+
+func TestGenerateShippoLabel_SpecificRate_Admin(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// Mock order DB query for email/status
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT payment_intent_id, shipping_method, items, receipt_email FROM orders WHERE id = $1`)).
+		WithArgs("1").
+		WillReturnRows(sqlmock.NewRows([]string{"payment_intent_id", "shipping_method", "items", "receipt_email"}).
+			AddRow("pi_123", "usps_ground_advantage", []byte(`[]`), "test@example.com"))
+
+	// Mock DB update
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE orders SET status = $1, tracking_number = $2, label_url = $3 WHERE id = $4`)).
+		WithArgs("shipped", "TRACK456", "http://label.pdf", "1").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	// Mock Shippo API response for transaction label purchase
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{
+			"status": "SUCCESS",
+			"tracking_number": "TRACK456",
+			"label_url": "http://label.pdf"
+		}`))
+	}))
+	defer server.Close()
+
+	oldShippoAPIBase := handlers.ShippoAPIBase
+	handlers.ShippoAPIBase = server.URL
+	defer func() { handlers.ShippoAPIBase = oldShippoAPIBase }()
+
+	os.Setenv("SHIPPO_API_KEY", "test_key")
+
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.POST("/api/admin/orders/:id/shippo-label", func(c *gin.Context) {
+		c.Set("admin", true)
+		handlers.GenerateShippoLabel(c, db)
+	})
+
+	// Pass specific rate_id in body
+	payload := `{"rate_id": "rate_123"}`
+	req, _ := http.NewRequest(http.MethodPost, "/api/admin/orders/1/shippo-label", strings.NewReader(payload))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "TRACK456")
+	assert.Contains(t, w.Body.String(), "http://label.pdf")
 }

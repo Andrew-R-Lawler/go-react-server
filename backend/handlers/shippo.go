@@ -78,6 +78,8 @@ type ShippoTransactionResponse struct {
 	TrackingNumber string `json:"tracking_number"`
 }
 
+var ShippoAPIBase = "https://api.goshippo.com"
+
 // GetShippoSenderAddress builds the sender address from environment variables or defaults
 func GetShippoSenderAddress() ShippoAddress {
 	getEnvDefault := func(key, defaultValue string) string {
@@ -118,7 +120,7 @@ func callShippoAPI(method, endpoint string, payload interface{}, responseObj int
 		bodyReader = bytes.NewBuffer(jsonBytes)
 	}
 
-	url := "https://api.goshippo.com" + endpoint
+	url := ShippoAPIBase + endpoint
 	req, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
@@ -150,19 +152,9 @@ func callShippoAPI(method, endpoint string, payload interface{}, responseObj int
 	return nil
 }
 
-// CreateShippoShipment calls Shippo to create a shipment and return its rates
-func CreateShippoShipment(toAddress ShippoAddress, totalOunces float64) (*ShippoShipmentResponse, error) {
+// CreateShippoShipmentWithOptions calls Shippo to create a shipment with custom parcel details
+func CreateShippoShipmentWithOptions(toAddress ShippoAddress, parcel ShippoParcel) (*ShippoShipmentResponse, error) {
 	sender := GetShippoSenderAddress()
-
-	// Default parcel dimensions (small package)
-	parcel := ShippoParcel{
-		Length:       "5",
-		Width:        "5",
-		Height:       "5",
-		DistanceUnit: "in",
-		Weight:       fmt.Sprintf("%.2f", totalOunces),
-		MassUnit:     "oz",
-	}
 
 	req := ShippoShipmentRequest{
 		AddressFrom: sender,
@@ -178,6 +170,21 @@ func CreateShippoShipment(toAddress ShippoAddress, totalOunces float64) (*Shippo
 	}
 
 	return &res, nil
+}
+
+// CreateShippoShipment calls Shippo to create a shipment and return its rates
+func CreateShippoShipment(toAddress ShippoAddress, totalOunces float64) (*ShippoShipmentResponse, error) {
+	// Default parcel dimensions (small package)
+	parcel := ShippoParcel{
+		Length:       "5",
+		Width:        "5",
+		Height:       "5",
+		DistanceUnit: "in",
+		Weight:       fmt.Sprintf("%.2f", totalOunces),
+		MassUnit:     "oz",
+	}
+
+	return CreateShippoShipmentWithOptions(toAddress, parcel)
 }
 
 // PurchaseShippoLabel buys a shipping label using the chosen rate ID
