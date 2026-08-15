@@ -33,6 +33,7 @@ import OrderFulfillment from './components/order-fulfillment'
 import ProductDetails from './components/product-details'
 import CookiePreferences from './components/cookie-preferences'
 import Privacy from './components/privacy'
+import Terms from './components/terms'
 import { CookiesProvider } from 'react-cookie'
 import axios from 'axios'
 import { ThemeProvider } from "@/components/theme-provider"
@@ -149,6 +150,7 @@ function AppContent() {
                         <Route path="/careers" element={<Careers />} />
                         <Route path="/cookie-preferences" element={<CookiePreferences />} />
                         <Route path="/privacy" element={<Privacy />} />
+                        <Route path="/terms" element={<Terms />} />
                         <Route path='/completion' element={<Completion />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

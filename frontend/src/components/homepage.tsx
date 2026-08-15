@@ -30,8 +30,8 @@ function HomePage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-            <SEO 
-                title="Home" 
+            <SEO
+                title="Home"
                 description="Welcome to Ecotheory Cosmetics. Discover our handcrafted, eco-friendly soaps and natural skincare collection."
             />
             {/* Hero Section */}

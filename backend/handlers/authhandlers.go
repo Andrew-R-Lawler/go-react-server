@@ -85,8 +85,19 @@ func SendVerificationEmail(token string, email string) error {
 	to := email
 
 	m := mail.NewMsg()
-	if err := m.From(smtpUser); err != nil {
-		return fmt.Errorf("failed to set From address: %s", err)
+	fromAddress := os.Getenv("SMTP_FROM")
+	if fromAddress == "" {
+		fromAddress = smtpUser
+	}
+	fromName := os.Getenv("SMTP_FROM_NAME")
+	if fromName != "" {
+		if err := m.FromFormat(fromName, fromAddress); err != nil {
+			return fmt.Errorf("failed to set From address: %s", err)
+		}
+	} else {
+		if err := m.From(fromAddress); err != nil {
+			return fmt.Errorf("failed to set From address: %s", err)
+		}
 	}
 	if err := m.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %s", err)
@@ -145,8 +156,19 @@ func SendResetEmail(token string, email string) error {
 	to := email
 
 	m := mail.NewMsg()
-	if err := m.From(smtpUser); err != nil {
-		return fmt.Errorf("failed to set From address: %s", err)
+	fromAddress := os.Getenv("SMTP_FROM")
+	if fromAddress == "" {
+		fromAddress = smtpUser
+	}
+	fromName := os.Getenv("SMTP_FROM_NAME")
+	if fromName != "" {
+		if err := m.FromFormat(fromName, fromAddress); err != nil {
+			return fmt.Errorf("failed to set From address: %s", err)
+		}
+	} else {
+		if err := m.From(fromAddress); err != nil {
+			return fmt.Errorf("failed to set From address: %s", err)
+		}
 	}
 	if err := m.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %s", err)
@@ -212,7 +234,11 @@ func SendShippingEmail(email string, orderID int, trackingNumber string) error {
 	to := email
 
 	m := mail.NewMsg()
-	if err := m.From(smtpUser); err != nil {
+	fromAddress := os.Getenv("SMTP_FROM")
+	if fromAddress == "" {
+		fromAddress = smtpUser
+	}
+	if err := m.From(fromAddress); err != nil {
 		return fmt.Errorf("failed to set From address: %s", err)
 	}
 	if err := m.To(to); err != nil {

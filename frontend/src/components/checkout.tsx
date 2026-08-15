@@ -11,7 +11,7 @@ import axios from "axios"
 import { User, Lock } from "lucide-react"
 
 // Revert to standard function to ensure render stability
-function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile }: { total: number, userEmail?: string, isPaymentUpdating: boolean, userProfile?: any }) {
+function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile, address, items, shipping_id, onAddressComplete }: { total: number, userEmail?: string, isPaymentUpdating: boolean, userProfile?: any, address: any, items: any[], shipping_id: string, onAddressComplete: (addr: any) => void }) {
     console.log("Rendering CheckoutForm", { total, userEmail, isPaymentUpdating })
     const stripe = useStripe()
     const elements = useElements()
@@ -21,28 +21,41 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile }: { to
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!stripe || !elements) {
-            return
-        }
+        if (!stripe || !elements) return
 
         setIsLoading(true)
 
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                // Make sure to change this to your actual return URL
-                return_url: `${window.location.origin}/completion`,
-                receipt_email: userEmail,
-            },
-        })
+        const { error: submitError } = await elements.submit()
+        if (submitError) {
+            setMessage(submitError.message || "Please complete all fields.")
+            setIsLoading(false)
+            return
+        }
 
-        // This point will only be reached if there is an immediate error when
-        // confirming the payment. Otherwise, your customer will be redirected to
-        // your `return_url`.
-        if (error.type === "card_error" || error.type === "validation_error") {
-            setMessage(error.message || "An unexpected error occurred.")
-        } else {
-            setMessage("An unexpected error occurred.")
+        try {
+            const res = await axios.post("/api/create-payment-intent", {
+                items: items,
+                shipping_id: shipping_id,
+                address: address
+            })
+            const clientSecret = res.data.clientSecret
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                clientSecret,
+                confirmParams: {
+                    return_url: `${window.location.origin}/completion`,
+                    receipt_email: userEmail,
+                },
+            })
+
+            if (error && (error.type === "card_error" || error.type === "validation_error")) {
+                setMessage(error.message || "An unexpected error occurred.")
+            } else if (error) {
+                setMessage("An unexpected error occurred.")
+            }
+        } catch (err) {
+            setMessage("Payment failed. Please try again.")
         }
 
         setIsLoading(false)
@@ -73,6 +86,12 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile }: { to
                             country: userProfile.country ? userProfile.country.toUpperCase() : undefined,
                         }
                     } : undefined
+                }} onChange={(e) => {
+                    if (e.complete) {
+                        onAddressComplete(e.value.address)
+                    } else {
+                        onAddressComplete(null)
+                    }
                 }} />
             </div>
 
@@ -100,20 +119,83 @@ function CheckoutForm({ total, userEmail, isPaymentUpdating, userProfile }: { to
 function Checkout() {
     const { items, cartTotal } = useCart()
     // Shipping State
-    const [selectedShipping, setSelectedShipping] = useState("standard")
+    const [selectedShipping, setSelectedShipping] = useState("usps_ground_advantage")
+    const [shippingOptions, setShippingOptions] = useState<Record<string, { id: string; label: string; price: number }>>({
+        usps_ground_advantage: { id: "usps_ground_advantage", label: "USPS Ground Advantage (2-5 business days)", price: 5.00 },
+        usps_priority_mail: { id: "usps_priority_mail", label: "USPS Priority Mail (1-3 business days)", price: 10.00 },
+        usps_priority_mail_express: { id: "usps_priority_mail_express", label: "USPS Priority Mail Express (Next-Day)", price: 25.00 }
+    })
 
-    const shippingOptions = {
-        standard: { id: "standard", label: "Standard Shipping", price: 5.00 },
-        express: { id: "express", label: "Express Shipping", price: 10.00 }
+    const shippingCost = shippingOptions[selectedShipping]?.price || 0
+    const [taxAmount, setTaxAmount] = useState(0)
+    const total = cartTotal + shippingCost + taxAmount
+
+    const [address, setAddress] = useState<any>(null)
+    const [isPaymentUpdating, setIsPaymentUpdating] = useState(false)
+
+    const fetchRatesAndTax = (addr: any, currentShippingId: string) => {
+        setIsPaymentUpdating(true)
+        axios.post("/api/shipping-rates", {
+            items,
+            address: addr
+        }).then(ratesRes => {
+            const newOptions: Record<string, { id: string; label: string; price: number }> = {}
+            ratesRes.data.forEach((opt: any) => {
+                newOptions[opt.id] = { id: opt.id, label: opt.label, price: opt.price }
+            })
+            setShippingOptions(newOptions)
+
+            let activeShippingId = currentShippingId
+            if (!newOptions[currentShippingId]) {
+                const keys = Object.keys(newOptions)
+                if (keys.length > 0) {
+                    activeShippingId = keys[0]
+                    setSelectedShipping(activeShippingId)
+                }
+            }
+
+            return axios.post("/api/calculate-tax", {
+                items,
+                shipping_id: activeShippingId,
+                address: addr
+            })
+        }).then(taxRes => {
+            if (taxRes) {
+                setTaxAmount(taxRes.data.taxAmount / 100)
+            }
+        }).catch((err) => {
+            console.error("Failed to fetch shipping/tax:", err)
+            setTaxAmount(0)
+        }).finally(() => {
+            setIsPaymentUpdating(false)
+        })
     }
 
-    const shippingCost = shippingOptions[selectedShipping as keyof typeof shippingOptions].price
-    const total = cartTotal + shippingCost
+    const handleAddressComplete = (addr: any) => {
+        setAddress(addr)
+        if (addr) {
+            fetchRatesAndTax(addr, selectedShipping)
+        } else {
+            setTaxAmount(0)
+        }
+    }
 
-    const [clientSecret, setClientSecret] = useState("")
-    console.log("Checkout State:", { itemsLength: items.length, clientSecret, total })
-    const [initError, setInitError] = useState<string | null>(null)
-    const [isPaymentUpdating, setIsPaymentUpdating] = useState(false)
+    useEffect(() => {
+        if (address) {
+            setIsPaymentUpdating(true)
+            axios.post("/api/calculate-tax", {
+                items,
+                shipping_id: selectedShipping,
+                address: address
+            }).then(res => {
+                setTaxAmount(res.data.taxAmount / 100)
+            }).catch(() => {
+                setTaxAmount(0)
+            }).finally(() => {
+                setIsPaymentUpdating(false)
+            })
+        }
+    }, [selectedShipping])
 
     // Auth State
     const [isGuest, setIsGuest] = useState(false)
@@ -185,22 +267,7 @@ function Checkout() {
         checkAuth()
     }, [])
 
-    useEffect(() => {
-        // Create PaymentIntent as soon as the page loads
-        if (items.length > 0) {
-            setIsPaymentUpdating(true)
-            axios.post("/api/create-payment-intent", {
-                items: items,
-                shipping_id: selectedShipping
-            })
-                .then((res) => setClientSecret(res.data.clientSecret))
-                .catch((err) => {
-                    console.error("Error creating payment intent:", err)
-                    setInitError("Failed to initialize payment. Please try again later.")
-                })
-                .finally(() => setIsPaymentUpdating(false))
-        }
-    }, [items, selectedShipping]) // Re-run when shipping changes
+    // Removed auto-create payment intent on load since we use deferred intent creation
 
     if (items.length === 0) {
         return (
@@ -298,7 +365,10 @@ function Checkout() {
                                                     <div className="text-sm">
                                                         <p className="font-medium text-foreground">{option.label}</p>
                                                         <p className="text-muted-foreground">
-                                                            {option.id === 'standard' ? '3-5 Business Days' : '1-2 Business Days'}
+                                                            {option.id === 'usps_ground_advantage' ? '2-5 Business Days' :
+                                                             option.id === 'usps_priority_mail' ? '1-3 Business Days' :
+                                                             option.id === 'usps_priority_mail_express' ? 'Next-Day Delivery' :
+                                                             'Standard Shipping'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -311,14 +381,11 @@ function Checkout() {
                                 </div>
                             </div>
 
-                            {initError ? (
-                                <div className="text-destructive text-center py-8">
-                                    <p>{initError}</p>
-                                    <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
-                                </div>
-                            ) : clientSecret && stripePromise ? (
-                                <Elements key={clientSecret} options={{
-                                    clientSecret,
+                            {stripePromise ? (
+                                <Elements key={isDarkMode ? 'dark' : 'light'} options={{
+                                    mode: 'payment',
+                                    amount: Math.max(100, Math.round(total * 100)),
+                                    currency: 'usd',
                                     appearance: {
                                         theme: isDarkMode ? 'night' : 'stripe',
                                         variables: {
@@ -331,7 +398,7 @@ function Checkout() {
                                     }
                                 }} stripe={stripePromise}>
                                     <div className="min-h-[300px]">
-                                        <CheckoutForm total={total} userEmail={userEmail} isPaymentUpdating={isPaymentUpdating} userProfile={userProfile} />
+                                        <CheckoutForm total={total} userEmail={userEmail} isPaymentUpdating={isPaymentUpdating} userProfile={userProfile} address={address} items={items} shipping_id={selectedShipping} onAddressComplete={handleAddressComplete} />
                                     </div>
                                 </Elements>
                             ) : (
@@ -380,6 +447,12 @@ function Checkout() {
                                     <span className="text-muted-foreground">Shipping ({shippingOptions[selectedShipping as keyof typeof shippingOptions].label})</span>
                                     <span>${shippingCost.toFixed(2)}</span>
                                 </div>
+                                {taxAmount > 0 && (
+                                    <div className="flex justify-between text-sm text-muted-foreground">
+                                        <span>Estimated Tax</span>
+                                        <span>${taxAmount.toFixed(2)}</span>
+                                    </div>
+                                )}
                                 <Separator />
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total</span>

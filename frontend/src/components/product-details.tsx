@@ -157,6 +157,16 @@ export default function ProductDetails() {
                         dangerouslySetInnerHTML={{ __html: product.long_description || product.description || "No description available." }}
                     />
 
+                    {product.ingredients && (
+                        <>
+                            <Separator />
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-semibold">Ingredients</h3>
+                                <p className="text-muted-foreground">{product.ingredients}</p>
+                            </div>
+                        </>
+                    )}
+
                     <div className="mt-auto space-y-4">
                         {/* Variant Selector */}
                         {product.skus && product.skus.length > 0 && (

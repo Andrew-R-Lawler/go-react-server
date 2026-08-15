@@ -16,6 +16,10 @@ export interface Product {
     on_sale: boolean
     sale_price: number
     long_description?: string
+    ingredients?: string
+    raw_ingredients_json?: string
     featured: boolean
+    gtin?: string
+    weight?: number
     skus?: ProductSKU[]
 }

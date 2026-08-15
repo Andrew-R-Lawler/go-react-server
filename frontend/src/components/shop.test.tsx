@@ -4,6 +4,7 @@ import Shop from './shop'
 import { CartProvider } from '@/context/cart-context'
 import axios from 'axios'
 import { MemoryRouter } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 
 // Mock axios
 vi.mock('axios')
@@ -27,11 +28,13 @@ describe('Shop Component', () => {
         (axios.get as any).mockResolvedValue({ data: mockProducts })
 
         render(
-            <MemoryRouter>
-                <CartProvider>
-                    <Shop />
-                </CartProvider>
-            </MemoryRouter>
+            <HelmetProvider>
+                <MemoryRouter>
+                    <CartProvider>
+                        <Shop />
+                    </CartProvider>
+                </MemoryRouter>
+            </HelmetProvider>
         )
 
         // Loading state should be visible first

@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
+	"github.com/stripe/stripe-go/v74/tax/calculation"
 	"github.com/wneessen/go-mail"
 )
 
@@ -27,9 +28,295 @@ type EmailItem struct {
 	Total    float64
 }
 
+type Address struct {
+	Line1      string `json:"line1"`
+	Line2      string `json:"line2,omitempty"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	PostalCode string `json:"postal_code"`
+	Country    string `json:"country"`
+}
+
 type PaymentRequest struct {
 	Items      []PaymentItem `json:"items"`
 	ShippingID string        `json:"shipping_id"`
+	Address    *Address      `json:"address,omitempty"`
+}
+
+type TaxRequest struct {
+	Items      []PaymentItem `json:"items"`
+	ShippingID string        `json:"shipping_id"`
+	Address    Address       `json:"address"`
+}
+
+func calculateShippingCost(items []PaymentItem, shippingID string, address *Address, db *sql.DB) int64 {
+	// Standard/express fallback if shippingID is standard/express or blank
+	if shippingID == "standard" || shippingID == "" {
+		return 500
+	}
+	if shippingID == "express" {
+		return 1000
+	}
+
+	// Dynamic USPS Calculation
+	var totalOunces float64
+	for _, item := range items {
+		var weight float64
+		err := db.QueryRow("SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1", item.ID).Scan(&weight)
+		if err != nil {
+			weight = 4.0 // fallback default weight (ounces)
+		}
+		if weight <= 0 {
+			weight = 4.0
+		}
+		totalOunces += weight * float64(item.Quantity)
+	}
+
+	// Map shippingID to fallback rates
+	var fallbackBase float64
+	var fallbackMultiplier float64
+	switch shippingID {
+	case "usps_ground_advantage":
+		fallbackBase = 4.50
+		fallbackMultiplier = 0.50
+	case "usps_priority_mail":
+		fallbackBase = 8.50
+		fallbackMultiplier = 1.00
+	case "usps_priority_mail_express":
+		fallbackBase = 25.50
+		fallbackMultiplier = 2.50
+	default:
+		// Unknown shipping method, fallback to standard $5.00
+		return 500
+	}
+
+	// Try querying Shippo API if credentials are set
+	shippoKey := os.Getenv("SHIPPO_API_KEY")
+	if shippoKey != "" && address != nil && address.PostalCode != "" && address.Country != "" {
+		toAddr := ShippoAddress{
+			Name:    "Customer",
+			Street1: address.Line1,
+			Street2: address.Line2,
+			City:    address.City,
+			State:   address.State,
+			Zip:     address.PostalCode,
+			Country: address.Country,
+		}
+
+		shipment, err := CreateShippoShipment(toAddr, totalOunces)
+		if err == nil && len(shipment.Rates) > 0 {
+			var targetToken string
+			switch shippingID {
+			case "usps_ground_advantage":
+				targetToken = "usps_ground_advantage"
+			case "usps_priority_mail":
+				targetToken = "usps_priority"
+			case "usps_priority_mail_express":
+				targetToken = "usps_priority_express"
+			default:
+				if shippingID == "express" {
+					targetToken = "usps_priority"
+				} else {
+					targetToken = "usps_ground_advantage"
+				}
+			}
+
+			var matchedRate *ShippoRate
+			for _, r := range shipment.Rates {
+				if r.ServiceLevel.Token == targetToken {
+					matchedRate = &r
+					break
+				}
+			}
+
+			if matchedRate == nil {
+				for _, r := range shipment.Rates {
+					if r.Provider == "USPS" {
+						matchedRate = &r
+						break
+					}
+				}
+			}
+
+			if matchedRate != nil {
+				var rateFloat float64
+				if _, err := fmt.Sscanf(matchedRate.Amount, "%f", &rateFloat); err == nil && rateFloat > 0 {
+					return int64(rateFloat * 100)
+				}
+			}
+		}
+	}
+
+
+	// Fallback/Mock USPS Rates Calculation
+	totalLbs := totalOunces / 16.0
+	cost := fallbackBase + (totalLbs * fallbackMultiplier)
+	return int64(cost * 100)
+}
+
+type ShippingRatesRequest struct {
+	Items   []PaymentItem `json:"items"`
+	Address Address       `json:"address"`
+}
+
+type ShippingOption struct {
+	ID    string  `json:"id"`
+	Label string  `json:"label"`
+	Price float64 `json:"price"`
+}
+
+func GetShippingRates(c *gin.Context, db *sql.DB) {
+	var req ShippingRatesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Calculate total ounces
+	var totalOunces float64
+	for _, item := range req.Items {
+		var weight float64
+		err := db.QueryRow("SELECT COALESCE(weight, 0.00) FROM products WHERE id = $1", item.ID).Scan(&weight)
+		if err != nil {
+			weight = 4.0
+		}
+		if weight <= 0 {
+			weight = 4.0
+		}
+		totalOunces += weight * float64(item.Quantity)
+	}
+
+	shippoKey := os.Getenv("SHIPPO_API_KEY")
+	if shippoKey != "" && req.Address.PostalCode != "" && req.Address.Country != "" {
+		toAddr := ShippoAddress{
+			Name:    "Customer",
+			Street1: req.Address.Line1,
+			Street2: req.Address.Line2,
+			City:    req.Address.City,
+			State:   req.Address.State,
+			Zip:     req.Address.PostalCode,
+			Country: req.Address.Country,
+		}
+
+		shipment, err := CreateShippoShipment(toAddr, totalOunces)
+		if err == nil && len(shipment.Rates) > 0 {
+			var options []ShippingOption
+			tokenToID := map[string]string{
+				"usps_ground_advantage": "usps_ground_advantage",
+				"usps_priority":         "usps_priority_mail",
+				"usps_priority_express": "usps_priority_mail_express",
+			}
+			idToLabel := map[string]string{
+				"usps_ground_advantage":      "USPS Ground Advantage (2-5 business days)",
+				"usps_priority_mail":         "USPS Priority Mail (1-3 business days)",
+				"usps_priority_mail_express": "USPS Priority Mail Express (Next-Day)",
+			}
+
+			populated := make(map[string]bool)
+
+			for _, r := range shipment.Rates {
+				if r.Provider == "USPS" {
+					if optID, ok := tokenToID[r.ServiceLevel.Token]; ok {
+						var rateFloat float64
+						if _, err := fmt.Sscanf(r.Amount, "%f", &rateFloat); err == nil {
+							options = append(options, ShippingOption{
+								ID:    optID,
+								Label: idToLabel[optID],
+								Price: rateFloat,
+							})
+							populated[optID] = true
+						}
+					}
+				}
+			}
+
+			for optID, label := range idToLabel {
+				if !populated[optID] {
+					price := float64(calculateShippingCost(req.Items, optID, &req.Address, db)) / 100.0
+					options = append(options, ShippingOption{
+						ID:    optID,
+						Label: label,
+						Price: price,
+					})
+				}
+			}
+
+			c.JSON(http.StatusOK, options)
+			return
+		}
+	}
+
+	// Fallback to standard USPS/mock calculation
+	options := []ShippingOption{
+		{
+			ID:    "usps_ground_advantage",
+			Label: "USPS Ground Advantage (2-5 business days)",
+			Price: float64(calculateShippingCost(req.Items, "usps_ground_advantage", &req.Address, db)) / 100.0,
+		},
+		{
+			ID:    "usps_priority_mail",
+			Label: "USPS Priority Mail (1-3 business days)",
+			Price: float64(calculateShippingCost(req.Items, "usps_priority_mail", &req.Address, db)) / 100.0,
+		},
+		{
+			ID:    "usps_priority_mail_express",
+			Label: "USPS Priority Mail Express (Next-Day)",
+			Price: float64(calculateShippingCost(req.Items, "usps_priority_mail_express", &req.Address, db)) / 100.0,
+		},
+	}
+
+	c.JSON(http.StatusOK, options)
+}
+
+func calculateTaxAmount(items []PaymentItem, shippingID string, address Address, db *sql.DB) int64 {
+	var lineItems []*stripe.TaxCalculationLineItemParams
+	for _, item := range items {
+		var price float64
+		if err := db.QueryRow("SELECT price FROM products WHERE id = $1", item.ID).Scan(&price); err == nil {
+			lineItems = append(lineItems, &stripe.TaxCalculationLineItemParams{
+				Amount:    stripe.Int64(int64(price * float64(item.Quantity) * 100)),
+				Reference: stripe.String(fmt.Sprintf("item_%d", item.ID)),
+			})
+		}
+	}
+
+	shippingCost := calculateShippingCost(items, shippingID, &address, db)
+	lineItems = append(lineItems, &stripe.TaxCalculationLineItemParams{
+		Amount:    stripe.Int64(shippingCost),
+		Reference: stripe.String("shipping"),
+	})
+
+	calcParams := &stripe.TaxCalculationParams{
+		Currency: stripe.String("usd"),
+		CustomerDetails: &stripe.TaxCalculationCustomerDetailsParams{
+			Address: &stripe.AddressParams{
+				Line1:      stripe.String(address.Line1),
+				Line2:      stripe.String(address.Line2),
+				City:       stripe.String(address.City),
+				State:      stripe.String(address.State),
+				PostalCode: stripe.String(address.PostalCode),
+				Country:    stripe.String(address.Country),
+			},
+			AddressSource: stripe.String("shipping"),
+		},
+		LineItems: lineItems,
+	}
+
+	calc, err := calculation.New(calcParams)
+	if err != nil {
+		return 0
+	}
+	return calc.TaxAmountExclusive
+}
+
+func CalculateTax(c *gin.Context, db *sql.DB) {
+	var req TaxRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	tax := calculateTaxAmount(req.Items, req.ShippingID, req.Address, db)
+	c.JSON(http.StatusOK, gin.H{"taxAmount": tax})
 }
 
 func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
@@ -39,8 +326,15 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// Calculate total amount on the server
-	total := calculateOrderAmount(req.Items, req.ShippingID, db)
+	// Calculate base total
+	total := calculateOrderAmount(req.Items, req.ShippingID, req.Address, db)
+
+	// Calculate tax if address provided
+	var tax int64 = 0
+	if req.Address != nil && req.Address.Country != "" {
+		tax = calculateTaxAmount(req.Items, req.ShippingID, *req.Address, db)
+		total += tax
+	}
 
 	// Serialize items to JSON
 	itemsJSON, err := json.Marshal(req.Items)
@@ -49,14 +343,12 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 		return
 	}
 
-	// Create a PaymentIntent with the order amount and currency
 	params := &stripe.PaymentIntentParams{
 		Amount:   stripe.Int64(total),
 		Currency: stripe.String(string(stripe.CurrencyUSD)),
 		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 			Enabled: stripe.Bool(true),
 		},
-		// PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 	}
 	params.AddMetadata("shipping_id", req.ShippingID)
 	params.AddMetadata("items_json", string(itemsJSON))
@@ -69,11 +361,12 @@ func CreatePaymentIntent(c *gin.Context, db *sql.DB) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"clientSecret": pi.ClientSecret,
+		"taxAmount":    tax,
 	})
 }
 
 // calculateOrderAmount returns the total amount in cents
-func calculateOrderAmount(items []PaymentItem, shippingID string, db *sql.DB) int64 {
+func calculateOrderAmount(items []PaymentItem, shippingID string, address *Address, db *sql.DB) int64 {
 	var totalAmount float64
 
 	for _, item := range items {
@@ -87,20 +380,10 @@ func calculateOrderAmount(items []PaymentItem, shippingID string, db *sql.DB) in
 	}
 
 	// Shipping Cost Logic
-	// standard = $5.00
-	// express = $10.00
-	var shippingCost float64 = 5.00 // Default to standard
+	shippingCost := calculateShippingCost(items, shippingID, address, db)
 
-	if shippingID == "express" {
-		shippingCost = 10.00
-	} else {
-		shippingCost = 5.00
-	}
-
-	totalAmount += shippingCost
-
-	// Convert to cents
-	return int64(totalAmount * 100)
+	totalAmountCents := int64(totalAmount * 100)
+	return totalAmountCents + shippingCost
 }
 
 // ConfirmOrder handles the stock deduction after a successful payment
@@ -286,8 +569,19 @@ func SendOrderConfirmationEmail(email string, orderID string, items []EmailItem,
 	`, orderID, itemsHTML, shippingMethod, float64(amount)/100.0, appURL)
 
 	m := mail.NewMsg()
-	if err := m.From(smtpUser); err != nil {
-		return err
+	fromAddress := os.Getenv("SMTP_FROM")
+	if fromAddress == "" {
+		fromAddress = smtpUser
+	}
+	fromName := os.Getenv("SMTP_FROM_NAME")
+	if fromName != "" {
+		if err := m.FromFormat(fromName, fromAddress); err != nil {
+			return err
+		}
+	} else {
+		if err := m.From(fromAddress); err != nil {
+			return err
+		}
 	}
 	if err := m.To(email); err != nil {
 		return err
